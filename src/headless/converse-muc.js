@@ -142,7 +142,7 @@ converse.plugins.add('converse-muc', {
         _converse.router.route('converse/room?jid=:jid', openRoom);
 
 
-        _converse.openChatRoom = function (jid, settings, bring_to_foreground) {
+        _converse.openChatRoom = async function (jid, settings, bring_to_foreground) {
             /* Opens a groupchat, making sure that certain attributes
              * are correct, for example that the "type" is set to
              * "chatroom".
@@ -150,7 +150,7 @@ converse.plugins.add('converse-muc', {
             settings.type = _converse.CHATROOMS_TYPE;
             settings.id = jid;
             settings.box_id = b64_sha1(jid)
-            const chatbox = _converse.chatboxes.getChatBox(jid, settings, true);
+            const chatbox = await _converse.chatboxes.getChatBox(jid, settings, true);
             chatbox.trigger('show', true);
             return chatbox;
         }
@@ -187,17 +187,16 @@ converse.plugins.add('converse-muc', {
                 this.on('change:connection_status', this.onConnectionStatusChanged, this);
 
                 const storage = _converse.config.get('storage');
-                const id = `converse.muc-features-${_converse.bare_jid}-${this.get('jid')}`;
+                let id = `converse.muc-features-${_converse.bare_jid}-${this.get('jid')}`;
                 this.features = new Backbone.Model(
                     _.assign({id}, _.zipObject(converse.ROOM_FEATURES, _.map(converse.ROOM_FEATURES, _.stubFalse)))
                 );
-                this.features.browserStorage = new Backbone.BrowserStorage.session(id);
+                this.features.browserStorage = new _converse.BrowserStorage(id, 'session');
                 this.features.fetch();
 
+                id = `converse.occupants-${_converse.bare_jid}${this.get('jid')}`;
                 this.occupants = new _converse.ChatRoomOccupants();
-                this.occupants.browserStorage = new Backbone.BrowserStorage.session(
-                    `converse.occupants-${_converse.bare_jid}${this.get('jid')}`
-                );
+                this.occupants.browserStorage = new _converse.BrowserStorage(id, 'session');
                 this.occupants.chatroom  = this;
                 this.registerHandlers();
             },
@@ -302,7 +301,7 @@ converse.plugins.add('converse-muc', {
                 return this;
             },
 
-            leave (exit_msg) {
+            async leave (exit_msg) {
                 /* Leave the groupchat.
                  *
                  * Parameters:
@@ -310,12 +309,12 @@ converse.plugins.add('converse-muc', {
                  *      reason for leaving.
                  */
                 this.features.destroy();
-                this.occupants.browserStorage._clear();
+                await this.occupants.browserStorage._clear();
                 this.occupants.reset();
                 if (_converse.disco_entities) {
                     const disco_entity = _converse.disco_entities.get(this.get('jid'));
                     if (disco_entity) {
-                        disco_entity.destroy();
+                        await new Promise((success, error) => disco_entity.destroy({success, error}));
                     }
                 }
                 if (_converse.connection.connected) {
@@ -695,10 +694,14 @@ converse.plugins.add('converse-muc', {
                     const affiliation = item.getAttribute('affiliation');
                     const role = item.getAttribute('role');
                     if (affiliation) {
-                        this.save({'affiliation': affiliation});
+                        this.save(
+                            {'affiliation': affiliation},
+                            {'wait': true, 'patch': true});
                     }
                     if (role) {
-                        this.save({'role': role});
+                        this.save(
+                            {'role': role},
+                            {'wait': true, 'patch': true});
                     }
                 }
             },
@@ -1066,7 +1069,7 @@ converse.plugins.add('converse-muc', {
                 _converse.emit('message', {'stanza': original_stanza, 'chatbox': this});
             },
 
-            onPresence (pres) {
+            async onPresence (pres) {
                 /* Handles all MUC presence stanzas.
                  *
                  * Parameters:
@@ -1078,15 +1081,19 @@ converse.plugins.add('converse-muc', {
                 }
                 const is_self = pres.querySelector("status[code='110']");
                 if (is_self && pres.getAttribute('type') !== 'unavailable') {
-                    this.onOwnPresence(pres);
+                    await this.onOwnPresence(pres);
                 }
                 this.updateOccupantsOnPresence(pres);
+
                 if (this.get('role') !== 'none' && this.get('connection_status') === converse.ROOMSTATUS.CONNECTING) {
-                    this.save('connection_status', converse.ROOMSTATUS.CONNECTED);
+                    await new Promise((success, error) => this.save(
+                        {'connection_status': converse.ROOMSTATUS.CONNECTED},
+                        {'patch': true, 'wait': true, success, error}
+                    ));
                 }
             },
 
-            onOwnPresence (pres) {
+            async onOwnPresence (pres) {
                 /* Handles a received presence relating to the current
                  * user.
                  *
@@ -1127,7 +1134,10 @@ converse.plugins.add('converse-muc', {
                         this.getRoomFeatures();
                     }
                 }
-                this.save('connection_status', converse.ROOMSTATUS.ENTERED);
+                await new Promise((success, error) => this.save(
+                    {'connection_status': converse.ROOMSTATUS.ENTERED},
+                    {'patch': true, 'wait': true, success, error}
+                ));
             },
 
             isUserMentioned (message) {
@@ -1290,7 +1300,7 @@ converse.plugins.add('converse-muc', {
         });
 
 
-        _converse.onDirectMUCInvitation = function (message) {
+        _converse.onDirectMUCInvitation = async function (message) {
             /* A direct MUC invitation to join a groupchat has been received
              * See XEP-0249: Direct MUC invitations.
              *
@@ -1323,8 +1333,7 @@ converse.plugins.add('converse-muc', {
                 }
             }
             if (result === true) {
-                const chatroom = _converse.openChatRoom(
-                    room_jid, {'password': x_el.getAttribute('password') });
+                const chatroom = await _converse.openChatRoom(room_jid, {'password': x_el.getAttribute('password') });
 
                 if (chatroom.get('connection_status') === converse.ROOMSTATUS.DISCONNECTED) {
                     _converse.chatboxviews.get(room_jid).join();
@@ -1461,6 +1470,7 @@ converse.plugins.add('converse-muc', {
                  * @param {(string[]|string)} jid|jids The JID or array of
                  *     JIDs of the chatroom(s) to create
                  * @param {object} [attrs] attrs The room attributes
+                 * @returns {Promise} Promise which resolves with the Backbone.Model representing the chat.
                  */
                 'create' (jids, attrs) {
                     if (_.isString(attrs)) {
@@ -1543,14 +1553,18 @@ converse.plugins.add('converse-muc', {
                         _converse.log(err_msg, Strophe.LogLevel.ERROR);
                         throw(new TypeError(err_msg));
                     } else if (_.isString(jids)) {
-                        return _converse.api.rooms.create(jids, attrs).trigger('show');
+                        const room = await _converse.api.rooms.create(jids, attrs);
+                        room.trigger('show');
+                        return room;
                     } else {
-                        return _.map(jids, (jid) => _converse.api.rooms.create(jid, attrs).trigger('show'));
+                        const rooms = await Promise.all(_.map(jids, (jid) => _converse.api.rooms.create(jid, attrs)));
+                        rooms.forEach(r =>  r.trigger('show'));
+                        return rooms;
                     }
                 },
 
                 /**
-                 * Returns an object representing a MUC chatroom (aka groupchat)
+                 * Fetches the object representing a MUC chatroom (aka groupchat)
                  *
                  * @method _converse.api.rooms.get
                  * @param {string} [jid] The room JID (if not specified, all rooms will be returned).
@@ -1562,6 +1576,7 @@ converse.plugins.add('converse-muc', {
                  *     the user's JID will be used.
                  * @param {boolean} create A boolean indicating whether the room should be created
                  *     if not found (default: `false`)
+                 * @returns {Promise} Promise which resolves with the Backbone.Model representing the chat.
                  * @example
                  * _converse.api.waitUntil('roomsAutoJoined').then(() => {
                  *     const create_if_not_found = true;

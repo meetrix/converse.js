@@ -18,9 +18,9 @@ import sizzle from "sizzle";
 import u from "@converse/headless/utils/core";
 
 Backbone = Backbone.noConflict();
+BrowserStorage.patch(Backbone);
 
 // Strophe globals
-const b64_sha1 = SHA1.b64_sha1;
 
 // Add Strophe Namespaces
 Strophe.addNamespace('CARBONS', 'urn:xmpp:carbons:2');
@@ -321,6 +321,38 @@ _converse.isUniView = function () {
     return _.includes(['mobile', 'fullscreen', 'embedded'], _converse.view_mode);
 }
 
+
+_converse.initStorage = async function () {
+    /* Set up Backbone.BrowserStorage and localForage for the 3 different stores.
+     */
+    _converse.localStorage = BrowserStorage.localForage.createInstance({
+        'name': 'local',
+        'driver': BrowserStorage.localForage.LOCALSTORAGE
+    });
+    _converse.indexedDB = BrowserStorage.localForage.createInstance({
+        'name': 'indexed',
+        'driver': BrowserStorage.localForage.INDEXEDDB
+    });
+    _converse.sessionStorage = BrowserStorage.localForage.createInstance({
+        'name': 'session'
+    });
+    _converse.storage = {
+        'session': _converse.sessionStorage,
+        'local': _converse.localStorage,
+        'indexed': _converse.indexedDB
+    }
+    await BrowserStorage.sessionStorageInitialized;
+    _converse.sessionStorage.setDriver('sessionStorageWrapper');
+};
+_converse.initStorage();
+
+
+_converse.BrowserStorage = function (id, storage) {
+    const s = storage ? storage : _converse.storage[_converse.config.get('storage')];
+    return new Backbone.BrowserStorage(id, s);
+}
+
+
 _converse.router = new Backbone.Router();
 
 
@@ -361,6 +393,7 @@ function initPlugins() {
     _converse.emit('pluginsInitialized');
 }
 
+
 function initClientConfig () {
     /* The client config refers to configuration of the client which is
      * independent of any particular user.
@@ -373,10 +406,11 @@ function initClientConfig () {
         'trusted': _converse.trusted && true || false,
         'storage': _converse.trusted ? 'local' : 'session'
     });
-    _converse.config.browserStorage = new Backbone.BrowserStorage.session(id);
+    _converse.config.browserStorage = new _converse.BrowserStorage(id, 'session');
     _converse.config.fetch();
     _converse.emit('clientConfigInitialized');
 }
+
 
 _converse.initConnection = function () {
     /* Creates a new Strophe.Connection instance if we don't already have one.
@@ -438,12 +472,13 @@ function unregisterGlobalEventHandlers () {
     _converse.emit('unregisteredGlobalEventHandlers');
 }
 
-function cleanup () {
+
+async function cleanup () {
     // Looks like _converse.initialized was called again without logging
     // out or disconnecting in the previous session.
     // This happens in tests. We therefore first clean up.
     Backbone.history.stop();
-    _converse.chatboxviews.closeAllChatBoxes();
+    await _converse.chatboxviews.closeAllChatBoxes();
     unregisterGlobalEventHandlers();
     window.localStorage.clear();
     window.sessionStorage.clear();
@@ -468,7 +503,7 @@ _converse.initialize = async function (settings, callback) {
     const init_promise = u.getResolveablePromise();
     _.each(PROMISES, addPromise);
     if (!_.isUndefined(_converse.connection)) {
-        cleanup();
+        await cleanup();
     }
 
     if ('onpagehide' in window) {
@@ -784,7 +819,7 @@ _converse.initialize = async function (settings, callback) {
         } else {
             const id = `converse.xmppstatus-${_converse.bare_jid}`;
             this.xmppstatus = new this.XMPPStatus({'id': id});
-            this.xmppstatus.browserStorage = new Backbone.BrowserStorage.session(id);
+            this.xmppstatus.browserStorage = new _converse.BrowserStorage(id, 'session');
             this.xmppstatus.fetch({
                 'success': _.partial(_converse.onStatusInitialized, reconnecting),
                 'error': _.partial(_converse.onStatusInitialized, reconnecting)
@@ -794,9 +829,9 @@ _converse.initialize = async function (settings, callback) {
 
 
     this.initSession = function () {
-        const id = 'converse.bosh-session';
+        const id = `converse.bosh-session-${_converse.bare_jid}`;
         _converse.session = new Backbone.Model({id});
-        _converse.session.browserStorage = new Backbone.BrowserStorage.session(id);
+        _converse.session.browserStorage = new _converse.BrowserStorage(id, 'session');
         _converse.session.fetch();
         _converse.emit('sessionInitialized');
     };
@@ -1156,7 +1191,7 @@ _converse.initialize = async function (settings, callback) {
             const password = _.isNil(credentials) ? (_converse.connection.pass || this.password) : credentials.password;
             if (!password) {
                 if (this.auto_login) {
-                    throw new Error("initConnection: If you use auto_login and "+
+                    throw new Error("If you use auto_login and "+
                         "authentication='login' then you also need to provide a password.");
                 }
                 _converse.setDisconnectionCause(Strophe.Status.AUTHFAIL, undefined, true);
@@ -1768,7 +1803,7 @@ const converse = {
         'Strophe': Strophe,
         '_': _,
         'f': f,
-        'b64_sha1':  b64_sha1,
+        'b64_sha1':  SHA1.b64_sha1,
         'moment': moment,
         'sizzle': sizzle,
         'utils': u

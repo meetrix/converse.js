@@ -6,9 +6,9 @@
         "test-utils"], factory);
 } (this, function (jasmine, $, mock, test_utils) {
     "use strict";
-    const Strophe = converse.env.Strophe;
     const $iq = converse.env.$iq;
     const $pres = converse.env.$pres;
+    const Strophe = converse.env.Strophe;
     const _ = converse.env._;
     const sizzle = converse.env.sizzle;
     const u = converse.env.utils;
@@ -461,7 +461,7 @@
 
                 var sent_IQ, IQ_id, jid = 'annegreet.gomez@localhost';
                 test_utils.openControlBox(_converse);
-                test_utils.createContacts(_converse, 'current');
+                await test_utils.createContacts(_converse, 'current');
                 spyOn(window, 'confirm').and.returnValue(true);
                 // We now have a contact we want to remove
                 expect(_converse.roster.get(jid) instanceof _converse.RosterContact).toBeTruthy();
@@ -515,17 +515,17 @@
 
             it("Receiving a subscription request", mock.initConverse(
                 null, ['rosterGroupsFetched'], {},
-                function (done, _converse) {
+                async function (done, _converse) {
 
-                spyOn(_converse, "emit");
-                test_utils.openControlBox(_converse);
-                test_utils.createContacts(_converse, 'current'); // Create some contacts so that we can test positioning
+                spyOn(_converse, "emit").and.callThrough();
+                await test_utils.openControlBox(_converse);
+                await test_utils.createContacts(_converse, 'current'); // Create some contacts so that we can test positioning
                 /* <presence
                  *     from='user@example.com'
                  *     to='contact@example.org'
                  *     type='subscribe'/>
                  */
-                var stanza = $pres({
+                const stanza = $pres({
                     'to': _converse.bare_jid,
                     'from': 'contact@example.org',
                     'type': 'subscribe'
@@ -533,19 +533,14 @@
                     'xmlns': Strophe.NS.NICK,
                 }).t('Clint Contact');
                 _converse.connection._dataRecv(test_utils.createRequest(stanza));
-                return test_utils.waitUntil(function () {
-                    var $header = $('a:contains("Contact requests")');
-                    var $contacts = $header.parent().find('li:visible');
-                    return $contacts.length;
-                }, 600).then(function () {
-                    expect(_converse.emit).toHaveBeenCalledWith('contactRequest', jasmine.any(Object));
-                    var $header = $('a:contains("Contact requests")');
-                    expect($header.length).toBe(1);
-                    expect($header.is(":visible")).toBeTruthy();
-                    var $contacts = $header.parent().find('li');
-                    expect($contacts.length).toBe(1);
-                    done();
-                });
+                await test_utils.waitUntil(() => $('a:contains("Contact requests")').parent().find('li:visible').length, 1000);
+                expect(_converse.emit).toHaveBeenCalledWith('contactRequest', jasmine.any(Object));
+                const $header = $('a:contains("Contact requests")');
+                expect($header.length).toBe(1);
+                expect($header.is(":visible")).toBeTruthy();
+                const $contacts = $header.parent().find('li');
+                expect($contacts.length).toBe(1);
+                done();
             }));
         });
     });

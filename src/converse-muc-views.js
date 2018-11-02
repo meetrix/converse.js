@@ -61,11 +61,11 @@ converse.plugins.add('converse-muc-views', {
                 if (this.roomspanel && u.isVisible(this.roomspanel.el)) {
                     return;
                 }
+                const id = `converse.roomspanel-${_converse.bare_jid}`;
                 this.roomspanel = new _converse.RoomsPanel({
                     'model': new (_converse.RoomsPanelModel.extend({
-                        'id': `converse.roomspanel${_converse.bare_jid}`, // Required by web storage
-                        'browserStorage': new Backbone.BrowserStorage[_converse.config.get('storage')](
-                            `converse.roomspanel${_converse.bare_jid}`)
+                        'id': id,
+                        'browserStorage': new _converse.BrowserStorage(id)
                     }))()
                 });
                 this.roomspanel.model.fetch();
@@ -710,7 +710,7 @@ converse.plugins.add('converse-muc-views', {
                 );
             },
 
-            close (ev) {
+            async close (ev) {
                 /* Close this chat box, which implies leaving the groupchat as
                  * well.
                  */
@@ -718,8 +718,8 @@ converse.plugins.add('converse-muc-views', {
                 if (Backbone.history.getFragment() === "converse/room?jid="+this.model.get('jid')) {
                     _converse.router.navigate('');
                 }
-                this.model.leave();
-                _converse.ChatBoxView.prototype.close.apply(this, arguments);
+                await this.model.leave();
+                return _converse.ChatBoxView.prototype.close.apply(this, arguments);
             },
 
             setOccupantsVisibility () {
@@ -1079,7 +1079,7 @@ converse.plugins.add('converse-muc-views', {
             populateAndJoin () {
                 this.model.occupants.fetchMembers();
                 this.join();
-                this.fetchMessages();
+                this.model.fetchMessages();
             },
 
             join (nick, password) {

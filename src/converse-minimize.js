@@ -414,11 +414,11 @@ converse.plugins.add('converse-minimize', {
 
             initToggle () {
                 const storage = _converse.config.get('storage'),
-                      id = `converse.minchatstoggle${_converse.bare_jid}`;
+                      id = `converse.minchatstoggle-${_converse.bare_jid}`;
                 this.toggleview = new _converse.MinimizedChatsToggleView({
                     'model': new _converse.MinimizedChatsToggle({'id': id})
                 });
-                this.toggleview.model.browserStorage = new Backbone.BrowserStorage[storage](id);
+                this.toggleview.model.browserStorage = new _converse.BrowserStorage(id);
                 this.toggleview.model.fetch();
             },
 
