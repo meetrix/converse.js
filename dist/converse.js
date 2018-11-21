@@ -55954,6 +55954,8 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_1__["default"].plugins
         this.save({
           'minimized': this.get('minimized') || false,
           'time_minimized': this.get('time_minimized') || moment()
+        }, {
+          'patch': true
         });
       },
 
@@ -55961,6 +55963,8 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_1__["default"].plugins
         u.safeSave(this, {
           'minimized': false,
           'time_opened': moment().valueOf()
+        }, {
+          'patch': true
         });
       },
 
@@ -55968,6 +55972,8 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_1__["default"].plugins
         u.safeSave(this, {
           'minimized': true,
           'time_minimized': moment().format()
+        }, {
+          'patch': true
         });
       }
 
@@ -56051,6 +56057,8 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_1__["default"].plugins
         if (this.model.collection && this.model.collection.browserStorage) {
           this.model.save({
             'scroll': this.content.scrollTop
+          }, {
+            'patch': true
           });
         } else {
           this.model.set({
@@ -56369,6 +56377,8 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_1__["default"].plugins
 
         this.toggleview.model.save({
           'collapsed': !this.toggleview.model.get('collapsed')
+        }, {
+          'patch': true
         });
         u.slideToggleElement(this.el.querySelector('.minimized-chats-flyout'), 200);
       },
@@ -56428,6 +56438,8 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_1__["default"].plugins
       updateUnreadMessagesCounter() {
         this.toggleview.model.save({
           'num_unread': _.sum(this.model.pluck('num_unread'))
+        }, {
+          'patch': true
         });
         this.render();
       }
@@ -57404,7 +57416,6 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_3__["default"].plugins
          */
         if (u.isPersistableModel(this.model)) {
           this.model.clearUnreadMsgCounter();
-          this.model.save();
         }
 
         this.occupantsview.setOccupantsHeight();
@@ -69640,6 +69651,8 @@ _converse_core__WEBPACK_IMPORTED_MODULE_6__["default"].plugins.add('converse-muc
 
       _.each(groupchats, gc => _utils_form__WEBPACK_IMPORTED_MODULE_7__["default"].safeSave(gc, {
         'connection_status': _converse_core__WEBPACK_IMPORTED_MODULE_6__["default"].ROOMSTATUS.DISCONNECTED
+      }, {
+        'patch': true
       }));
 
       this.__super__.tearDown.call(this, arguments);
@@ -69863,7 +69876,11 @@ _converse_core__WEBPACK_IMPORTED_MODULE_6__["default"].plugins.add('converse-muc
           stanza.cnode(Strophe.xmlElement("password", [], password));
         }
 
-        this.save('connection_status', _converse_core__WEBPACK_IMPORTED_MODULE_6__["default"].ROOMSTATUS.CONNECTING);
+        this.save({
+          'connection_status': _converse_core__WEBPACK_IMPORTED_MODULE_6__["default"].ROOMSTATUS.CONNECTING
+        }, {
+          'patch': true
+        });
 
         _converse.api.send(stanza);
 
@@ -69898,6 +69915,8 @@ _converse_core__WEBPACK_IMPORTED_MODULE_6__["default"].plugins.add('converse-muc
 
         _utils_form__WEBPACK_IMPORTED_MODULE_7__["default"].safeSave(this, {
           'connection_status': _converse_core__WEBPACK_IMPORTED_MODULE_6__["default"].ROOMSTATUS.DISCONNECTED
+        }, {
+          'patch': true
         });
         this.removeHandlers();
       },
@@ -70027,6 +70046,8 @@ _converse_core__WEBPACK_IMPORTED_MODULE_6__["default"].plugins.add('converse-muc
         if (nick) {
           this.save({
             'nick': nick
+          }, {
+            'patch': true
           });
         } else {
           nick = this.get('nick');
@@ -70158,7 +70179,12 @@ _converse_core__WEBPACK_IMPORTED_MODULE_6__["default"].plugins.add('converse-muc
 
           attrs[fieldname.replace('muc_', '')] = true;
         });
-        this.features.save(attrs);
+        attrs.description = _.get(fields.findWhere({
+          'var': "muc#roominfo_description"
+        }), 'attributes.value');
+        this.features.save(attrs, {
+          'patch': true
+        });
       },
 
       requestMemberList(affiliation) {
@@ -70349,7 +70375,6 @@ _converse_core__WEBPACK_IMPORTED_MODULE_6__["default"].plugins.add('converse-muc
             this.save({
               'affiliation': affiliation
             }, {
-              'wait': true,
               'patch': true
             });
           }
@@ -70358,7 +70383,6 @@ _converse_core__WEBPACK_IMPORTED_MODULE_6__["default"].plugins.add('converse-muc
             this.save({
               'role': role
             }, {
-              'wait': true,
               'patch': true
             });
           }
@@ -70481,6 +70505,7 @@ _converse_core__WEBPACK_IMPORTED_MODULE_6__["default"].plugins.add('converse-muc
           'reserved_nick': nick,
           'nick': nick
         }, {
+          'patch': true,
           'silent': true
         });
         return iq;
@@ -70759,6 +70784,8 @@ _converse_core__WEBPACK_IMPORTED_MODULE_6__["default"].plugins.add('converse-muc
           if (forwarded && msg && msg.get('sender') === 'me') {
             msg.save({
               'received': moment().format()
+            }, {
+              'patch': true
             });
           }
         }
@@ -70769,38 +70796,39 @@ _converse_core__WEBPACK_IMPORTED_MODULE_6__["default"].plugins.add('converse-muc
         });
       },
 
-      async onPresence(pres) {
+      onPresence(pres) {
         /* Handles all MUC presence stanzas.
          *
          * Parameters:
          *  (XMLElement) pres: The stanza
          */
         if (pres.getAttribute('type') === 'error') {
-          this.save('connection_status', _converse_core__WEBPACK_IMPORTED_MODULE_6__["default"].ROOMSTATUS.DISCONNECTED);
+          this.save({
+            'connection_status': _converse_core__WEBPACK_IMPORTED_MODULE_6__["default"].ROOMSTATUS.DISCONNECTED
+          }, {
+            'patch': true
+          });
           return;
         }
 
         const is_self = pres.querySelector("status[code='110']");
 
         if (is_self && pres.getAttribute('type') !== 'unavailable') {
-          await this.onOwnPresence(pres);
+          this.onOwnPresence(pres);
         }
 
         this.updateOccupantsOnPresence(pres);
 
         if (this.get('role') !== 'none' && this.get('connection_status') === _converse_core__WEBPACK_IMPORTED_MODULE_6__["default"].ROOMSTATUS.CONNECTING) {
-          await new Promise((success, error) => this.save({
+          this.save({
             'connection_status': _converse_core__WEBPACK_IMPORTED_MODULE_6__["default"].ROOMSTATUS.CONNECTED
           }, {
-            'patch': true,
-            'wait': true,
-            success,
-            error
-          }));
+            'patch': true
+          });
         }
       },
 
-      async onOwnPresence(pres) {
+      onOwnPresence(pres) {
         /* Handles a received presence relating to the current
          * user.
          *
@@ -70842,14 +70870,11 @@ _converse_core__WEBPACK_IMPORTED_MODULE_6__["default"].plugins.add('converse-muc
           }
         }
 
-        await new Promise((success, error) => this.save({
+        this.save({
           'connection_status': _converse_core__WEBPACK_IMPORTED_MODULE_6__["default"].ROOMSTATUS.ENTERED
         }, {
-          'patch': true,
-          'wait': true,
-          success,
-          error
-        }));
+          'patch': true
+        });
       },
 
       isUserMentioned(message) {
@@ -70905,6 +70930,8 @@ _converse_core__WEBPACK_IMPORTED_MODULE_6__["default"].plugins.add('converse-muc
         _utils_form__WEBPACK_IMPORTED_MODULE_7__["default"].safeSave(this, {
           'num_unread': 0,
           'num_unread_general': 0
+        }, {
+          'patch': true
         });
       }
 
@@ -71141,7 +71168,11 @@ _converse_core__WEBPACK_IMPORTED_MODULE_6__["default"].plugins.add('converse-muc
        */
       _converse.chatboxes.each(function (model) {
         if (model.get('type') === _converse.CHATROOMS_TYPE) {
-          model.save('connection_status', _converse_core__WEBPACK_IMPORTED_MODULE_6__["default"].ROOMSTATUS.DISCONNECTED);
+          model.save({
+            'connection_status': _converse_core__WEBPACK_IMPORTED_MODULE_6__["default"].ROOMSTATUS.DISCONNECTED
+          }, {
+            'patch': true
+          });
         }
       });
     }
@@ -73766,11 +73797,11 @@ u.onMultipleEvents = function () {
   _lodash_noconflict__WEBPACK_IMPORTED_MODULE_3___default.a.each(events, map => map.object.on(map.event, handler));
 };
 
-u.safeSave = function (model, attributes) {
+u.safeSave = function (model, attributes, options) {
   if (u.isPersistableModel(model)) {
-    model.save(attributes);
+    model.save(attributes, options);
   } else {
-    model.set(attributes);
+    model.set(attributes, options);
   }
 };
 
