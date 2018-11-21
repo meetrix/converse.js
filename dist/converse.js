@@ -58957,25 +58957,29 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_3__["default"].plugins
          */
         'close'(jids) {
           if (_.isUndefined(jids)) {
-            _converse.chatboxviews.each(function (view) {
+            return Promise.all(_converse.chatboxviews.map(view => {
               if (view.is_chatroom && view.model) {
-                view.close();
+                return view.close();
               }
-            });
+
+              return Promise.resolve();
+            }));
           } else if (_.isString(jids)) {
             const view = _converse.chatboxviews.get(jids);
 
             if (view) {
-              view.close();
+              return view.close();
             }
           } else {
-            _.each(jids, function (jid) {
+            return Promise.all(_.map(jids, jid => {
               const view = _converse.chatboxviews.get(jid);
 
               if (view) {
-                view.close();
+                return view.close();
               }
-            });
+
+              return Promise.resolve();
+            }));
           }
         }
 
