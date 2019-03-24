@@ -600,7 +600,7 @@ converse.plugins.add('converse-muc-views', {
                     'auto_evaluate': false,
                     'min_chars': 1,
                     'match_current_word': true,
-                    'list': () => this.model.occupants.map(o => ({'label': o.getDisplayName(), 'value': `@${o.getDisplayName()}`})),
+                    'list': () => _converse.roster.map(o => ({'label': o.getDisplayName(), 'value': `@${o.getDisplayName()}`})),
                     'filter': _converse.FILTER_STARTSWITH,
                     'ac_triggers': ["Tab", "@"],
                     'include_triggers': []
