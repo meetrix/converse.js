@@ -49240,12 +49240,10 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_3__["default"].plugins
       },
 
       initialize() {
-        this.model.on("destroy", this.removeChat, this);
-        const bg = document.getElementById('conversejs-bg');
-
-        if (bg && !bg.innerHTML.trim()) {
-          bg.innerHTML = templates_background_logo_html__WEBPACK_IMPORTED_MODULE_5___default()();
-        }
+        this.model.on("destroy", this.removeChat, this); //const bg = document.getElementById('conversejs-bg');
+        // if (bg && !bg.innerHTML.trim()) {
+        //     bg.innerHTML = tpl_background_logo();
+        // }
 
         const body = document.querySelector('body');
         body.classList.add(`converse-${_converse.view_mode}`);
