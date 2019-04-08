@@ -370,11 +370,13 @@ converse.plugins.add('converse-chatview', {
                 if (!_converse.show_toolbar) {
                     return this;
                 }
+                console.log('toolbar',toolbar)
                 toolbar = toolbar || tpl_toolbar;
                 options = _.assign(
                     this.model.toJSON(),
                     this.getToolbarOptions(options || {})
                 );
+                console.log('element',this.el)
                 this.el.querySelector('.chat-toolbar').innerHTML = toolbar(options);
                 this.addSpoilerButton(options);
                 this.addFileUploadButton();

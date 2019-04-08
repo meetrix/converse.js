@@ -49301,8 +49301,10 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
           return this;
         }
 
+        console.log('toolbar', toolbar);
         toolbar = toolbar || templates_toolbar_html__WEBPACK_IMPORTED_MODULE_18___default.a;
         options = _.assign(this.model.toJSON(), this.getToolbarOptions(options || {}));
+        console.log('element', this.el);
         this.el.querySelector('.chat-toolbar').innerHTML = toolbar(options);
         this.addSpoilerButton(options);
         this.addFileUploadButton();
@@ -92954,7 +92956,7 @@ var _ = {escape:__webpack_require__(/*! ./node_modules/lodash/escape.js */ "./no
 module.exports = function(o) {
 var __t, __p = '', __j = Array.prototype.join;
 function print() { __p += __j.call(arguments, '') }
-__p += '<!-- src/templates/chatarea.html -->\n<div class="chat-area col-md-9 col-8">\n    <div class="chat-content ';
+__p += '<!-- src/templates/chatarea.html -->\n<div class="chat-area col-md-9 col-8">\n    <!-- <div class="chat-upper-toolbar"></div> -->\n    <div class="chat-content ';
  if (o.show_send_button) { ;
 __p += 'chat-content-sendbutton';
  } ;
@@ -92975,7 +92977,7 @@ var _ = {escape:__webpack_require__(/*! ./node_modules/lodash/escape.js */ "./no
 module.exports = function(o) {
 var __t, __p = '', __j = Array.prototype.join;
 function print() { __p += __j.call(arguments, '') }
-__p += '<!-- src/templates/chatbox.html -->\n<div class="flyout box-flyout">\n    <div class="chat-body">\n        <div class="chat-content ';
+__p += '<!-- src/templates/chatbox.html -->\n<div class="flyout box-flyout">\n    <div class="chat-body">\n        <div class="top-toolbar">\n            toolbar upeet\n        </div>\n        <div class="chat-content ';
  if (o.show_send_button) { ;
 __p += 'chat-content-sendbutton';
  } ;
@@ -93115,7 +93117,7 @@ return __p
 var _ = {escape:__webpack_require__(/*! ./node_modules/lodash/escape.js */ "./node_modules/lodash/escape.js")};
 module.exports = function(o) {
 var __t, __p = '';
-__p += '<!-- src/templates/chatroom.html -->\n<div class="flyout box-flyout">\n    <div class="chat-head chat-head-chatroom row no-gutters"></div>\n    <div class="chat-body chatroom-body row no-gutters">\n        <div class="disconnect-container hidden"></div>\n    </div>\n</div>\n';
+__p += '<!-- src/templates/chatroom.html -->\n<div class="flyout box-flyout">\n        \n    <div class="chat-head chat-head-chatroom row no-gutters"></div>\n    <div class="top-toolbar">\n            toolbar upeet\n    </div>\n    <div class="chat-body chatroom-body row no-gutters">\n        <div class="disconnect-container hidden"></div>\n    </div>\n</div>\n';
 return __p
 };
 
@@ -95493,7 +95495,7 @@ var _ = {escape:__webpack_require__(/*! ./node_modules/lodash/escape.js */ "./no
 module.exports = function(o) {
 var __t, __p = '', __e = _.escape, __j = Array.prototype.join;
 function print() { __p += __j.call(arguments, '') }
-__p += '<!-- src/templates/roster_item.html -->\n<a class="list-item-link cbox-list-item open-chat w-100 ';
+__p += '<!-- src/templates/roster_item.html -->\n<img class="roster-avatar avatar direct-message-avatart" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAChElEQVRYR2NcbK7zn2EAAeOoA0ZDYDQERkNgNATQQyD62EUGRiYmhnvbNzMca6xCKaRdpsxhkDAxZ3h98TzDzvQ4FDnvJWsZBFXUGP79+cOwzMaQ6MIdoyiGOeD/3z8M25OiGN7dvA43zHXqXAZxYzOG15cuMOxMi0WxJOrwOQYmVlaw2N0tGxiOt9QS5QicDgDp/vLsCcOGIE+CDjAuKGPQjIhl+Pb6JQOXqDjDz48fGFa725LvAIb//xgYGBgZGJmZGW6uWc5wuqcNbBiuEAjavAdsMUitim8QAzM7O8OhykKGR/v3EHQE1hD4//cvw9Njhxhk7Z0Z/v3+zbAp3A8cGtgcwCMlwxCwdhvD/39/GZZaGzJ4LVzFIKSuCY66bfFh5Dtgma0RQ+jOwwzs/AIMnx7cZ9gU4YfVAY69Uxmkre0YPj9+xLAx1JtB0cOHwbqhnejEiDMEQA4AG1bfxsDAyMhwZcFsBlFdfYxEGLb7KAMbLx/D7fWrGN5cvQL2sVlJJQMzByfD7Q1rGE52NOINBbwOQI73vz9/MLy5cgnFAfKuHgy2zd04Lfj5/h3Dak97yhwA0h2+7wQDKxc3w59v3xhYuLjg2RAW378+fWL4/uYVikX8isrgkNtflA1OT7gAwRAAaQRlMVBWgwFYORB16CwDExsbw6nuFoZba1ei2BGy7QADh5Aww9vrVxm2J0ZQ5gCQbq8FKxmENLTABoEc8Or8GQbt+BSGvz++Myx3MMOwwKKqkUHFLwici0DpibQQABWndsYYeiIPnmZgZucAF8WcoqIMoCz45uolhh3J0VjNjz56noGRmYXh+orFDGcndGFVM9oqHg2B0RAYDYEBDwEAlXNl0GM81WwAAAAASUVORK5CYII=">\n<a class="list-item-link cbox-list-item open-chat w-100 ';
  if (o.num_unread) { ;
 __p += ' unread-msgs ';
  } ;
