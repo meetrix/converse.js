@@ -92841,7 +92841,7 @@ var _ = {escape:__webpack_require__(/*! ./node_modules/lodash/escape.js */ "./no
 module.exports = function(o) {
 var __t, __p = '', __e = _.escape, __j = Array.prototype.join;
 function print() { __p += __j.call(arguments, '') }
-__p += '<!-- src/templates/bookmark.html -->\n<div class="list-item controlbox-padded room-item available-chatroom d-flex flex-row ';
+__p += '<!-- src/templates/bookmark.html -->\n<div class="list-item bookmark-chat-room-list controlbox-padded room-item available-chatroom d-flex flex-row ';
  if (o.hidden) { ;
 __p += ' hidden ';
  } ;
@@ -95505,7 +95505,7 @@ var _ = {escape:__webpack_require__(/*! ./node_modules/lodash/escape.js */ "./no
 module.exports = function(o) {
 var __t, __p = '', __e = _.escape, __j = Array.prototype.join;
 function print() { __p += __j.call(arguments, '') }
-__p += '<!-- src/templates/roster_item.html -->\n<img class="roster-avatar avatar direct-message-avatart" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAChElEQVRYR2NcbK7zn2EAAeOoA0ZDYDQERkNgNATQQyD62EUGRiYmhnvbNzMca6xCKaRdpsxhkDAxZ3h98TzDzvQ4FDnvJWsZBFXUGP79+cOwzMaQ6MIdoyiGOeD/3z8M25OiGN7dvA43zHXqXAZxYzOG15cuMOxMi0WxJOrwOQYmVlaw2N0tGxiOt9QS5QicDgDp/vLsCcOGIE+CDjAuKGPQjIhl+Pb6JQOXqDjDz48fGFa725LvAIb//xgYGBgZGJmZGW6uWc5wuqcNbBiuEAjavAdsMUitim8QAzM7O8OhykKGR/v3EHQE1hD4//cvw9Njhxhk7Z0Z/v3+zbAp3A8cGtgcwCMlwxCwdhvD/39/GZZaGzJ4LVzFIKSuCY66bfFh5Dtgma0RQ+jOwwzs/AIMnx7cZ9gU4YfVAY69Uxmkre0YPj9+xLAx1JtB0cOHwbqhnejEiDMEQA4AG1bfxsDAyMhwZcFsBlFdfYxEGLb7KAMbLx/D7fWrGN5cvQL2sVlJJQMzByfD7Q1rGE52NOINBbwOQI73vz9/MLy5cgnFAfKuHgy2zd04Lfj5/h3Dak97yhwA0h2+7wQDKxc3w59v3xhYuLjg2RAW378+fWL4/uYVikX8isrgkNtflA1OT7gAwRAAaQRlMVBWgwFYORB16CwDExsbw6nuFoZba1ei2BGy7QADh5Aww9vrVxm2J0ZQ5gCQbq8FKxmENLTABoEc8Or8GQbt+BSGvz++Myx3MMOwwKKqkUHFLwici0DpibQQABWndsYYeiIPnmZgZucAF8WcoqIMoCz45uolhh3J0VjNjz56noGRmYXh+orFDGcndGFVM9oqHg2B0RAYDYEBDwEAlXNl0GM81WwAAAAASUVORK5CYII=">\n<a class="list-item-link cbox-list-item open-chat w-100 ';
+__p += '<!-- src/templates/roster_item.html -->\n\n<a class="list-item-link cbox-list-item open-chat w-100 ';
  if (o.num_unread) { ;
 __p += ' unread-msgs ';
  } ;
