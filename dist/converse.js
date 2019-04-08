@@ -55297,7 +55297,8 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
       className: 'controlbox-section',
       id: 'chatrooms',
       events: {
-        'click a.controlbox-heading__btn.show-add-muc-modal': 'showAddRoomModal',
+        // 'click a.controlbox-heading__btn.show-add-muc-modal': 'showAddRoomModal',
+        'click div.controlbox-heading__btn.show-add-muc-modal': 'showAddRoomModal',
         'click a.controlbox-heading__btn.show-list-muc-modal': 'showListRoomsModal'
       },
 
@@ -94177,17 +94178,17 @@ var _ = {escape:__webpack_require__(/*! ./node_modules/lodash/escape.js */ "./no
 module.exports = function(o) {
 var __t, __p = '', __e = _.escape, __j = Array.prototype.join;
 function print() { __p += __j.call(arguments, '') }
-__p += '<!-- src/templates/group_header.html -->\n<a href="#" class="list-toggle group-toggle controlbox-padded" title="' +
+__p += '<!-- src/templates/group_header.html -->\n<!-- <a href="#" class="list-toggle group-toggle controlbox-padded" title="' +
 __e(o.desc_group_toggle) +
-'">\n    <span class="fa ';
+'"> -->\n    <!-- <span class="fa ';
  if (o.toggle_state === o._converse.OPENED) { ;
 __p += ' fa-caret-down ';
  } else { ;
 __p += ' fa-caret-right ';
  } ;
-__p += '">\n    </span> ' +
+__p += '"> -->\n    </span> ' +
 __e(o.label_group) +
-'</a>\n<ul class="items-list roster-group-contacts ';
+'\n<!-- </a> -->\n<ul class="items-list roster-group-contacts ';
  if (o.toggle_state === o._converse.CLOSED) { ;
 __p += ' collapsed ';
  } ;
@@ -95211,9 +95212,9 @@ __p += '<!-- src/templates/room_panel.html -->\n<!-- <div id="chatrooms"> -->\n<
 __e(o.heading_chatrooms) +
 '</span>\n    <a class="controlbox-heading__btn show-list-muc-modal fa fa-list-ul" title="' +
 __e(o.title_list_rooms) +
-'" data-toggle="modal" data-target="#list-chatrooms-modal"></a>\n    <a class="controlbox-heading__btn show-add-muc-modal fa fa-plus" title="' +
+'" data-toggle="modal" data-target="#list-chatrooms-modal"></a>\n    <!-- <a class="controlbox-heading__btn show-add-muc-modal fa fa-plus" title="' +
 __e(o.title_new_room) +
-'" data-toggle="modal" data-target="#add-chatrooms-modal"></a>\n</div>\n<div class="list-container open-rooms-list rooms-list-container"></div>\n<div class="controlbox-heading__btn show-add-muc-modal" title="' +
+'" data-toggle="modal" data-target="#add-chatrooms-modal"></a> -->\n</div>\n<div class="list-container open-rooms-list rooms-list-container"></div>\n<div class="controlbox-heading__btn show-add-muc-modal" title="' +
 __e(o.title_new_room) +
 '" data-toggle="modal" data-target="#add-chatrooms-modal" >\n    <img class="channle-icon" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAwElEQVRYR2P8GZH5n2EAAeOoA0ZDYDQERkNgNARGQ4CsEBAVYmCb2Mzwb99Rhj9zllFUlZFXGYmJMLBNbGL4d+gEw5/pi0aIAxjVlBhYi9IhvmVmYmDg4WZg+POHgeHrd7DQv9MXGP7MXU5yaBAdBYzaagys5dlQCxgZGFhZGBj+/4c4AuyAiwx/Js+jnQNQTB6RaWBwhQAjIwOjlDjD/w+fGBi+fiM53pE1EJ0IKbIFj+ZRB4yGwGgIjIbAgIcAALMWlEG2y2cpAAAAAElFTkSuQmCC">Add Channel\n</div>\n<div class="list-container bookmarks-list rooms-list-container"></div>\n<!-- </div> -->\n';
 return __p
@@ -95252,9 +95253,9 @@ __p += ' fa-caret-right ';
  } ;
 __p += '">\n        </span> ' +
 __e(o.label_rooms) +
-'</div> -->\n        <span>' +
+'</div> -->\n        <!-- <span>' +
 __e(o.label_rooms) +
-'</span>\n<div class="items-list rooms-list open-rooms-list"></div>\n';
+'</span> -->\n<div class="items-list rooms-list open-rooms-list"></div>\n';
 return __p
 };
 
