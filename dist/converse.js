@@ -95232,7 +95232,7 @@ var _ = {escape:__webpack_require__(/*! ./node_modules/lodash/escape.js */ "./no
 module.exports = function(o) {
 var __t, __p = '', __e = _.escape, __j = Array.prototype.join;
 function print() { __p += __j.call(arguments, '') }
-__p += '<!-- src/templates/rooms_list.html -->\n<a href="#" class="list-toggle open-rooms-toggle controlbox-padded" title="' +
+__p += '<!-- src/templates/rooms_list.html -->\n<!-- <a href="#" class="list-toggle open-rooms-toggle controlbox-padded" title="' +
 __e(o.desc_rooms) +
 '">\n    <span class="fa ';
  if (o.toggle_state === o._converse.OPENED) { ;
@@ -95242,7 +95242,19 @@ __p += ' fa-caret-right ';
  } ;
 __p += '">\n    </span> ' +
 __e(o.label_rooms) +
-'</a>\n<div class="items-list rooms-list open-rooms-list"></div>\n';
+'</a> -->\n<!-- <div class="list-toggle open-rooms-toggle controlbox-padded" title="' +
+__e(o.desc_rooms) +
+'">\n        <span class="fa ';
+ if (o.toggle_state === o._converse.OPENED) { ;
+__p += ' fa-caret-down ';
+ } else { ;
+__p += ' fa-caret-right ';
+ } ;
+__p += '">\n        </span> ' +
+__e(o.label_rooms) +
+'</div> -->\n        <span>' +
+__e(o.label_rooms) +
+'</span>\n<div class="items-list rooms-list open-rooms-list"></div>\n';
 return __p
 };
 
