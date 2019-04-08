@@ -92867,17 +92867,17 @@ var _ = {escape:__webpack_require__(/*! ./node_modules/lodash/escape.js */ "./no
 module.exports = function(o) {
 var __t, __p = '', __e = _.escape, __j = Array.prototype.join;
 function print() { __p += __j.call(arguments, '') }
-__p += '<!-- src/templates/bookmarks_list.html -->\n<a href="#" class="list-toggle bookmarks-toggle controlbox-padded" title="' +
+__p += '<!-- src/templates/bookmarks_list.html -->\n<!-- <a href="#" class="list-toggle bookmarks-toggle controlbox-padded" title="' +
 __e(o.desc_bookmarks) +
-'">\n    <span class="fa ';
+'"> -->\n    <!-- <span class="fa ';
  if (o.toggle_state === o._converse.OPENED) { ;
 __p += ' fa-caret-down ';
  } else { ;
 __p += ' fa-caret-right ';
  } ;
-__p += '">\n    </span> ' +
+__p += '"> -->\n    </span> ' +
 __e(o.label_bookmarks) +
-'</a>\n<div class="items-list bookmarks rooms-list ';
+'\n<!-- </a> -->\n<div class="items-list bookmarks rooms-list ';
  if (o.toggle_state !== o._converse.OPENED) { ;
 __p += ' hidden ';
  } ;
@@ -95213,7 +95213,9 @@ __e(o.heading_chatrooms) +
 __e(o.title_list_rooms) +
 '" data-toggle="modal" data-target="#list-chatrooms-modal"></a>\n    <a class="controlbox-heading__btn show-add-muc-modal fa fa-plus" title="' +
 __e(o.title_new_room) +
-'" data-toggle="modal" data-target="#add-chatrooms-modal"></a>\n</div>\n<div class="list-container open-rooms-list rooms-list-container"></div>\n<div class="list-container bookmarks-list rooms-list-container"></div>\n<!-- </div> -->\n';
+'" data-toggle="modal" data-target="#add-chatrooms-modal"></a>\n</div>\n<div class="list-container open-rooms-list rooms-list-container"></div>\n<div class="controlbox-heading__btn show-add-muc-modal" title="' +
+__e(o.title_new_room) +
+'" data-toggle="modal" data-target="#add-chatrooms-modal" >\n    <img class="channle-icon" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAwElEQVRYR2P8GZH5n2EAAeOoA0ZDYDQERkNgNARGQ4CsEBAVYmCb2Mzwb99Rhj9zllFUlZFXGYmJMLBNbGL4d+gEw5/pi0aIAxjVlBhYi9IhvmVmYmDg4WZg+POHgeHrd7DQv9MXGP7MXU5yaBAdBYzaagys5dlQCxgZGFhZGBj+/4c4AuyAiwx/Js+jnQNQTB6RaWBwhQAjIwOjlDjD/w+fGBi+fiM53pE1EJ0IKbIFj+ZRB4yGwGgIjIbAgIcAALMWlEG2y2cpAAAAAElFTkSuQmCC">Add Channel\n</div>\n<div class="list-container bookmarks-list rooms-list-container"></div>\n<!-- </div> -->\n';
 return __p
 };
 
@@ -95267,7 +95269,7 @@ __p += ' unread-msgs ';
  } ;
 __p += '"\n    data-room-jid="' +
 __e(o.jid) +
-'">\n\n';
+'">\n    <div>\n            <img class="channle-icon" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAqklEQVRYR2NU+5rzn2EAAeOoA0ZDYDQERkNgNARICYHTXF0MfAycOAvu4B/dDFf+PSKpYCepKD7L1c3Aw8DBcObfXayWFP1cwPDy/wfaOoCLgZ1B81seSZbgU0xyCIw6AJQGsIGOX+sZ5v/ZR3LUkBwFIAfc+PcUw6Ke3xsZDv+9TnsHjKaBkR0CoKIYlAgHrCAiOYkToYGkbEiEeSQrGXXAaAiMhsCAhwAAIQ6G4S1d9YMAAAAASUVORK5CYII=">\n    </div>\n\n';
  if (o.num_unread) { ;
 __p += '\n    <span class="list-item-badge badge badge-room-color msgs-indicator">' +
 __e( o.num_unread ) +
