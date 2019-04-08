@@ -527,6 +527,8 @@ converse.plugins.add('converse-muc-views', {
                 'input .chat-textarea': 'inputChanged',
                 'dragover .chat-textarea': 'onDragOver',
                 'drop .chat-textarea': 'onDrop',
+                'click .top-toolbar-video-cal': 'videoCall',
+                'click .top-toolbar-file-attach': 'toggleFileUpload',
             },
 
             initialize () {
@@ -578,6 +580,9 @@ converse.plugins.add('converse-muc-views', {
                  * @example _converse.api.listen.on('chatRoomOpened', view => { ... });
                  */
                 _converse.api.trigger('chatRoomOpened', this);
+            },
+            videoCall(){
+                console.log('video call click')
             },
 
             render () {

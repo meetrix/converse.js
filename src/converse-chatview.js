@@ -320,6 +320,8 @@ converse.plugins.add('converse-chatview', {
                 'keydown .chat-textarea': 'keyPressed',
                 'dragover .chat-textarea': 'onDragOver',
                 'drop .chat-textarea': 'onDrop',
+                'click .top-toolbar-video-cal': 'videoCall',
+                'click .top-toolbar-file-attach': 'toggleFileUpload',
             },
 
             initialize () {
@@ -351,7 +353,9 @@ converse.plugins.add('converse-chatview', {
                 this.markScrolled = _.debounce(this._markScrolled, 100);
                 this.show = _.debounce(this._show, 250, {'leading': true});
             },
-
+            videoCall(){
+                console.log('video call click')
+            },
             render () {
                 // XXX: Is this still needed?
                 this.el.setAttribute('id', this.model.get('box_id'));
@@ -365,18 +369,17 @@ converse.plugins.add('converse-chatview', {
                 this.insertHeading();
                 return this;
             },
-
             renderToolbar (toolbar, options) {
                 if (!_converse.show_toolbar) {
                     return this;
                 }
-                console.log('toolbar',toolbar)
+                
                 toolbar = toolbar || tpl_toolbar;
                 options = _.assign(
                     this.model.toJSON(),
                     this.getToolbarOptions(options || {})
                 );
-                console.log('element',this.el)
+                
                 this.el.querySelector('.chat-toolbar').innerHTML = toolbar(options);
                 this.addSpoilerButton(options);
                 this.addFileUploadButton();

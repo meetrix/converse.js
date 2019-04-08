@@ -49249,7 +49249,9 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
         'input .chat-textarea': 'inputChanged',
         'keydown .chat-textarea': 'keyPressed',
         'dragover .chat-textarea': 'onDragOver',
-        'drop .chat-textarea': 'onDrop'
+        'drop .chat-textarea': 'onDrop',
+        'click .top-toolbar-video-cal': 'videoCall',
+        'click .top-toolbar-file-attach': 'toggleFileUpload'
       },
 
       initialize() {
@@ -49284,6 +49286,10 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
         });
       },
 
+      videoCall() {
+        console.log('video call click');
+      },
+
       render() {
         // XXX: Is this still needed?
         this.el.setAttribute('id', this.model.get('box_id'));
@@ -49301,10 +49307,8 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
           return this;
         }
 
-        console.log('toolbar', toolbar);
         toolbar = toolbar || templates_toolbar_html__WEBPACK_IMPORTED_MODULE_18___default.a;
         options = _.assign(this.model.toJSON(), this.getToolbarOptions(options || {}));
-        console.log('element', this.el);
         this.el.querySelector('.chat-toolbar').innerHTML = toolbar(options);
         this.addSpoilerButton(options);
         this.addFileUploadButton();
@@ -53897,7 +53901,9 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
         'keyup .chat-textarea': 'keyUp',
         'input .chat-textarea': 'inputChanged',
         'dragover .chat-textarea': 'onDragOver',
-        'drop .chat-textarea': 'onDrop'
+        'drop .chat-textarea': 'onDrop',
+        'click .top-toolbar-video-cal': 'videoCall',
+        'click .top-toolbar-file-attach': 'toggleFileUpload'
       },
 
       initialize() {
@@ -53952,6 +53958,10 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
 
 
         _converse.api.trigger('chatRoomOpened', this);
+      },
+
+      videoCall() {
+        console.log('video call click');
       },
 
       render() {
@@ -92977,7 +92987,7 @@ var _ = {escape:__webpack_require__(/*! ./node_modules/lodash/escape.js */ "./no
 module.exports = function(o) {
 var __t, __p = '', __j = Array.prototype.join;
 function print() { __p += __j.call(arguments, '') }
-__p += '<!-- src/templates/chatbox.html -->\n<div class="flyout box-flyout">\n    <div class="chat-body">\n        <div class="top-toolbar">\n            toolbar upeet\n        </div>\n        <div class="chat-content ';
+__p += '<!-- src/templates/chatbox.html -->\n<div class="flyout box-flyout">\n    <div class="chat-body">\n        <div class="top-toolbar">\n            toolbar upeet\n            <ui class="top-toolbar-manu">\n                <li class="top-toolbar-video-cal">\n                    <i class="fa fa-video"></i>\n                </li>\n                <li class="top-toolbar-audio-cal">\n                    <i class="fa fa-phone"></i>\n                </li>\n                <li class="top-toolbar-file-attach">\n                    <i class="fa fa-paperclip"></i>\n                </li>\n            </ui>\n        </div>\n        <div class="chat-content ';
  if (o.show_send_button) { ;
 __p += 'chat-content-sendbutton';
  } ;
@@ -93117,7 +93127,7 @@ return __p
 var _ = {escape:__webpack_require__(/*! ./node_modules/lodash/escape.js */ "./node_modules/lodash/escape.js")};
 module.exports = function(o) {
 var __t, __p = '';
-__p += '<!-- src/templates/chatroom.html -->\n<div class="flyout box-flyout">\n        \n    <div class="chat-head chat-head-chatroom row no-gutters"></div>\n    <div class="top-toolbar">\n            toolbar upeet\n    </div>\n    <div class="chat-body chatroom-body row no-gutters">\n        <div class="disconnect-container hidden"></div>\n    </div>\n</div>\n';
+__p += '<!-- src/templates/chatroom.html -->\n<div class="flyout box-flyout">\n        \n    <div class="chat-head chat-head-chatroom row no-gutters"></div>\n        <div class="top-toolbar">\n            toolbar upeet\n            <ui class="top-toolbar-manu">\n                <li class="top-toolbar-video-cal">\n                    <i class="fa fa-video"></i>\n                </li>\n                <li class="top-toolbar-audio-cal">\n                    <i class="fa fa-phone"></i>\n                </li>\n                <li class="top-toolbar-file-attach">\n                    <i class="fa fa-paperclip"></i>\n                </li>\n            </ui>\n        </div>\n    <div class="chat-body chatroom-body row no-gutters">\n        <div class="disconnect-container hidden"></div>\n    </div>\n</div>\n';
 return __p
 };
 
