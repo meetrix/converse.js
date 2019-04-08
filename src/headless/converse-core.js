@@ -62,7 +62,7 @@ _.templateSettings = {
 const BOSH_WAIT = 59;
 
 /**
- * A private, closured object containing the private api (via `_converse.api`)
+ * A private, closured object containing the private api (via {@link _converse.api})
  * as well as private methods and internal data-structures.
  *
  * @namespace _converse
@@ -72,7 +72,7 @@ const _converse = {
     'promises': {}
 }
 
-_converse.VERSION_NAME = "v4.1.2";
+_converse.VERSION_NAME = "v4.2.0";
 
 _.extend(_converse, Backbone.Events);
 
@@ -107,7 +107,6 @@ _converse.keycodes = {
     META: 91,
     META_RIGHT: 93
 };
-
 
 // Module-level constants
 _converse.STATUS_WEIGHTS = {
@@ -198,6 +197,7 @@ _converse.default_settings = {
     debug: false,
     default_state: 'online',
     expose_rid_and_sid: false,
+    forward_messages: false,
     geouri_regex: /https:\/\/www.openstreetmap.org\/.*#map=[0-9]+\/([\-0-9.]+)\/([\-0-9.]+)\S*/g,
     geouri_replacement: 'https://www.openstreetmap.org/?mlat=$1&mlon=$2#map=18/$1/$2',
     idle_presence_timeout: 300, // Seconds after which an idle presence is sent
@@ -225,20 +225,19 @@ _converse.default_settings = {
 };
 
 
+/**
+ * Logs messages to the browser's developer console.
+ * Available loglevels are 0 for 'debug', 1 for 'info', 2 for 'warn',
+ * 3 for 'error' and 4 for 'fatal'.
+ * When using the 'error' or 'warn' loglevels, a full stacktrace will be
+ * logged as well.
+ * @method log
+ * @private
+ * @memberOf _converse
+ * @param { string } message - The message to be logged
+ * @param { integer } level - The loglevel which allows for filtering of log messages
+ */
 _converse.log = function (message, level, style='') {
-    /* Logs messages to the browser's developer console.
-     *
-     * Parameters:
-     *      (String) message - The message to be logged.
-     *      (Integer) level - The loglevel which allows for filtering of log
-     *                       messages.
-     *
-     *  Available loglevels are 0 for 'debug', 1 for 'info', 2 for 'warn',
-     *  3 for 'error' and 4 for 'fatal'.
-     *
-     *  When using the 'error' or 'warn' loglevels, a full stacktrace will be
-     *  logged as well.
-     */
     if (level === Strophe.LogLevel.ERROR || level === Strophe.LogLevel.FATAL) {
         style = style || 'color: maroon';
     }
@@ -275,12 +274,15 @@ Strophe.log = function (level, msg) { _converse.log(level+' '+msg, level); };
 Strophe.error = function (msg) { _converse.log(msg, Strophe.LogLevel.ERROR); };
 
 
+/**
+ * Translate the given string based on the current locale.
+ * Handles all MUC presence stanzas.
+ * @method __
+ * @private
+ * @memberOf _converse
+ * @param { String } str - The string to translate
+ */
 _converse.__ = function (str) {
-    /* Translate the given string based on the current locale.
-     *
-     * Parameters:
-     *      (String) str - The string to translate.
-     */
     if (_.isUndefined(i18n)) {
         return str;
     }
@@ -304,12 +306,13 @@ function addPromise (promise) {
 }
 
 _converse.emit = function (name) {
-    /* Event emitter and promise resolver */
-    _converse.trigger.apply(this, arguments);
-    const promise = _converse.promises[name];
-    if (!_.isUndefined(promise)) {
-        promise.resolve();
-    }
+   _converse.log(
+      "(DEPRECATION) "+
+      "_converse.emit has been has been deprecated. "+
+      "Please use `_converse.api.trigger` instead.",
+      Strophe.LogLevel.WARN
+   )
+   _converse.api.emit.apply(_converse, arguments);
 };
 
 _converse.isUniView = function () {
@@ -358,7 +361,23 @@ function initPlugins() {
         },
         '_converse': _converse
     }, whitelist, _converse.blacklisted_plugins);
-    _converse.emit('pluginsInitialized');
+    
+    /**
+     * Triggered once all plugins have been initialized. This is a useful event if you want to
+     * register event handlers but would like your own handlers to be overridable by
+     * plugins. In that case, you need to first wait until all plugins have been
+     * initialized, so that their overrides are active. One example where this is used
+     * is in [converse-notifications.js](https://github.com/jcbrand/converse.js/blob/master/src/converse-notification.js)`.
+     *
+     * Also available as an [ES2015 Promise](http://es6-features.org/#PromiseUsage)
+     * which can be listened to with `_converse.api.waitUntil`.
+     *
+     * @event _converse#pluginsInitialized
+     * @memberOf _converse
+     * @example _converse.api.listen.on('pluginsInitialized', () => { ... });
+     * @example _converse.api.waitUntil('pluginsInitialized').then(() => { ... });
+     */
+    _converse.api.trigger('pluginsInitialized');
 }
 
 function initClientConfig () {
@@ -375,7 +394,16 @@ function initClientConfig () {
     });
     _converse.config.browserStorage = new Backbone.BrowserStorage.session(id);
     _converse.config.fetch();
-    _converse.emit('clientConfigInitialized');
+    /**
+     * Triggered once the XMPP-client configuration has been initialized.
+     * The client configuration is independent of any particular and its values
+     * persist across user sessions.
+     *
+     * @event _converse#clientConfigInitialized
+     * @example
+     * _converse.api.listen.on('clientConfigInitialized', () => { ... });
+     */
+    _converse.api.trigger('clientConfigInitialized');
 }
 
 _converse.initConnection = function () {
@@ -397,7 +425,13 @@ _converse.initConnection = function () {
         }
     }
     setUpXMLLogging();
-    _converse.emit('connectionInitialized');
+    /**
+     * Triggered once the `Strophe.Connection` constructor has been initialized, which
+     * will be responsible for managing the connection to the XMPP server.
+     *
+     * @event _converse#connectionInitialized
+     */
+    _converse.api.trigger('connectionInitialized');
 }
 
 
@@ -426,7 +460,7 @@ function finishInitialization () {
         Backbone.history.start();
     }
     if (_converse.idle_presence_timeout > 0) {
-        _converse.on('addClientFeatures', () => {
+        _converse.api.listen.on('addClientFeatures', () => {
             _converse.api.disco.own.features.add(Strophe.NS.IDLE);
         });
     }
@@ -435,7 +469,7 @@ function finishInitialization () {
 
 function unregisterGlobalEventHandlers () {
     document.removeEventListener("visibilitychange", _converse.saveWindowState);
-    _converse.emit('unregisteredGlobalEventHandlers');
+    _converse.api.trigger('unregisteredGlobalEventHandlers');
 }
 
 function cleanup () {
@@ -533,12 +567,14 @@ _converse.initialize = async function (settings, callback) {
 
     this.generateResource = () => `/converse.js-${Math.floor(Math.random()*139749528).toString()}`;
 
+    /**
+     * Send out a Chat Status Notification (XEP-0352)
+     * @private
+     * @method sendCSI
+     * @memberOf _converse
+     * @param { String } stat - The user's chat status
+     */
     this.sendCSI = function (stat) {
-        /* Send out a Chat Status Notification (XEP-0352)
-         *
-         * Parameters:
-         *  (String) stat: The user's chat status
-         */
         _converse.api.send($build(stat, {xmlns: Strophe.NS.CSI}));
         _converse.inactive = (stat === _converse.INACTIVE) ? true : false;
     };
@@ -629,14 +665,15 @@ _converse.initialize = async function (settings, callback) {
         });
     };
 
+    /**
+     * Reject or cancel another user's subscription to our presence updates.
+     * @method rejectPresenceSubscription
+     * @private
+     * @memberOf _converse
+     * @param { String } jid - The Jabber ID of the user whose subscription is being canceled
+     * @param { String } message - An optional message to the user
+     */
     this.rejectPresenceSubscription = function (jid, message) {
-        /* Reject or cancel another user's subscription to our presence updates.
-         *
-         *  Parameters:
-         *    (String) jid - The Jabber ID of the user whose subscription
-         *      is being canceled.
-         *    (String) message - An optional message to the user
-         */
         const pres = $pres({to: jid, type: "unsubscribed"});
         if (message && message !== "") { pres.c("status").t(message); }
         _converse.api.send(pres);
@@ -660,7 +697,13 @@ _converse.initialize = async function (settings, callback) {
         _converse.connection.reset();
         _converse.tearDown();
         _converse.clearSession();
-        _converse.emit('disconnected');
+        /**
+         * Triggered after converse.js has disconnected from the XMPP server.
+         * @event _converse#disconnected
+         * @memberOf _converse
+         * @example _converse.api.listen.on('disconnected', () => { ... });
+         */
+        _converse.api.trigger('disconnected');
     };
 
     this.onDisconnected = function () {
@@ -675,7 +718,7 @@ _converse.initialize = async function (settings, callback) {
                 /* In this case, we reconnect, because we might be receiving
                  * expirable tokens from the credentials_url.
                  */
-                _converse.emit('will-reconnect');
+                _converse.api.trigger('will-reconnect');
                 return _converse.reconnect();
             } else {
                 return _converse.disconnect();
@@ -687,7 +730,13 @@ _converse.initialize = async function (settings, callback) {
                 !_converse.auto_reconnect) {
             return _converse.disconnect();
         }
-        _converse.emit('will-reconnect');
+        /**
+         * Triggered when the connection has dropped, but Converse will attempt
+         * to reconnect again.
+         *
+         * @event _converse#will-reconnect
+         */
+        _converse.api.trigger('will-reconnect');
         _converse.reconnect();
     };
 
@@ -794,9 +843,9 @@ _converse.initialize = async function (settings, callback) {
             _converse.onStatusInitialized(reconnecting);
         } else {
             const id = `converse.xmppstatus-${_converse.bare_jid}`;
-            this.xmppstatus = new this.XMPPStatus({'id': id});
-            this.xmppstatus.browserStorage = new Backbone.BrowserStorage.session(id);
-            this.xmppstatus.fetch({
+            _converse.xmppstatus = new this.XMPPStatus({'id': id});
+            _converse.xmppstatus.browserStorage = new Backbone.BrowserStorage.session(id);
+            _converse.xmppstatus.fetch({
                 'success': _.partial(_converse.onStatusInitialized, reconnecting),
                 'error': _.partial(_converse.onStatusInitialized, reconnecting)
             });
@@ -809,7 +858,13 @@ _converse.initialize = async function (settings, callback) {
         _converse.session = new Backbone.Model({id});
         _converse.session.browserStorage = new Backbone.BrowserStorage.session(id);
         _converse.session.fetch();
-        _converse.emit('sessionInitialized');
+        /**
+         * Triggered once the session has been initialized. The session is a
+         * persistent object which stores session information in the browser storage.
+         * @event _converse#sessionInitialized
+         * @memberOf _converse
+         */
+        _converse.api.trigger('sessionInitialized');
     };
 
     this.clearSession = function () {
@@ -819,7 +874,13 @@ _converse.initialize = async function (settings, callback) {
         } else if (!_.isUndefined(this.session) && this.session.browserStorage) {
             this.session.browserStorage._clear();
         }
-        _converse.emit('clearSession');
+        /**
+         * Triggered once the session information has been cleared,
+         * for example when the user has logged out or when Converse has
+         * disconnected for some other reason.
+         * @event _converse#clearSession
+         */
+        _converse.api.trigger('clearSession');
     };
 
     this.logOut = function () {
@@ -832,8 +893,11 @@ _converse.initialize = async function (settings, callback) {
         }
         // Recreate all the promises
         _.each(_.keys(_converse.promises), addPromise);
-
-        _converse.emit('logout');
+        /**
+         * Triggered once the user has logged out.
+         * @event _converse#logout
+         */
+        _converse.api.trigger('logout');
     };
 
     this.saveWindowState = function (ev) {
@@ -859,13 +923,29 @@ _converse.initialize = async function (settings, callback) {
             _converse.clearMsgCounter();
         }
         _converse.windowState = state;
-        _converse.emit('windowStateChanged', {state});
+        /**
+         * Triggered when window state has changed.
+         * Used to determine when a user left the page and when came back.
+         * @event _converse#windowStateChanged
+         * @type { object }
+         * @property{ string } state - Either "hidden" or "visible"
+         * @example _converse.api.listen.on('windowStateChanged', obj => { ... });
+         */
+        _converse.api.trigger('windowStateChanged', {state});
     };
 
     this.registerGlobalEventHandlers = function () {
         document.addEventListener("visibilitychange", _converse.saveWindowState);
         _converse.saveWindowState({'type': document.hidden ? "blur" : "focus"}); // Set initial state
-        _converse.emit('registeredGlobalEventHandlers');
+        /**
+         * Called once Converse has registered its global event handlers
+         * (for events such as window resize or unload).
+         * Plugins can listen to this event as cue to register their own
+         * global event handlers.
+         * @event _converse#registeredGlobalEventHandlers
+         * @example _converse.api.listen.on('registeredGlobalEventHandlers', () => { ... });
+         */
+        _converse.api.trigger('registeredGlobalEventHandlers');
     };
 
     this.enableCarbons = function () {
@@ -902,13 +982,36 @@ _converse.initialize = async function (settings, callback) {
     };
 
     this.onStatusInitialized = function (reconnecting) {
-        _converse.emit('statusInitialized', reconnecting);
+       /**
+        * Triggered when the user's own chat status has been initialized.
+        * @event _converse#statusInitialized
+        * @example _converse.api.listen.on('statusInitialized', status => { ... });
+        * @example _converse.api.waitUntil('statusInitialized').then(() => { ... });
+        */
+        _converse.api.trigger('statusInitialized', reconnecting);
         if (reconnecting) {
-            _converse.emit('reconnected');
+            /**
+             * After the connection has dropped and converse.js has reconnected.
+             * Any Strophe stanza handlers (as registered via `converse.listen.stanza`) will
+             * have to be registered anew.
+             * @event _converse#reconnected
+             * @example _converse.api.listen.on('reconnected', () => { ... });
+             */
+            _converse.api.trigger('reconnected');
         } else {
             init_promise.resolve();
-            _converse.emit('initialized');
-            _converse.emit('connected');
+            /**
+             * Triggered once converse.js has been initialized.
+             * See also {@link _converse#event:pluginsInitialized}.
+             * @event _converse#initialized
+             */
+            _converse.api.trigger('initialized');
+            /**
+             * Triggered after the connection has been established and Converse
+             * has got all its ducks in a row.
+             * @event _converse#initialized
+             */
+            _converse.api.trigger('connected');
         }
     };
 
@@ -917,7 +1020,7 @@ _converse.initialize = async function (settings, callback) {
         _converse.bare_jid = Strophe.getBareJidFromJid(_converse.connection.jid);
         _converse.resource = Strophe.getResourceFromJid(_converse.connection.jid);
         _converse.domain = Strophe.getDomainFromJid(_converse.connection.jid);
-        _converse.emit('setUserJID');
+        _converse.api.trigger('setUserJID');
     };
 
     this.onConnected = function (reconnecting) {
@@ -939,9 +1042,7 @@ _converse.initialize = async function (settings, callback) {
         },
 
         initialize () {
-            this.on('change', () => {
-                _converse.emit('connfeedback', _converse.connfeedback);
-            });
+            this.on('change', () => _converse.api.trigger('connfeedback', _converse.connfeedback));
         }
     });
     this.connfeedback = new this.ConnectionFeedback();
@@ -965,13 +1066,25 @@ _converse.initialize = async function (settings, callback) {
             this.on('change:status', (item) => {
                 const status = this.get('status');
                 this.sendPresence(status);
-                _converse.emit('statusChanged', status);
+                /**
+                 * Triggered when the current user's status has changed
+                 * @event _converse#statusChanged
+                 * @type { string }
+                 * @example _converse.api.listen.on('statusChanged', status => { ... });
+                 */
+                _converse.api.trigger('statusChanged', status);
             });
 
             this.on('change:status_message', () => {
                 const status_message = this.get('status_message');
                 this.sendPresence(this.get('status'), status_message);
-                _converse.emit('statusMessageChanged', status_message);
+                /**
+                 * Triggered when the current user's custom status message has changed.
+                 * @event _converse#statusMessageChanged
+                 * @type { string }
+                 * @example _converse.api.listen.on('statusMessageChanged', message => { ... });
+                 */
+                _converse.api.trigger('statusMessageChanged', status_message);
             });
         },
 
@@ -1034,7 +1147,7 @@ _converse.initialize = async function (settings, callback) {
             };
             xhr.onerror = function () {
                 delete _converse.connection;
-                _converse.emit('noResumeableSession', this);
+                _converse.api.trigger('noResumeableSession', this);
                 reject(xhr.responseText);
             };
             xhr.send();
@@ -1056,7 +1169,13 @@ _converse.initialize = async function (settings, callback) {
         };
         xhr.onerror = function () {
             delete _converse.connection;
-            _converse.emit('noResumeableSession', this);
+            /**
+             * Triggered when keepalive=true but there aren't any stored prebind tokens.
+             * @event _converse#noResumeableSession
+             * @type { _converse }
+             * @example _converse.api.listen.on('noResumeableSession', _converse => { ... });
+             */
+            _converse.api.trigger('noResumeableSession', this);
         };
         xhr.send();
     };
@@ -1198,7 +1317,7 @@ _converse.initialize = async function (settings, callback) {
     };
 
     this.tearDown = function () {
-        _converse.emit('beforeTearDown');
+        _converse.api.trigger('beforeTearDown');
         if (!_.isUndefined(_converse.session)) {
             _converse.session.destroy();
         }
@@ -1208,7 +1327,7 @@ _converse.initialize = async function (settings, callback) {
         window.removeEventListener('mousemove', _converse.onUserActivity);
         window.removeEventListener(_converse.unloadevent, _converse.onUserActivity);
         window.clearInterval(_converse.everySecondTrigger);
-        _converse.emit('afterTearDown');
+        _converse.api.trigger('afterTearDown');
         return _converse;
     };
 
@@ -1276,14 +1395,28 @@ _converse.api = {
     },
 
     /**
-     * Lets you emit (i.e. trigger) events, which can be listened to via
-     * {@link _converse.api.listen.on} or {@link _converse.api.listen.once}
-     * (see [_converse.api.listen](http://localhost:8000/docs/html/api/-_converse.api.listen.html)).
-     *
+     * Lets you emit (i.e. trigger) events.
+     * @deprecated since version 4.2.0. Use _converse.api.trigger instead.
      * @method _converse.api.emit
      */
     'emit' () {
-        _converse.emit.apply(_converse, arguments);
+         _converse.api.trigger.apply(this, arguments);
+    },
+
+    /**
+     * Lets you trigger events, which can be listened to via
+     * {@link _converse.api.listen.on} or {@link _converse.api.listen.once}
+     * (see [_converse.api.listen](http://localhost:8000/docs/html/api/-_converse.api.listen.html)).
+     *
+     * @method _converse.api.trigger
+     */
+    'trigger' (name) {
+         /* Event emitter and promise resolver */
+         _converse.trigger.apply(_converse, arguments);
+         const promise = _converse.promises[name];
+         if (!_.isUndefined(promise)) {
+            promise.resolve();
+         }
     },
 
     /**
@@ -1469,7 +1602,7 @@ _converse.api = {
     },
 
     /**
-     * Converse and its plugins emit various events which you can listen to via the
+     * Converse and its plugins trigger various events which you can listen to via the
      * {@link _converse.api.listen} namespace.
      *
      * Some of these events are also available as [ES2015 Promises](http://es6-features.org/#PromiseUsage)
@@ -1504,7 +1637,7 @@ _converse.api = {
          * Generally, it's the responsibility of the plugin which adds the promise to
          * also resolve it.
          *
-         * This is done by calling {@link _converse.api.emit}, which not only resolves the
+         * This is done by calling {@link _converse.api.trigger}, which not only resolves the
          * promise, but also emits an event with the same name (which can be listened to
          * via {@link _converse.api.listen}).
          *
@@ -1591,13 +1724,11 @@ _converse.api = {
 
         /**
          * Subscribe to an incoming stanza
-         *
-         * Every a matched stanza is received, the callback method specified by `callback` will be called.
-         *
+         * Every a matched stanza is received, the callback method specified by
+         * `callback` will be called.
          * @method _converse.api.listen.stanza
          * @param {string} name The stanza's name
-         * @param {object} options Matching options
-         * (e.g. 'ns' for namespace, 'type' for stanza type, also 'id' and 'from');
+         * @param {object} options Matching options (e.g. 'ns' for namespace, 'type' for stanza type, also 'id' and 'from');
          * @param {function} handler The callback method to be called when the stanza appears
          */
         'stanza' (name, options, handler) {
@@ -1621,7 +1752,6 @@ _converse.api = {
 
     /**
      * Wait until a promise is resolved
-     *
      * @method _converse.api.waitUntil
      * @param {string} name The name of the promise
      * @returns {Promise}
@@ -1636,7 +1766,6 @@ _converse.api = {
 
     /**
      * Allows you to send XML stanzas.
-     *
      * @method _converse.api.send
      * @example
      * const msg = converse.env.$msg({
@@ -1648,12 +1777,26 @@ _converse.api = {
      */
     'send' (stanza) {
         _converse.connection.send(stanza);
-        _converse.emit('send', stanza);
+
+         if (_converse.forward_messages) {
+            // Forward the message, so that other connected resources are also aware of it.
+            _converse.connection.send(
+               $msg({
+                  'to': _converse.bare_jid,
+                  'type': this.get('message_type'),
+               }).c('forwarded', {'xmlns': Strophe.NS.FORWARD})
+                     .c('delay', {
+                           'xmns': Strophe.NS.DELAY,
+                           'stamp': moment().format()
+                     }).up()
+                  .cnode(stanza.tree())
+            );
+         }
+        _converse.api.trigger('send', stanza);
     },
 
     /**
      * Send an IQ stanza and receive a promise
-     *
      * @method _converse.api.sendIQ
      * @returns {Promise} A promise which resolves when we receive a `result` stanza
      * or is rejected when we receive an `error` stanza.
@@ -1661,7 +1804,7 @@ _converse.api = {
     'sendIQ' (stanza, timeout) {
         return new Promise((resolve, reject) => {
             _converse.connection.sendIQ(stanza, resolve, reject, timeout || _converse.IQ_TIMEOUT);
-            _converse.emit('send', stanza);
+            _converse.api.trigger('send', stanza);
         });
     }
 };
@@ -1682,11 +1825,9 @@ const converse = {
     /**
      * Public API method which initializes Converse.
      * This method must always be called when using Converse.
-     *
      * @memberOf converse
      * @method initialize
      * @param {object} config A map of [configuration-settings](https://conversejs.org/docs/html/configuration.html#configuration-settings).
-     *
      * @example
      * converse.initialize({
      *     auto_list_rooms: false,
@@ -1710,7 +1851,6 @@ const converse = {
      * if you want to have access to the private API methods defined further down below.
      *
      * For more information on plugins, read the documentation on [writing a plugin](/docs/html/plugin_development.html).
-     *
      * @namespace plugins
      * @memberOf converse
      */
@@ -1720,9 +1860,7 @@ const converse = {
          * @method converse.plugins.add
          * @param {string} name The name of the plugin
          * @param {object} plugin The plugin object
-         *
          * @example
-         *
          *  const plugin = {
          *      initialize: function () {
          *          // Gets called as soon as the plugin has been loaded.
@@ -1782,6 +1920,15 @@ const converse = {
         'utils': u
     }
 };
+
 window.converse = converse;
+
+/**
+ * Once Converse.js has loaded, it'll dispatch a custom event with the name `converse-loaded`.
+ * You can listen for this event in order to be informed as soon as converse.js has been
+ * loaded and parsed, which would mean it's safe to call `converse.initialize`.
+ * @event converse-loaded
+ * @example window.addEventListener('converse-loaded', () => converse.initialize());
+ */
 window.dispatchEvent(new CustomEvent('converse-loaded'));
 export default converse;
