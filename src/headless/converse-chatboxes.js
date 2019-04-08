@@ -36,7 +36,6 @@ converse.plugins.add('converse-chatboxes', {
         _converse.api.settings.update({
             'auto_join_private_chats': [],
             'filter_by_resource': false,
-            'forward_messages': false,
             'send_chat_state_notifications': true
         });
         _converse.api.promises.add([
@@ -220,6 +219,13 @@ converse.plugins.add('converse-chatboxes', {
         });
 
 
+        /**
+         * Represents an open/ongoing chat conversation.
+         *
+         * @class
+         * @namespace _converse.ChatBox
+         * @memberOf _converse
+         */
         _converse.ChatBox = Backbone.Model.extend({
             defaults () {
                 return {
@@ -261,7 +267,7 @@ converse.plugins.add('converse-chatboxes', {
 
                 this.messages.on('change:upload', (message) => {
                     if (message.get('upload') === _converse.SUCCESS) {
-                        this.sendMessageStanza(this.createMessageStanza(message));
+                        _converse.api.send(this.createMessageStanza(message));
                     }
                 });
 
@@ -330,7 +336,7 @@ converse.plugins.add('converse-chatboxes', {
             },
 
             getDuplicateMessage (stanza) {
-                return  this.findDuplicateFromOriginID(stanza) || this.findDuplicateFromStanzaID(stanza);
+                return this.findDuplicateFromOriginID(stanza) || this.findDuplicateFromStanzaID(stanza);
             },
 
             findDuplicateFromOriginID  (stanza) {
@@ -436,13 +442,13 @@ converse.plugins.add('converse-chatboxes', {
                 return false;
             },
 
+            /**
+             * Given a {@link _converse.Message} return the XML stanza that represents it.
+             * @private
+             * @method _converse.ChatBox#createMessageStanza
+             * @param { _converse.Message } message - The message object
+             */
             createMessageStanza (message) {
-                /* Given a _converse.Message Backbone.Model, return the XML
-                 * stanza that represents it.
-                 *
-                 *  Parameters:
-                 *    (Object) message - The Backbone.Model representing the message
-                 */
                 const stanza = $msg({
                         'from': _converse.connection.jid,
                         'to': this.get('jid'),
@@ -489,48 +495,43 @@ converse.plugins.add('converse-chatboxes', {
                 return stanza;
             },
 
-            sendMessageStanza (stanza) {
-                _converse.api.send(stanza);
-                if (_converse.forward_messages) {
-                    // Forward the message, so that other connected resources are also aware of it.
-                    _converse.api.send(
-                        $msg({
-                            'to': _converse.bare_jid,
-                            'type': this.get('message_type'),
-                        }).c('forwarded', {'xmlns': Strophe.NS.FORWARD})
-                            .c('delay', {
-                                    'xmns': Strophe.NS.DELAY,
-                                    'stamp': moment().format()
-                            }).up()
-                          .cnode(stanza.tree())
-                    );
-                }
-            },
-
             getOutgoingMessageAttributes (text, spoiler_hint) {
                 const is_spoiler = this.get('composing_spoiler'),
                       origin_id = _converse.connection.getUniqueId();
 
-                return _.extend(this.toJSON(), {
-                    'id': origin_id,
+                return {
+                    'jid': this.get('jid'),
+                    'nickname': this.get('nickname'),
+                    'msgid': origin_id,
                     'origin_id': origin_id,
                     'fullname': _converse.xmppstatus.get('fullname'),
                     'from': _converse.bare_jid,
+                    'is_single_emoji': text ? u.isSingleEmoji(text) : false,
                     'sender': 'me',
                     'time': moment().format(),
                     'message': text ? u.httpToGeoUri(u.shortnameToUnicode(text), _converse) : undefined,
                     'is_spoiler': is_spoiler,
                     'spoiler_hint': is_spoiler ? spoiler_hint : undefined,
                     'type': this.get('message_type')
-                });
+                }
             },
 
-            sendMessage (attrs) {
-                /* Responsible for sending off a text message.
-                 *
-                 *  Parameters:
-                 *    (Message) message - The chat message
-                 */
+            /**
+             * Responsible for sending off a text message inside an ongoing
+             * chat conversation.
+             *
+             * @method _converse.ChatBox#sendMessage
+             * @memberOf _converse.ChatBox
+             *
+             * @param {String} text - The chat message text
+             * @param {String} spoiler_hint - An optional hint, if the message being sent is a spoiler
+             *
+             * @example
+             * const chat = _converse.api.chats.get('buddy1@example.com');
+             * chat.sendMessage('hello world');
+             */
+            sendMessage (text, spoiler_hint) {
+                const attrs = this.getOutgoingMessageAttributes(text, spoiler_hint);
                 let message = this.messages.findWhere('correcting')
                 if (message) {
                     const older_versions = message.get('older_versions') || [];
@@ -545,7 +546,7 @@ converse.plugins.add('converse-chatboxes', {
                 } else {
                     message = this.messages.create(attrs);
                 }
-                this.sendMessageStanza(this.createMessageStanza(message));
+                _converse.api.send(this.createMessageStanza(message));
                 return true;
             },
 
@@ -629,13 +630,14 @@ converse.plugins.add('converse-chatboxes', {
                 });
             },
 
+            /**
+             * Extract the XEP-0359 stanza IDs from the passed in stanza
+             * and return a map containing them.
+             * @private
+             * @method _converse.ChatBox#getStanzaIDs
+             * @param { XMLElement } stanza - The message stanza
+             */
             getStanzaIDs (stanza) {
-                /* Extract the XEP-0359 stanza IDs from the passed in stanza
-                 * and return a map containing them.
-                 *
-                 * Parameters:
-                 *    (XMLElement) stanza - The message stanza
-                 */
                 const attrs = {};
                 const stanza_ids = sizzle(`stanza-id[xmlns="${Strophe.NS.SID}"]`, stanza);
                 if (stanza_ids.length) {
@@ -658,18 +660,17 @@ converse.plugins.add('converse-chatboxes', {
                 return !_.isNil(sizzle(`result[xmlns="${Strophe.NS.MAM}"]`, original_stanza).pop());
             },
 
+            /**
+             * Parses a passed in message stanza and returns an object
+             * of attributes.
+             * @private
+             * @method _converse.ChatBox#getMessageAttributesFromStanza
+             * @param { XMLElement } stanza - The message stanza
+             * @param { XMLElement } delay - The <delay> node from the stanza, if there was one.
+             * @param { XMLElement } original_stanza - The original stanza, that contains the
+             *  message stanza, if it was contained, otherwise it's the message stanza itself.
+             */
             getMessageAttributesFromStanza (stanza, original_stanza) {
-                /* Parses a passed in message stanza and returns an object
-                 * of attributes.
-                 *
-                 * Parameters:
-                 *    (XMLElement) stanza - The message stanza
-                 *    (XMLElement) delay - The <delay> node from the
-                 *      stanza, if there was one.
-                 *    (XMLElement) original_stanza - The original stanza,
-                 *      that contains the message stanza, if it was
-                 *      contained, otherwise it's the message stanza itself.
-                 */
                 const spoiler = sizzle(`spoiler[xmlns="${Strophe.NS.SPOILER}"]`, original_stanza).pop(),
                       delay = sizzle(`delay[xmlns="${Strophe.NS.DELAY}"]`, original_stanza).pop(),
                       text = _converse.chatboxes.getMessageBody(stanza) || undefined,
@@ -772,7 +773,7 @@ converse.plugins.add('converse-chatboxes', {
                         // TODO: currently Strophe has no way to register a handler
                         // for stanzas without a `type` attribute.
                         // We could update it to accept null to mean no attribute,
-                        // but that would be a backward-incompatible chnge
+                        // but that would be a backward-incompatible change
                         return true; // Gets handled above.
                     }
                     this.onMessage(stanza);
@@ -796,7 +797,16 @@ converse.plugins.add('converse-chatboxes', {
                         chatbox.trigger('show');
                     }
                 });
-                _converse.emit('chatBoxesFetched');
+                /**
+                 * Triggered when a message stanza is been received and processed.
+                 * @event _converse#message
+                 * @type { object }
+                 * @property { _converse.ChatBox | _converse.ChatRoom } chatbox
+                 * @property { XMLElement } stanza
+                 * @example _converse.api.listen.on('message', obj => { ... });
+                 * @example _converse.api.waitUntil('chatBoxesFetched').then(() => { ... });
+                 */
+                _converse.api.trigger('chatBoxesFetched');
             },
 
             onConnected () {
@@ -854,13 +864,13 @@ converse.plugins.add('converse-chatboxes', {
                 }
             },
 
+            /**
+             * Handler method for all incoming single-user chat "message" stanzas.
+             * @private
+             * @method _converse.ChatBox#onMessage
+             * @param { XMLElement } stanza - The incoming message stanza
+             */
             async onMessage (stanza) {
-                /* Handler method for all incoming single-user chat "message"
-                 * stanzas.
-                 *
-                 * Parameters:
-                 *    (XMLElement) stanza - The incoming message stanza
-                 */
                 let to_jid = stanza.getAttribute('to');
                 const to_resource = Strophe.getResourceFromJid(to_jid);
 
@@ -890,15 +900,15 @@ converse.plugins.add('converse-chatboxes', {
 
                 if (!_.isNull(forwarded)) {
                     const forwarded_message = forwarded.querySelector('message'),
-                          forwarded_from = forwarded_message.getAttribute('from');
-                    is_carbon = !_.isNull(stanza.querySelector(`received[xmlns="${Strophe.NS.CARBONS}"]`));
-                    is_mam = sizzle(`message > result[xmlns="${Strophe.NS.MAM}"]`, stanza).length > 0;
-
+                          forwarded_from = forwarded_message.getAttribute('from'),
+                          xmlns = Strophe.NS.CARBONS;
+                    is_carbon = sizzle(`received[xmlns="${xmlns}"]`, stanza).length > 0;
                     if (is_carbon && Strophe.getBareJidFromJid(forwarded_from) !== from_jid) {
                         // Prevent message forging via carbons
                         // https://xmpp.org/extensions/xep-0280.html#security
                         return true;
                     }
+                    is_mam = sizzle(`message > result[xmlns="${Strophe.NS.MAM}"]`, stanza).length > 0;
                     stanza = forwarded_message;
                     from_jid = stanza.getAttribute('from');
                     to_jid = stanza.getAttribute('to');
@@ -949,18 +959,27 @@ converse.plugins.add('converse-chatboxes', {
                         }
                     }
                 }
-                _converse.emit('message', {'stanza': original_stanza, 'chatbox': chatbox});
+                /**
+                 * Triggered when a message stanza is been received and processed
+                 * @event _converse#message
+                 * @type { object }
+                 * @property { _converse.ChatBox | _converse.ChatRoom } chatbox
+                 * @property { XMLElement } stanza
+                 * @example _converse.api.listen.on('message', obj => { ... });
+                 */
+                _converse.api.trigger('message', {'stanza': original_stanza, 'chatbox': chatbox});
             },
 
+            /**
+             * Returns a chat box or optionally return a newly
+             * created one if one doesn't exist.
+             * @private
+             * @method _converse.ChatBox#getChatBox
+             * @param { string } jid - The JID of the user whose chat box we want
+             * @param { boolean } create - Should a new chat box be created if none exists?
+             * @param { object } attrs - Optional chat box atributes.
+             */
             getChatBox (jid, attrs={}, create) {
-                /* Returns a chat box or optionally return a newly
-                 * created one if one doesn't exist.
-                 *
-                 * Parameters:
-                 *    (String) jid - The JID of the user whose chat box we want
-                 *    (Boolean) create - Should a new chat box be created if none exists?
-                 *    (Object) attrs - Optional chat box atributes.
-                 */
                 if (_.isObject(jid)) {
                     create = attrs;
                     attrs = jid;
@@ -998,15 +1017,23 @@ converse.plugins.add('converse-chatboxes', {
                         Strophe.LogLevel.ERROR);
                 }
             });
-            _converse.emit('privateChatsAutoJoined');
+            /**
+             * Triggered once any private chats have been automatically joined as
+             * specified by the `auto_join_private_chats` setting.
+             * See: https://conversejs.org/docs/html/configuration.html#auto-join-private-chats
+             * @event _converse#privateChatsAutoJoined
+             * @example _converse.api.listen.on('privateChatsAutoJoined', () => { ... });
+             * @example _converse.api.waitUntil('privateChatsAutoJoined').then(() => { ... });
+             */
+            _converse.api.trigger('privateChatsAutoJoined');
         }
 
 
         /************************ BEGIN Event Handlers ************************/
-        _converse.on('chatBoxesFetched', autoJoinChats);
+        _converse.api.listen.on('chatBoxesFetched', autoJoinChats);
 
 
-        _converse.on('addClientFeatures', () => {
+        _converse.api.listen.on('addClientFeatures', () => {
             _converse.api.disco.own.features.add(Strophe.NS.MESSAGE_CORRECT);
             _converse.api.disco.own.features.add(Strophe.NS.HTTPUPLOAD);
             _converse.api.disco.own.features.add(Strophe.NS.OUTOFBAND);
@@ -1014,9 +1041,14 @@ converse.plugins.add('converse-chatboxes', {
 
         _converse.api.listen.on('pluginsInitialized', () => {
             _converse.chatboxes = new _converse.ChatBoxes();
-            _converse.emit('chatBoxesInitialized');
+            /**
+             * Triggered once the _converse.ChatBoxes collection has been initialized.
+             * @event _converse#chatBoxesInitialized
+             * @example _converse.api.listen.on('chatBoxesInitialized', () => { ... });
+             * @example _converse.api.waitUntil('chatBoxesInitialized').then(() => { ... });
+             */
+            _converse.api.trigger('chatBoxesInitialized');
         });
-
         _converse.api.listen.on('presencesInitialized', () => _converse.chatboxes.onConnected());
         /************************ END Event Handlers ************************/
 
@@ -1116,7 +1148,7 @@ converse.plugins.add('converse-chatboxes', {
                  *
                  * @method _converse.api.chats.get
                  * @param {String|string[]} name - e.g. 'buddy@example.com' or ['buddy1@example.com', 'buddy2@example.com']
-                 * @returns {Backbone.Model}
+                 * @returns {_converse.ChatBox}
                  *
                  * @example
                  * // To return a single chat, provide the JID of the contact you're chatting with in that chat:
