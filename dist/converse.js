@@ -95220,7 +95220,7 @@ return __p
 var _ = {escape:__webpack_require__(/*! ./node_modules/lodash/escape.js */ "./node_modules/lodash/escape.js")};
 module.exports = function(o) {
 var __t, __p = '', __e = _.escape;
-__p += '<!-- src/templates/room_panel.html -->\n<!-- <div id="chatrooms"> -->\n<div class="d-flex controlbox-padded">\n    <span class="w-100 controlbox-heading controlbox-heading--groupchats">' +
+__p += '<!-- src/templates/room_panel.html -->\n<!-- <div id="chatrooms"> -->\n<div class="list-container bookmarks-list rooms-list-container"></div>\n<div class="d-flex controlbox-padded">\n    <span class="w-100 controlbox-heading controlbox-heading--groupchats">' +
 __e(o.heading_chatrooms) +
 '</span>\n    <a class="controlbox-heading__btn show-list-muc-modal fa fa-list-ul" title="' +
 __e(o.title_list_rooms) +
@@ -95228,7 +95228,7 @@ __e(o.title_list_rooms) +
 __e(o.title_new_room) +
 '" data-toggle="modal" data-target="#add-chatrooms-modal"></a> -->\n</div>\n<div class="list-container open-rooms-list rooms-list-container"></div>\n<div class="controlbox-heading__btn show-add-muc-modal" title="' +
 __e(o.title_new_room) +
-'" data-toggle="modal" data-target="#add-chatrooms-modal" >\n    <img class="channle-icon" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAwElEQVRYR2P8GZH5n2EAAeOoA0ZDYDQERkNgNARGQ4CsEBAVYmCb2Mzwb99Rhj9zllFUlZFXGYmJMLBNbGL4d+gEw5/pi0aIAxjVlBhYi9IhvmVmYmDg4WZg+POHgeHrd7DQv9MXGP7MXU5yaBAdBYzaagys5dlQCxgZGFhZGBj+/4c4AuyAiwx/Js+jnQNQTB6RaWBwhQAjIwOjlDjD/w+fGBi+fiM53pE1EJ0IKbIFj+ZRB4yGwGgIjIbAgIcAALMWlEG2y2cpAAAAAElFTkSuQmCC">\n    <span>Add Channel</span>\n</div>\n<div class="list-container bookmarks-list rooms-list-container"></div>\n<!-- </div> -->\n';
+'" data-toggle="modal" data-target="#add-chatrooms-modal" >\n    <img class="channle-icon" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAwElEQVRYR2P8GZH5n2EAAeOoA0ZDYDQERkNgNARGQ4CsEBAVYmCb2Mzwb99Rhj9zllFUlZFXGYmJMLBNbGL4d+gEw5/pi0aIAxjVlBhYi9IhvmVmYmDg4WZg+POHgeHrd7DQv9MXGP7MXU5yaBAdBYzaagys5dlQCxgZGFhZGBj+/4c4AuyAiwx/Js+jnQNQTB6RaWBwhQAjIwOjlDjD/w+fGBi+fiM53pE1EJ0IKbIFj+ZRB4yGwGgIjIbAgIcAALMWlEG2y2cpAAAAAElFTkSuQmCC">\n    <span>Add Channel</span>\n</div>\n<!-- </div> -->\n';
 return __p
 };
 
