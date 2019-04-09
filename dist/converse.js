@@ -92966,7 +92966,7 @@ var _ = {escape:__webpack_require__(/*! ./node_modules/lodash/escape.js */ "./no
 module.exports = function(o) {
 var __t, __p = '', __j = Array.prototype.join;
 function print() { __p += __j.call(arguments, '') }
-__p += '<!-- src/templates/chatarea.html -->\n<div class="chat-area col-md-9 col-8">\n    <!-- <div class="chat-upper-toolbar"></div> -->\n    <div class="chat-content ';
+__p += '<!-- src/templates/chatarea.html -->\n<div class="chat-area col-md-9 col-8">\n    <!-- <div class="chat-upper-toolbar"></div> -->\n    <div class="top-toolbar">\n            toolbar upeet\n            <ui class="top-toolbar-manu">\n                <li class="top-toolbar-video-cal">\n                    <i class="fa fa-video"></i>\n                </li>\n                <li class="top-toolbar-audio-cal">\n                    <i class="fa fa-phone"></i>\n                </li>\n                <li class="top-toolbar-file-attach">\n                    <i class="fa fa-paperclip"></i>\n                </li>\n            </ui>\n        </div>\n    <div class="chat-content ';
  if (o.show_send_button) { ;
 __p += 'chat-content-sendbutton';
  } ;
@@ -93127,7 +93127,7 @@ return __p
 var _ = {escape:__webpack_require__(/*! ./node_modules/lodash/escape.js */ "./node_modules/lodash/escape.js")};
 module.exports = function(o) {
 var __t, __p = '';
-__p += '<!-- src/templates/chatroom.html -->\n<div class="flyout box-flyout">\n        \n    <div class="chat-head chat-head-chatroom row no-gutters"></div>\n        <div class="top-toolbar">\n            toolbar upeet\n            <ui class="top-toolbar-manu">\n                <li class="top-toolbar-video-cal">\n                    <i class="fa fa-video"></i>\n                </li>\n                <li class="top-toolbar-audio-cal">\n                    <i class="fa fa-phone"></i>\n                </li>\n                <li class="top-toolbar-file-attach">\n                    <i class="fa fa-paperclip"></i>\n                </li>\n            </ui>\n        </div>\n    <div class="chat-body chatroom-body row no-gutters">\n        <div class="disconnect-container hidden"></div>\n    </div>\n</div>\n';
+__p += '<!-- src/templates/chatroom.html -->\n<div class="flyout box-flyout">\n        \n    <div class="chat-head chat-head-chatroom row no-gutters"></div>\n    <div class="chat-body chatroom-body row no-gutters">\n        <div class="disconnect-container hidden"></div>\n    </div>\n</div>\n';
 return __p
 };
 
@@ -94894,7 +94894,7 @@ __p += ' fa fa-circle chat-status chat-status--offline';
  } ;
 __p += '"></span>\n                        <!-- ' +
 __e(o.status_message) +
-'</span> -->\n                    </span>\n                <!-- <a class="controlbox-heading__btn change-status fa fa-pencil-alt" title="' +
+'-->\n                        </span>\n                </span>\n                <!-- <a class="controlbox-heading__btn change-status fa fa-pencil-alt" title="' +
 __e(o.title_change_status) +
 '" data-toggle="modal" data-target="#changeStatusModal"></a> -->\n            </div>\n    </a>\n    <div class="media-body dropdown">\n        <a href="#" data-toggle="dropdown" class="profile-menu media-title dropdown-toggle font-weight-semibold" aria-expanded="false">' +
 __e(o.fullname) +
