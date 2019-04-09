@@ -93549,7 +93549,7 @@ var _ = {escape:__webpack_require__(/*! ./node_modules/lodash/escape.js */ "./no
 module.exports = function(o) {
 var __t, __p = '', __e = _.escape, __j = Array.prototype.join;
 function print() { __p += __j.call(arguments, '') }
-__p += '<!-- src/templates/chatroom_head.html -->\n<div class="chatbox-navback"><i class="fa fa-arrow-left"></i></div>\n<div class="chatbox-title">\n    <div class="chat-title" ';
+__p += '<!-- src/templates/chatroom_head.html -->\n<!-- <div class="chatbox-navback"><i class="fa fa-arrow-left"></i></div>\n<div class="chatbox-title">\n    <div class="chat-title" ';
  if (o._converse.locked_muc_domain !== 'hidden') { ;
 __p += ' title="' +
 __e(o.jid) +
@@ -93571,9 +93571,9 @@ __e( o.Strophe.getNodeFromJid(o.jid) ) +
 __e( o.Strophe.getDomainFromJid(o.jid) ) +
 '\n        ';
  } ;
-__p += '\n    </div>\n    <!-- Sanitized in converse-muc-views. We want to render links. -->\n    <p class="chatroom-description">' +
+__p += '\n    </div> -->\n    <!-- Sanitized in converse-muc-views. We want to render links. -->\n    <p class="chatroom-description">' +
 ((__t = (o.description)) == null ? '' : __t) +
-'</p>\n</div>\n<div class="chatbox-buttons row no-gutters">\n    <a class="chatbox-btn close-chatbox-button fa fa-sign-out-alt" title="' +
+'</p>\n<!-- </div>\n<div class="chatbox-buttons row no-gutters">\n    <a class="chatbox-btn close-chatbox-button fa fa-sign-out-alt" title="' +
 __e(o.info_close) +
 '"></a>\n    ';
  if (o.affiliation == 'owner') { ;
@@ -93583,7 +93583,7 @@ __e(o.info_configure) +
  } ;
 __p += '\n    <a class="chatbox-btn show-room-details-modal fa fa-info-circle" title="' +
 __e(o.info_details) +
-'"></a>\n</div>\n';
+'"></a>\n</div> -->\n';
 return __p
 };
 
