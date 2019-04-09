@@ -59862,7 +59862,6 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_4__["default"].plugins
 
       render() {
         this.el.setAttribute('data-group', this.model.get('name'));
-        console.log('grop name', this.model.get('name'));
         this.el.innerHTML = templates_group_header_html__WEBPACK_IMPORTED_MODULE_6___default()({
           'label_group': this.model.get('name'),
           'desc_group_toggle': this.model.get('description'),
@@ -93009,7 +93008,7 @@ var _ = {escape:__webpack_require__(/*! ./node_modules/lodash/escape.js */ "./no
 module.exports = function(o) {
 var __t, __p = '', __e = _.escape, __j = Array.prototype.join;
 function print() { __p += __j.call(arguments, '') }
-__p += '<!-- src/templates/chatbox_head.html -->\n<div class="chat-head chat-head-chatbox row no-gutters">\n    <div class="chatbox-navback"><i class="fa fa-arrow-left"></i></div>\n    <div class="chatbox-title">\n        <div class="row no-gutters">\n            <canvas class="avatar" height="36" width="36"></canvas>\n            <div class="col chat-title" title="' +
+__p += '<!-- src/templates/chatbox_head.html -->\n<div class="chat-head chat-head-chatbox row no-gutters">\n    <!-- <div class="chatbox-navback"><i class="fa fa-arrow-left"></i></div> -->\n    <!-- <div class="chatbox-title">\n        <div class="row no-gutters">\n            <canvas class="avatar" height="36" width="36"></canvas>\n            <div class="col chat-title" title="' +
 __e(o.jid) +
 '">\n                ';
  if (o.url) { ;
@@ -93025,11 +93024,11 @@ __p += '\n                    </a>\n                ';
  } ;
 __p += '\n                <p class="user-custom-message">' +
 __e( o.status ) +
-'</p>\n            </div>\n        </div>\n    </div>\n    <div class="chatbox-buttons row no-gutters">\n        <a class="chatbox-btn close-chatbox-button fa fa-times" title="' +
+'</p>\n            </div>\n        </div>\n    </div> -->\n    <!-- <div class="chatbox-buttons row no-gutters">\n        <a class="chatbox-btn close-chatbox-button fa fa-times" title="' +
 __e(o.info_close) +
 '"></a>\n        <a class="chatbox-btn show-user-details-modal fa fa-id-card" title="' +
 __e(o.info_details) +
-'"></a>\n    </div>\n</div>\n';
+'"></a>\n    </div> -->\n</div>\n';
 return __p
 };
 
