@@ -59862,6 +59862,7 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_4__["default"].plugins
 
       render() {
         this.el.setAttribute('data-group', this.model.get('name'));
+        console.log('grop name', this.model.get('name'));
         this.el.innerHTML = templates_group_header_html__WEBPACK_IMPORTED_MODULE_6___default()({
           'label_group': this.model.get('name'),
           'desc_group_toggle': this.model.get('description'),
@@ -92966,7 +92967,7 @@ var _ = {escape:__webpack_require__(/*! ./node_modules/lodash/escape.js */ "./no
 module.exports = function(o) {
 var __t, __p = '', __j = Array.prototype.join;
 function print() { __p += __j.call(arguments, '') }
-__p += '<!-- src/templates/chatarea.html -->\n<div class="chat-area col-md-9 col-8">\n    <!-- <div class="chat-upper-toolbar"></div> -->\n    <div class="top-toolbar">\n            toolbar upeet\n            <ui class="top-toolbar-manu">\n                <li class="top-toolbar-video-cal">\n                    <i class="fa fa-video"></i>\n                </li>\n                <li class="top-toolbar-audio-cal">\n                    <i class="fa fa-phone"></i>\n                </li>\n                <li class="top-toolbar-file-attach">\n                    <i class="fa fa-paperclip"></i>\n                </li>\n            </ui>\n        </div>\n    <div class="chat-content ';
+__p += '<!-- src/templates/chatarea.html -->\n<div class="chat-area col-md-9 col-8">\n    <!-- <div class="chat-upper-toolbar"></div> -->\n    <div class="top-toolbar">\n            <ul class="top-toolbar-menu">\n                <li class="top-toolbar-video-cal">\n                    <i class="fa fa-video"></i>\n                </li>\n                <li class="top-toolbar-audio-cal">\n                    <i class="fa fa-phone"></i>\n                </li>\n                <li class="top-toolbar-file-attach">\n                    <i class="fa fa-paperclip"></i>\n                </li>\n            </ul>\n        </div>\n    <div class="chat-content ';
  if (o.show_send_button) { ;
 __p += 'chat-content-sendbutton';
  } ;
@@ -92987,7 +92988,7 @@ var _ = {escape:__webpack_require__(/*! ./node_modules/lodash/escape.js */ "./no
 module.exports = function(o) {
 var __t, __p = '', __j = Array.prototype.join;
 function print() { __p += __j.call(arguments, '') }
-__p += '<!-- src/templates/chatbox.html -->\n<div class="flyout box-flyout">\n    <div class="chat-body">\n        <div class="top-toolbar">\n            toolbar upeet\n            <ui class="top-toolbar-manu">\n                <li class="top-toolbar-video-cal">\n                    <i class="fa fa-video"></i>\n                </li>\n                <li class="top-toolbar-audio-cal">\n                    <i class="fa fa-phone"></i>\n                </li>\n                <li class="top-toolbar-file-attach">\n                    <i class="fa fa-paperclip"></i>\n                </li>\n            </ui>\n        </div>\n        <div class="chat-content ';
+__p += '<!-- src/templates/chatbox.html -->\n<div class="flyout box-flyout">\n    <div class="chat-body">\n        <div class="top-toolbar">\n            <ul class="top-toolbar-menu">\n                <li class="top-toolbar-video-cal">\n                    <i class="fa fa-video"></i>\n                </li>\n                <li class="top-toolbar-audio-cal">\n                    <i class="fa fa-phone"></i>\n                </li>\n                <li class="top-toolbar-file-attach">\n                    <i class="fa fa-paperclip"></i>\n                </li>\n            </ul>\n        </div>\n        <div class="chat-content ';
  if (o.show_send_button) { ;
 __p += 'chat-content-sendbutton';
  } ;
@@ -94198,9 +94199,9 @@ __p += ' fa-caret-down ';
  } else { ;
 __p += ' fa-caret-right ';
  } ;
-__p += '"> -->\n    </span> ' +
+__p += '"> -->\n    <!-- </span>  -->\n    <span>' +
 __e(o.label_group) +
-'\n<!-- </a> -->\n<ul class="items-list roster-group-contacts ';
+'</span>\n<!-- </a> -->\n<ul class="items-list roster-group-contacts ';
  if (o.toggle_state === o._converse.CLOSED) { ;
 __p += ' collapsed ';
  } ;
