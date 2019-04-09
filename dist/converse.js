@@ -95267,7 +95267,7 @@ __p += '">\n        </span> ' +
 __e(o.label_rooms) +
 '</div> -->\n        <!-- <span>' +
 __e(o.label_rooms) +
-'</span> -->\n<div class="items-list rooms-list open-rooms-list"></div>\n';
+'</span> -->\n<div class="items-list rooms-list"></div>\n';
 return __p
 };
 
