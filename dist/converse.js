@@ -93047,37 +93047,37 @@ var __t, __p = '', __e = _.escape, __j = Array.prototype.join;
 function print() { __p += __j.call(arguments, '') }
 __p += '<!-- src/templates/chatbox_message_form.html -->\n<div class="message-form-container">\n<div class="new-msgs-indicator hidden">▼ ' +
 __e( o.unread_msgs ) +
-' ▼</div>\n<form class="sendXMPPMessage">\n    ';
- if (o.show_toolbar) { ;
-__p += '\n        <ul class="chat-toolbar no-text-select"></ul>\n    ';
- } ;
-__p += '\n    <input type="text" placeholder="' +
+' ▼</div>\n<form class="sendXMPPMessage">\n    <div class="row">\n        <div class="col-sm-6 red">\n            <input type="text" placeholder="' +
 ((__t = (o.label_spoiler_hint)) == null ? '' : __t) +
 '" value="' +
 ((__t = ( o.hint_value )) == null ? '' : __t) +
-'"\n           class="';
+'"\n            class="';
  if (!o.composing_spoiler) { ;
 __p += ' hidden ';
  } ;
-__p += ' spoiler-hint"/>\n\n    <div class="suggestion-box">\n        <ul class="suggestion-box__results suggestion-box__results--above" hidden=""></ul>\n        <textarea\n            type="text"\n            class="chat-textarea suggestion-box__input\n                ';
+__p += ' spoiler-hint"/>\n     \n            <div class="suggestion-box">\n                <ul class="suggestion-box__results suggestion-box__results--above" hidden=""></ul>\n                <textarea\n                    type="text"\n                    class="chat-textarea suggestion-box__input\n                        ';
  if (o.show_send_button) { ;
 __p += ' chat-textarea-send-button ';
  } ;
-__p += '\n                ';
+__p += '\n                        ';
  if (o.composing_spoiler) { ;
 __p += ' spoiler ';
  } ;
-__p += '"\n            placeholder="' +
+__p += '"\n                    placeholder="' +
 __e(o.label_message) +
 '">' +
 ((__t = ( o.message_value )) == null ? '' : __t) +
-'</textarea>\n        <span class="suggestion-box__additions visually-hidden" role="status" aria-live="assertive" aria-relevant="additions"></span>\n\n        ';
+'</textarea>\n                <span class="suggestion-box__additions visually-hidden" role="status" aria-live="assertive" aria-relevant="additions"></span>\n        \n                ';
  if (o.show_send_button) { ;
-__p += '\n            <button type="submit" class="pure-button send-button">' +
+__p += '\n                    <button type="submit" class="pure-button send-button">' +
 __e( o.label_send ) +
-'</button>\n        ';
+'</button>\n                ';
  } ;
-__p += '\n    </div>\n</form>\n</div>\n';
+__p += '\n            </div>\n        </div>\n        <div class="col-sm-6 blue">\n            ';
+ if (o.show_toolbar) { ;
+__p += '\n                <ul class="chat-toolbar no-text-select"></ul>\n            ';
+ } ;
+__p += '\n        <div>\n    </div>\n   \n    \n    \n</form>\n</div>\n';
 return __p
 };
 
