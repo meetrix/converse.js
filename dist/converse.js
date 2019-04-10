@@ -53783,7 +53783,7 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
         return templates_add_chatroom_modal_html__WEBPACK_IMPORTED_MODULE_7___default()(_.extend(this.model.toJSON(), {
           '__': _converse.__,
           '_converse': _converse,
-          'label_room_address': _converse.muc_domain ? __('Groupchat name') : __('Groupchat address'),
+          'label_room_address': _converse.muc_domain ? __('Channel name') : __('Channel address'),
           'chatroom_placeholder': placeholder
         }));
       },
@@ -58987,6 +58987,62 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_0__["default"].plugins
         } else {
           return this.model.get('name');
         }
+      },
+
+      createAvatar(nickname, width, height, font) {
+        console.log('create canvas');
+
+        if (!nickname) {
+          nickname = 'no-name';
+        }
+
+        nickname = nickname.toLowerCase();
+        if (!width) width = 32;
+        if (!height) height = 32;
+        if (!font) font = "16px Arial";
+        var canvas = document.createElement('canvas');
+        canvas.style.display = 'none';
+        canvas.width = width;
+        canvas.height = height;
+        document.body.appendChild(canvas);
+        var context = canvas.getContext('2d');
+        context.fillStyle = this.getRandomColor(nickname);
+        context.fillRect(0, 0, canvas.width, canvas.height);
+        context.font = font;
+        context.fillStyle = "#fff";
+        var first, last;
+        var name = nickname.split(" ");
+        var l = name.length - 1;
+
+        if (name && name[0] && name.first != '') {
+          first = name[0][0];
+          last = name[l] && name[l] != '' && l > 0 ? name[l][0] : null;
+          var initials;
+
+          if (last) {
+            initials = first + last;
+            context.fillText(initials.toUpperCase(), 3, 23);
+          } else {
+            initials = first;
+            context.fillText(initials.toUpperCase(), 10, 23);
+          }
+
+          var data = canvas.toDataURL();
+          document.body.removeChild(canvas);
+        }
+
+        return canvas.toDataURL();
+      },
+
+      getRandomColor(nickname) {
+        var letters = '0123456789ABCDEF';
+        var color = '#';
+
+        for (var i = 0; i < 6; i++) {
+          color += letters[Math.floor(Math.random() * 16)];
+        }
+
+        return color;
       }
 
     });
@@ -92655,7 +92711,7 @@ module.exports = function(o) {
 var __t, __p = '', __e = _.escape, __j = Array.prototype.join;
 function print() { __p += __j.call(arguments, '') }
 __p += '<!-- src/templates/add_chatroom_modal.html -->\n<div class="modal fade" id="add-chatroom-modal" tabindex="-1" role="dialog" aria-labelledby="add-chatroom-modal-label" aria-hidden="true">\n    <div class="modal-dialog" role="document">\n        <div class="modal-content">\n            <div class="modal-header">\n                <h5 class="modal-title"\n                    id="add-chatroom-modal-label">' +
-__e(o.__('Enter a new Groupchat')) +
+__e(o.__('Create New Channel')) +
 '</h5>\n                <button type="button" class="close" data-dismiss="modal" aria-label="Close">\n                    <span aria-hidden="true">×</span>\n                </button>\n            </div>\n            <div class="modal-body">\n                <form class="converse-form add-chatroom">\n                    <div class="form-group">\n                        <label for="chatroom">' +
 __e(o.label_room_address) +
 ':</label>\n                        <input type="text" required="required" name="chatroom" class="form-control" placeholder="' +
@@ -93913,12 +93969,21 @@ return __p
 
 var _ = {escape:__webpack_require__(/*! ./node_modules/lodash/escape.js */ "./node_modules/lodash/escape.js")};
 module.exports = function(o) {
-var __t, __p = '', __e = _.escape;
+var __t, __p = '', __e = _.escape, __j = Array.prototype.join;
+function print() { __p += __j.call(arguments, '') }
 __p += '<!-- src/templates/file.html -->\n<a target="_blank" rel="noopener" href="' +
 __e(o.url) +
 '">' +
 __e(o.label_download) +
-'</a>\n';
+'\n    ';
+ if (o.fileType === 'pdf')  { ;
+__p += '\n   <img src="data:image/png;base64,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"/>\n    ';
+ } ;
+__p += '\n    ';
+ if (o.fileType === 'txt')  { ;
+__p += '\n   <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAOEAAADhCAMAAAAJbSJIAAAAZlBMVEW23P7///9HiMc/g8Tg6fQ1gMSVwet8pdS84f9Rj8tMi8m53/9ChcWGteMxfsOZuNz1+Pugy/Kx2fxXkcvu9PlmntVyoNHn7vaq0/hhmtJvpdmdyPF+r+CKueaSv+t3qt2UtdvC5v9cD6qPAAAErUlEQVR4nO3c4XaiMBAF4Ai1jSS6LWxb27q6ff+XXBUmBNBT0WBmsvf+KiFQvg6HQKSqWepRsQ9g8kAoPxDKD4TyA6H8QDibvb893S3PUYQPK3uv5FUc4Ty7W6Yg8hJmNjyRmXAC4qXCYjFtpiNeKMwf9aT5nk9GvFho1JTRR6GdgshJaJ8WNjyRkzD/9VyXMeigwUs4+50FryIzIREDVpGbMHwV2QmDE/kJQxMZCgMTOQrDElkKgxJ5CkMOGkyFAavIVRiuimyFwarIVxiKyFgYiMhZGIbIWhiEyFsYgshcGGDQ4C68vYrshTdXkb/w1ioKEN5IlCC8jShCeBNRhvAWohDhDUQpwusHDTHCq6soR3htFQUJr6yiJOF1RFHCq4iyhNcQhQmvIEoTjieKE44eNOQJx1ZRoHBkFSUKx1VRpHBPzC4mshL+nT1fmHci/vxWMSdhlq8uDb3ot3qQJRyfOYQQ3k+4ysfGyhKa5eh8WlFCZcZGP+ayhKNjIIQQwuiBEEII4wdCCCGMHwghhDB+IIQQwviBEEII4wdCCCGMHwgjCwPs7K7C4myyUpllRgtb2odxTRujXuzZzSvNQ2jOf8xuS6XWOS28NgdsXqhpvlbKLQy3XvAX5nuh/rC0RBtsqOVQpPPCTEAND0KzdcJmJ7qihsN5K1+olDtNP+sjLl3DYXUCQv1KRczq/tvcFycgNF9kyL8Oe9Gf1l9MQKgULdZF07RYHPcp4Fqqhl9+2HzLYlEchWbnTtPDXmj4yDe1MGu2LtzmtL8PLkJ6iefFOxub1B3aFS9GmT8kXHc210v6O9iyu3l8If3OFtLrram6dl82uvDYXoXMpnOJ/fG3xbgvPSs0S1pT7Vc0Z2O+7XWSLGzv3PLSVdr2D1m00N255Vvd1JOG/0SE3iD/3WDrwTAZoVLteNH8VPS7CBe6+xjbjBV2k5iwvXOjLuvBIcsWKlN0gP3BMAWhe+qte2xP9JAtbIfEuseJQ5YuNJUHHAyGSQj/eKfpYDBMQahKT7g4sV6+0HtQHg6GKQg7I2KVotCbjzo8CScoLP3RIsVrqZu7aHqcOGThQl2lfk/TvaU5NRUqXOgO331kMbjWSBcuCEYP+7t+EYULaVXlJhazwSGLFupm1ntfuZ2bk0prnsat0HRrM3gGFi2sjyarP6lxn5f25jFEC90d20K3P/dvv0ULS3cBNe3UaVb0Dlmw0D38HtvLc70EC92bCbbzobd7+0S+cN25fLanad6RCBa6icR8WTc7yabbTaxQ02RwMz60z8JFGsJ2+qLQ3rEd+/lTbnKF7Ycyu6bVzbp1rjVyhe5dE1ex9jT1rzVihe2l0z1NeKfp0usoQUhfFDT3euuKvhSoPSXNnNoKX0itc7bC8pHi31SfaDRfrtHDrF3jBcBIb0GbU2/6nGo0F/dkJrxnIIQQwviBEEII4wdCCCGMHwghhDB+IIQQwviBEEII4wdCCCGMHwghhDB+IIQQwviBEEII4wdCCCGMHwghhDB+IIQQwviBEML/Uai5JbCQvhmYUY7/txlQyDQQQlgLV5ZvViGE729PfPP2HkAoPRDKD4TyA6H8QCg/EMrPPx1qBFXTXDkmAAAAAElFTkSuQmCC"/>\n    ';
+ } ;
+__p += '\n  \n</a>\n';
 return __p
 };
 
@@ -95228,7 +95293,7 @@ __e(o.title_list_rooms) +
 __e(o.title_new_room) +
 '" data-toggle="modal" data-target="#add-chatrooms-modal"></a> -->\n</div>\n<div class="list-container open-rooms-list rooms-list-container"></div>\n<div class="controlbox-heading__btn show-add-muc-modal" title="' +
 __e(o.title_new_room) +
-'" data-toggle="modal" data-target="#add-chatrooms-modal" >\n    <img class="channle-icon" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAwElEQVRYR2P8GZH5n2EAAeOoA0ZDYDQERkNgNARGQ4CsEBAVYmCb2Mzwb99Rhj9zllFUlZFXGYmJMLBNbGL4d+gEw5/pi0aIAxjVlBhYi9IhvmVmYmDg4WZg+POHgeHrd7DQv9MXGP7MXU5yaBAdBYzaagys5dlQCxgZGFhZGBj+/4c4AuyAiwx/Js+jnQNQTB6RaWBwhQAjIwOjlDjD/w+fGBi+fiM53pE1EJ0IKbIFj+ZRB4yGwGgIjIbAgIcAALMWlEG2y2cpAAAAAElFTkSuQmCC">\n    <span>Add Channel</span>\n</div>\n<!-- </div> -->\n';
+'" data-toggle="modal" data-target="#add-chatrooms-modal" >\n    <img class="channle-icon" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAwElEQVRYR2P8GZH5n2EAAeOoA0ZDYDQERkNgNARGQ4CsEBAVYmCb2Mzwb99Rhj9zllFUlZFXGYmJMLBNbGL4d+gEw5/pi0aIAxjVlBhYi9IhvmVmYmDg4WZg+POHgeHrd7DQv9MXGP7MXU5yaBAdBYzaagys5dlQCxgZGFhZGBj+/4c4AuyAiwx/Js+jnQNQTB6RaWBwhQAjIwOjlDjD/w+fGBi+fiM53pE1EJ0IKbIFj+ZRB4yGwGgIjIbAgIcAALMWlEG2y2cpAAAAAElFTkSuQmCC">\n    <span>Create Channel</span>\n</div>\n<!-- </div> -->\n';
 return __p
 };
 
@@ -96176,7 +96241,10 @@ _headless_utils_core__WEBPACK_IMPORTED_MODULE_16__["default"].renderFileURL = fu
 
   const __ = _converse.__,
         filename = uri.filename();
+  var re = /(?:\.([^.]+))?$/;
+  var ext = re.exec(filename)[1];
   return _templates_file_html__WEBPACK_IMPORTED_MODULE_5___default()({
+    'fileType': ext,
     'url': url,
     'label_download': __('Download file "%1$s"', decodeURI(filename))
   });

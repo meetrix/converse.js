@@ -145,7 +145,61 @@ converse.plugins.add('converse-roomslist', {
                 } else {
                     return this.model.get('name');
                 }
-            }
+            },
+            createAvatar(nickname, width, height, font)
+            {
+                console.log('create canvas');
+                if(!nickname){
+                    nickname= 'no-name' 
+                }
+                nickname = nickname.toLowerCase();
+
+
+                if (!width) width = 32;
+                if (!height) height = 32;
+                if (!font) font = "16px Arial";
+
+                var canvas = document.createElement('canvas');
+                canvas.style.display = 'none';
+                canvas.width = width;
+                canvas.height = height;
+                document.body.appendChild(canvas);
+                var context = canvas.getContext('2d');
+                context.fillStyle = this.getRandomColor(nickname);
+                context.fillRect(0, 0, canvas.width, canvas.height);
+                context.font = font;
+                context.fillStyle = "#fff";
+
+                var first, last;
+                var name = nickname.split(" ");
+                var l = name.length - 1;
+
+                if (name && name[0] && name.first != '')
+                {
+                    first = name[0][0];
+                    last = name[l] && name[l] != '' && l > 0 ? name[l][0] : null;
+                    var initials
+                    if (last) {
+                         initials = first + last;
+                        context.fillText(initials.toUpperCase(), 3, 23);
+                    } else {
+                         initials = first;
+                        context.fillText(initials.toUpperCase(), 10, 23);
+                    }
+                    var data = canvas.toDataURL();
+                    document.body.removeChild(canvas);
+                }
+                return canvas.toDataURL();
+            },
+            getRandomColor(nickname){
+                    var letters = '0123456789ABCDEF';
+                    var color = '#';
+
+                    for (var i = 0; i < 6; i++) {
+                        color += letters[Math.floor(Math.random() * 16)];
+                    }
+                    return color;
+                }
         });
 
 
