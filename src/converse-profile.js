@@ -227,7 +227,7 @@ converse.plugins.add('converse-profile', {
                 "click a.show-profile": "showProfileModal",
                 "click a.change-status": "showStatusChangeModal",
                 "click .show-client-info": "showClientInfoModal",
-                "click .logout": "logOut"
+                "click .logout": "logOut",
             },
 
             initialize () {

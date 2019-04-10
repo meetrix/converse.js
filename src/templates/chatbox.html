@@ -1,17 +1,22 @@
 <div class="flyout box-flyout">
     <div class="chat-body">
         <div class="top-toolbar">
-            <ul class="top-toolbar-menu">
-                <li class="top-toolbar-video-cal">
-                    <i class="fa fa-video"></i>
-                </li>
-                <li class="top-toolbar-audio-cal">
-                    <i class="fa fa-phone"></i>
-                </li>
-                <li class="top-toolbar-file-attach">
-                    <i class="fa fa-paperclip"></i>
-                </li>
-            </ul>
+            <div class="row">
+                <div class="col-sm-6 red">Annoucements</div>
+                <div class="col-sm-6 blue">
+                    <ul class="top-toolbar-menu">
+                        <li class="top-toolbar-video-cal">
+                            <i class="fa fa-video"></i>
+                        </li>
+                        <li class="top-toolbar-audio-cal">
+                            <i class="fa fa-phone"></i>
+                        </li>
+                        <li class="top-toolbar-file-attach">
+                            <i class="fa fa-paperclip"></i>
+                        </li>
+                    </ul>
+                </div>
+            </div>
         </div>
         <div class="chat-content {[ if (o.show_send_button) { ]}chat-content-sendbutton{[ } ]}" aria-live="polite"></div>
         <div class="message-form-container"></div>
