@@ -286,7 +286,7 @@ converse.plugins.add('converse-muc-views', {
                 return tpl_list_chatrooms_modal(_.extend(this.model.toJSON(), {
                     'heading_list_chatrooms': __('List Channels'),
                     'label_server_address': __('Server address'),
-                    'label_query': __('Show groupchats'),
+                    'label_query': __('Show Channels'),
                     'show_form': !_converse.locked_muc_domain,
                     'server_placeholder': muc_domain ? muc_domain : __('conference.example.org')
                 }));
@@ -355,7 +355,7 @@ converse.plugins.add('converse-muc-views', {
                 const available_chatrooms = this.el.querySelector('.available-chatrooms');
                 this.rooms = iq.querySelectorAll('query item');
                 if (this.rooms.length) {
-                    available_chatrooms.innerHTML = tpl_rooms_results({'feedback_text': __('Groupchats found:')});
+                    available_chatrooms.innerHTML = tpl_rooms_results({'feedback_text': __('Channels found:')});
                     const fragment = document.createDocumentFragment();
                     const children = _.reject(_.map(this.rooms, this.roomStanzaItemToHTMLElement), _.isNil)
                     _.each(children, (child) => fragment.appendChild(child));

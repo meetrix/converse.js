@@ -53640,7 +53640,7 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
         return templates_list_chatrooms_modal_html__WEBPACK_IMPORTED_MODULE_21___default()(_.extend(this.model.toJSON(), {
           'heading_list_chatrooms': __('List Channels'),
           'label_server_address': __('Server address'),
-          'label_query': __('Show groupchats'),
+          'label_query': __('Show Channels'),
           'show_form': !_converse.locked_muc_domain,
           'server_placeholder': muc_domain ? muc_domain : __('conference.example.org')
         }));
@@ -53711,7 +53711,7 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
 
         if (this.rooms.length) {
           available_chatrooms.innerHTML = templates_rooms_results_html__WEBPACK_IMPORTED_MODULE_26___default()({
-            'feedback_text': __('Groupchats found:')
+            'feedback_text': __('Channels found:')
           });
           const fragment = document.createDocumentFragment();
 
@@ -59507,8 +59507,13 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_4__["default"].plugins
 
       addContactFromForm(ev) {
         ev.preventDefault();
-        const data = new FormData(ev.target),
-              jid = data.get('jid');
+        const data = new FormData(ev.target);
+        let jid = data.get('jid');
+
+        if (_.compact(jid.split('@')).length < 2) {
+          jid = _.compact(jid.split('@'))[0] + '@' + _converse.api.settings.get("default_domain");
+          console.log('domain', jid);
+        }
 
         if (!jid && _converse.xhr_user_search_url && _.isString(_converse.xhr_user_search_url)) {
           const input_el = this.el.querySelector('input[name="name"]');
@@ -93025,7 +93030,7 @@ var _ = {escape:__webpack_require__(/*! ./node_modules/lodash/escape.js */ "./no
 module.exports = function(o) {
 var __t, __p = '', __j = Array.prototype.join;
 function print() { __p += __j.call(arguments, '') }
-__p += '<!-- src/templates/chatarea.html -->\n<div class="chat-area col-md-9 col-8">\n    <!-- <div class="chat-upper-toolbar"></div> -->\n    <div class="top-toolbar">\n        <div class="row">\n            <div class="col-sm-6 red">Annoucements</div>\n            <div class="col-sm-6 blue">\n                <ul class="top-toolbar-menu">\n                    <li class="top-toolbar-video-cal">\n                        <i class="fa fa-video"></i>\n                    </li>\n                    <li class="top-toolbar-audio-cal">\n                        <i class="fa fa-phone"></i>\n                    </li>\n                    <li class="top-toolbar-file-attach">\n                        <i class="fa fa-paperclip"></i>\n                    </li>\n                </ul>\n            </div>\n        </div>\n    </div>\n    <div class="chat-content ';
+__p += '<!-- src/templates/chatarea.html -->\n<div class="chat-area col-md-9 col-8">\n    <!-- <div class="chat-upper-toolbar"></div> -->\n    <div class="top-toolbar container-fluid">\n        <div class="row">\n            <div class="col-sm-6 red">Annoucements</div>\n            <div class="col-sm-6 blue">\n                <ul class="top-toolbar-menu">\n                    <li class="top-toolbar-video-cal">\n                        <i class="fa fa-video"></i>\n                    </li>\n                    <li class="top-toolbar-audio-cal">\n                        <i class="fa fa-phone"></i>\n                    </li>\n                    <li class="top-toolbar-file-attach">\n                        <i class="fa fa-paperclip"></i>\n                    </li>\n                </ul>\n            </div>\n        </div>\n    </div>\n    <div class="chat-content ';
  if (o.show_send_button) { ;
 __p += 'chat-content-sendbutton';
  } ;

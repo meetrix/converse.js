@@ -234,8 +234,11 @@ converse.plugins.add('converse-rosterview', {
 
             addContactFromForm (ev) {
                 ev.preventDefault();
-                const data = new FormData(ev.target),
-                      jid = data.get('jid');
+                const data = new FormData(ev.target)
+                let  jid = data.get('jid');
+                if(_.compact(jid.split('@')).length < 2){
+                    jid = _.compact(jid.split('@'))[0]+'@'+_converse.api.settings.get("default_domain");
+                }
                 if (!jid && _converse.xhr_user_search_url && _.isString(_converse.xhr_user_search_url)) {
                     const input_el = this.el.querySelector('input[name="name"]');
                     this.xhr.open("GET", `${_converse.xhr_user_search_url}q=${input_el.value}`, true);
