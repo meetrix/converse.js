@@ -600,7 +600,9 @@ converse.plugins.add('converse-muc-views', {
 
             renderHeading () {
                 /* Render the heading UI of the groupchat. */
-                // this.el.querySelector('.chat-head-chatroom').innerHTML = this.generateHeadingHTML();
+                document.getElementsByClassName('room-description').innerHTML = u.addHyperlinks(xss.filterXSS(_.get(this.model.get('subject'), 'text'), {'whiteList': {}}))
+                 //this.el.querySelector('.chat-head-chatroom').innerHTML = this.generateHeadingHTML();
+        
             },
 
             renderChatArea () {
@@ -608,8 +610,9 @@ converse.plugins.add('converse-muc-views', {
                  */
                 if (_.isNull(this.el.querySelector('.chat-area'))) {
                     const container_el = this.el.querySelector('.chatroom-body');
+                    // console.log('description',u.addHyperlinks(xss.filterXSS(_.get(this.model.get('subject'), 'text'), {'whiteList': {}})));
                     container_el.insertAdjacentHTML('beforeend', tpl_chatarea({
-                        'show_send_button': _converse.show_send_button
+                        'show_send_button': _converse.show_send_button,
                     }));
                     container_el.insertAdjacentElement('beforeend', this.occupantsview.el);
                     this.content = this.el.querySelector('.chat-content');

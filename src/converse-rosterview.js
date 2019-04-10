@@ -124,7 +124,7 @@ converse.plugins.add('converse-rosterview', {
                     'heading_new_contact': __('Add a Contact'),
                     'label_xmpp_address': __('User Address'),//__('XMPP Address')
                     'label_nickname': label_nickname,
-                    'contact_placeholder': __('name'),//__('name@example.org'),
+                    'contact_placeholder': __('name@'+_converse.api.settings.get("default_domain")),//__('name@example.org'),
                     'label_add': __('Add'),
                     'error_message': __('Please enter a valid XMPP address')
                 }));
@@ -235,10 +235,10 @@ converse.plugins.add('converse-rosterview', {
             addContactFromForm (ev) {
                 ev.preventDefault();
                 const data = new FormData(ev.target)
-                let  jid = data.get('jid');
-                if(_.compact(jid.split('@')).length < 2){
-                    jid = _.compact(jid.split('@'))[0]+'@'+_converse.api.settings.get("default_domain");
-                }
+                const jid = data.get('jid');
+                // if(_.compact(jid.split('@')).length < 2){
+                //     jid = _.compact(jid.split('@'))[0]+'@'+_converse.api.settings.get("default_domain");
+                // }
                 if (!jid && _converse.xhr_user_search_url && _.isString(_converse.xhr_user_search_url)) {
                     const input_el = this.el.querySelector('input[name="name"]');
                     this.xhr.open("GET", `${_converse.xhr_user_search_url}q=${input_el.value}`, true);
@@ -499,7 +499,7 @@ converse.plugins.add('converse-rosterview', {
             },
 
             renderRosterItem (item) {
-                let status_icon = 'fa fa-times-circle';
+                let status_icon = 'fa fa-circle';
                 const show = item.presence.get('show') || 'offline';
                 if (show === 'online') {
                     status_icon = 'fa fa-circle chat-status chat-status--online';
