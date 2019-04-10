@@ -78,7 +78,7 @@ converse.plugins.add('converse-rosterview', {
         const HEADER_CURRENT_CONTACTS =  __('My contacts');
         const HEADER_PENDING_CONTACTS = __('Pending contacts');
         const HEADER_REQUESTING_CONTACTS = __('Contact requests');
-        const HEADER_UNGROUPED = __('Ungrouped');
+        const HEADER_UNGROUPED = __('Direct Messages');
         const HEADER_WEIGHTS = {};
         HEADER_WEIGHTS[HEADER_REQUESTING_CONTACTS] = 0;
         HEADER_WEIGHTS[HEADER_CURRENT_CONTACTS]    = 1;

@@ -1838,7 +1838,7 @@ converse.plugins.add('converse-muc-views', {
 
             render () {
                 this.el.innerHTML = tpl_room_panel({
-                    'heading_chatrooms': __('Groupchats'),
+                    'heading_chatrooms': __('Channels'),
                     'title_new_room': __('Add a new groupchat'),
                     'title_list_rooms': __('Query for groupchats')
                 });

@@ -458,7 +458,7 @@ converse.plugins.add('converse-bookmarks', {
                 this.el.innerHTML = tpl_bookmarks_list({
                     'toggle_state': this.list_model.get('toggle-state'),
                     'desc_bookmarks': __('Click to toggle the bookmarks list'),
-                    'label_bookmarks': __('Bookmarks'),
+                    'label_bookmarks': __('Startted Channels'),
                     '_converse': _converse
                 });
                 this.showOrHide();

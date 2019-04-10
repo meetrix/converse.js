@@ -48435,7 +48435,7 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_0__["default"].plugins
         this.el.innerHTML = templates_bookmarks_list_html__WEBPACK_IMPORTED_MODULE_3___default()({
           'toggle_state': this.list_model.get('toggle-state'),
           'desc_bookmarks': __('Click to toggle the bookmarks list'),
-          'label_bookmarks': __('Bookmarks'),
+          'label_bookmarks': __('Startted Channels'),
           '_converse': _converse
         });
         this.showOrHide();
@@ -55316,7 +55316,7 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
 
       render() {
         this.el.innerHTML = templates_room_panel_html__WEBPACK_IMPORTED_MODULE_25___default()({
-          'heading_chatrooms': __('Groupchats'),
+          'heading_chatrooms': __('Channels'),
           'title_new_room': __('Add a new groupchat'),
           'title_list_rooms': __('Query for groupchats')
         });
@@ -59272,7 +59272,7 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_4__["default"].plugins
 
     const HEADER_REQUESTING_CONTACTS = __('Contact requests');
 
-    const HEADER_UNGROUPED = __('Ungrouped');
+    const HEADER_UNGROUPED = __('Direct Messages');
 
     const HEADER_WEIGHTS = {};
     HEADER_WEIGHTS[HEADER_REQUESTING_CONTACTS] = 0;
