@@ -118,13 +118,13 @@ converse.plugins.add('converse-rosterview', {
             },
 
             toHTML () {
-                const label_nickname = _converse.xhr_user_search_url ? __('Contact name') : __('Optional nickname');
+                const label_nickname = _converse.xhr_user_search_url ? __('Contact name') : __('nickname (Optional)');
                 return tpl_add_contact_modal(_.extend(this.model.toJSON(), {
                     '_converse': _converse,
                     'heading_new_contact': __('Add a Contact'),
-                    'label_xmpp_address': __('XMPP Address'),
+                    'label_xmpp_address': __('User Address'),//__('XMPP Address')
                     'label_nickname': label_nickname,
-                    'contact_placeholder': __('name@example.org'),
+                    'contact_placeholder': __('name'),//__('name@example.org'),
                     'label_add': __('Add'),
                     'error_message': __('Please enter a valid XMPP address')
                 }));
@@ -136,8 +136,8 @@ converse.plugins.add('converse-rosterview', {
                 } else {
                     this.initJIDAutoComplete();
                 }
-                const jid_input = this.el.querySelector('input[name="jid"]');
-                this.el.addEventListener('shown.bs.modal', () => jid_input.focus(), false);
+                // const jid_input = this.el.querySelector('input[name="jid"]');
+                // this.el.addEventListener('shown.bs.modal', () => jid_input.focus(), false);
             },
 
             initJIDAutoComplete () {
@@ -175,6 +175,8 @@ converse.plugins.add('converse-rosterview', {
                 const input_el = this.el.querySelector('input[name="name"]');
                 input_el.addEventListener('input', _.debounce(() => {
                     xhr.open("GET", `${_converse.xhr_user_search_url}q=${input_el.value}`, true);
+                    // xhr.setRequestHeader('Authorization','0z7QDAX4QW0RszYi');
+                    // xhr.setRequestHeader( 'Content-Type',   'application/json' );
                     xhr.send()
                 } , 300));
                 this.name_auto_complete.on('suggestion-box-selectcomplete', ev => {
@@ -234,7 +236,6 @@ converse.plugins.add('converse-rosterview', {
                 ev.preventDefault();
                 const data = new FormData(ev.target),
                       jid = data.get('jid');
-
                 if (!jid && _converse.xhr_user_search_url && _.isString(_converse.xhr_user_search_url)) {
                     const input_el = this.el.querySelector('input[name="name"]');
                     this.xhr.open("GET", `${_converse.xhr_user_search_url}q=${input_el.value}`, true);
@@ -341,6 +342,7 @@ converse.plugins.add('converse-rosterview', {
 
             shouldBeVisible () {
                 return _converse.roster.length >= 5 || this.isActive();
+                //return true;
             },
 
             showOrHide () {

@@ -53638,7 +53638,7 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
         const muc_domain = this.model.get('muc_domain') || _converse.muc_domain;
 
         return templates_list_chatrooms_modal_html__WEBPACK_IMPORTED_MODULE_21___default()(_.extend(this.model.toJSON(), {
-          'heading_list_chatrooms': __('Query for Groupchats'),
+          'heading_list_chatrooms': __('List Channels'),
           'label_server_address': __('Server address'),
           'label_query': __('Show groupchats'),
           'show_form': !_converse.locked_muc_domain,
@@ -53695,7 +53695,7 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
       informNoRoomsFound() {
         const chatrooms_el = this.el.querySelector('.available-chatrooms');
         chatrooms_el.innerHTML = templates_rooms_results_html__WEBPACK_IMPORTED_MODULE_26___default()({
-          'feedback_text': __('No groupchats found')
+          'feedback_text': __('No Channels found')
         });
         const input_el = this.el.querySelector('input[name="server"]');
         input_el.classList.remove('hidden');
@@ -59373,13 +59373,15 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_4__["default"].plugins
       },
 
       toHTML() {
-        const label_nickname = _converse.xhr_user_search_url ? __('Contact name') : __('Optional nickname');
+        const label_nickname = _converse.xhr_user_search_url ? __('Contact name') : __('nickname (Optional)');
         return templates_add_contact_modal_html__WEBPACK_IMPORTED_MODULE_5___default()(_.extend(this.model.toJSON(), {
           '_converse': _converse,
           'heading_new_contact': __('Add a Contact'),
-          'label_xmpp_address': __('XMPP Address'),
+          'label_xmpp_address': __('User Address'),
+          //__('XMPP Address')
           'label_nickname': label_nickname,
-          'contact_placeholder': __('name@example.org'),
+          'contact_placeholder': __('name'),
+          //__('name@example.org'),
           'label_add': __('Add'),
           'error_message': __('Please enter a valid XMPP address')
         }));
@@ -59390,10 +59392,9 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_4__["default"].plugins
           this.initXHRAutoComplete();
         } else {
           this.initJIDAutoComplete();
-        }
+        } // const jid_input = this.el.querySelector('input[name="jid"]');
+        // this.el.addEventListener('shown.bs.modal', () => jid_input.focus(), false);
 
-        const jid_input = this.el.querySelector('input[name="jid"]');
-        this.el.addEventListener('shown.bs.modal', () => jid_input.focus(), false);
       },
 
       initJIDAutoComplete() {
@@ -59436,7 +59437,9 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_4__["default"].plugins
 
         const input_el = this.el.querySelector('input[name="name"]');
         input_el.addEventListener('input', _.debounce(() => {
-          xhr.open("GET", `${_converse.xhr_user_search_url}q=${input_el.value}`, true);
+          xhr.open("GET", `${_converse.xhr_user_search_url}q=${input_el.value}`, true); // xhr.setRequestHeader('Authorization','0z7QDAX4QW0RszYi');
+          // xhr.setRequestHeader( 'Content-Type',   'application/json' );
+
           xhr.send();
         }, 300));
         this.name_auto_complete.on('suggestion-box-selectcomplete', ev => {
@@ -59621,7 +59624,7 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_4__["default"].plugins
       },
 
       shouldBeVisible() {
-        return _converse.roster.length >= 5 || this.isActive();
+        return _converse.roster.length >= 5 || this.isActive(); //return true;
       },
 
       showOrHide() {
@@ -93022,7 +93025,7 @@ var _ = {escape:__webpack_require__(/*! ./node_modules/lodash/escape.js */ "./no
 module.exports = function(o) {
 var __t, __p = '', __j = Array.prototype.join;
 function print() { __p += __j.call(arguments, '') }
-__p += '<!-- src/templates/chatarea.html -->\n<div class="chat-area col-md-9 col-8">\n    <!-- <div class="chat-upper-toolbar"></div> -->\n    <div class="top-toolbar">\n            <ul class="top-toolbar-menu">\n                <li class="top-toolbar-video-cal">\n                    <i class="fa fa-video"></i>\n                </li>\n                <li class="top-toolbar-audio-cal">\n                    <i class="fa fa-phone"></i>\n                </li>\n                <li class="top-toolbar-file-attach">\n                    <i class="fa fa-paperclip"></i>\n                </li>\n            </ul>\n        </div>\n    <div class="chat-content ';
+__p += '<!-- src/templates/chatarea.html -->\n<div class="chat-area col-md-9 col-8">\n    <!-- <div class="chat-upper-toolbar"></div> -->\n    <div class="top-toolbar">\n        <div class="row">\n            <div class="col-sm-6 red">Annoucements</div>\n            <div class="col-sm-6 blue">\n                <ul class="top-toolbar-menu">\n                    <li class="top-toolbar-video-cal">\n                        <i class="fa fa-video"></i>\n                    </li>\n                    <li class="top-toolbar-audio-cal">\n                        <i class="fa fa-phone"></i>\n                    </li>\n                    <li class="top-toolbar-file-attach">\n                        <i class="fa fa-paperclip"></i>\n                    </li>\n                </ul>\n            </div>\n        </div>\n    </div>\n    <div class="chat-content ';
  if (o.show_send_button) { ;
 __p += 'chat-content-sendbutton';
  } ;
@@ -94454,7 +94457,7 @@ __p += '\n            <span class="spinner fa fa-spinner centered"/>\n        ';
 __p += '\n            ';
  if (o.authentication == o.LOGIN || o.authentication == o.EXTERNAL) { ;
 __p += '\n                <div class="form-group">\n                    <label for="converse-login-jid">' +
-__e(o.__("XMPP Address:")) +
+__e(o.__("Username:")) +
 '</label>\n                    <input id="converse-login-jid" class="form-control" autofocus required="required" type="text" name="jid" placeholder="' +
 __e(o.placeholder_username) +
 '"/>\n                </div>\n                ';

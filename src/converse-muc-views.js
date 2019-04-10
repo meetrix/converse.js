@@ -284,7 +284,7 @@ converse.plugins.add('converse-muc-views', {
             toHTML () {
                 const muc_domain = this.model.get('muc_domain') || _converse.muc_domain;
                 return tpl_list_chatrooms_modal(_.extend(this.model.toJSON(), {
-                    'heading_list_chatrooms': __('Query for Groupchats'),
+                    'heading_list_chatrooms': __('List Channels'),
                     'label_server_address': __('Server address'),
                     'label_query': __('Show groupchats'),
                     'show_form': !_converse.locked_muc_domain,
@@ -342,7 +342,7 @@ converse.plugins.add('converse-muc-views', {
 
             informNoRoomsFound () {
                 const chatrooms_el = this.el.querySelector('.available-chatrooms');
-                chatrooms_el.innerHTML = tpl_rooms_results({'feedback_text': __('No groupchats found')});
+                chatrooms_el.innerHTML = tpl_rooms_results({'feedback_text': __('No Channels found')});
                 const input_el = this.el.querySelector('input[name="server"]');
                 input_el.classList.remove('hidden')
                 this.removeSpinner();
