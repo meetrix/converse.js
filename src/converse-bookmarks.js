@@ -68,13 +68,13 @@ converse.plugins.add('converse-bookmarks', {
                         'bookmarked': this.model.get('bookmarked')
                     }));
 
-                const buttons_row = this.el.querySelector('.chatbox-buttons')
-                const close_button = buttons_row.querySelector('.close-chatbox-button');
-                if (close_button) {
-                    close_button.insertAdjacentHTML('afterend', bookmark_button);
-                } else {
-                    buttons_row.insertAdjacentHTML('beforeEnd', bookmark_button);
-                }
+                // const buttons_row = this.el.querySelector('.chatbox-buttons')
+                // const close_button = buttons_row.querySelector('.close-chatbox-button');
+                // if (close_button) {
+                //     close_button.insertAdjacentHTML('afterend', bookmark_button);
+                // } else {
+                //     buttons_row.insertAdjacentHTML('beforeEnd', bookmark_button);
+                // }
             },
 
             async renderHeading () {

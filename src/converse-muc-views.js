@@ -600,7 +600,7 @@ converse.plugins.add('converse-muc-views', {
 
             renderHeading () {
                 /* Render the heading UI of the groupchat. */
-                this.el.querySelector('.chat-head-chatroom').innerHTML = this.generateHeadingHTML();
+                // this.el.querySelector('.chat-head-chatroom').innerHTML = this.generateHeadingHTML();
             },
 
             renderChatArea () {

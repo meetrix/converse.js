@@ -47992,15 +47992,13 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_0__["default"].plugins
         const bookmark_button = templates_chatroom_bookmark_toggle_html__WEBPACK_IMPORTED_MODULE_5___default()(_.assignIn(this.model.toJSON(), {
           'info_toggle_bookmark': this.model.get('bookmarked') ? __('Unbookmark this groupchat') : __('Bookmark this groupchat'),
           'bookmarked': this.model.get('bookmarked')
-        }));
-        const buttons_row = this.el.querySelector('.chatbox-buttons');
-        const close_button = buttons_row.querySelector('.close-chatbox-button');
-
-        if (close_button) {
-          close_button.insertAdjacentHTML('afterend', bookmark_button);
-        } else {
-          buttons_row.insertAdjacentHTML('beforeEnd', bookmark_button);
-        }
+        })); // const buttons_row = this.el.querySelector('.chatbox-buttons')
+        // const close_button = buttons_row.querySelector('.close-chatbox-button');
+        // if (close_button) {
+        //     close_button.insertAdjacentHTML('afterend', bookmark_button);
+        // } else {
+        //     buttons_row.insertAdjacentHTML('beforeEnd', bookmark_button);
+        // }
       },
 
       async renderHeading() {
@@ -53981,7 +53979,7 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
 
       renderHeading() {
         /* Render the heading UI of the groupchat. */
-        this.el.querySelector('.chat-head-chatroom').innerHTML = this.generateHeadingHTML();
+        // this.el.querySelector('.chat-head-chatroom').innerHTML = this.generateHeadingHTML();
       },
 
       renderChatArea() {
@@ -93008,7 +93006,7 @@ var _ = {escape:__webpack_require__(/*! ./node_modules/lodash/escape.js */ "./no
 module.exports = function(o) {
 var __t, __p = '', __e = _.escape, __j = Array.prototype.join;
 function print() { __p += __j.call(arguments, '') }
-__p += '<!-- src/templates/chatbox_head.html -->\n<div class="chat-head chat-head-chatbox row no-gutters">\n    <!-- <div class="chatbox-navback"><i class="fa fa-arrow-left"></i></div> -->\n    <!-- <div class="chatbox-title">\n        <div class="row no-gutters">\n            <canvas class="avatar" height="36" width="36"></canvas>\n            <div class="col chat-title" title="' +
+__p += '<!-- src/templates/chatbox_head.html -->\n<!-- <div class="chat-head chat-head-chatbox row no-gutters"> -->\n    <!-- <div class="chatbox-navback"><i class="fa fa-arrow-left"></i></div> -->\n    <!-- <div class="chatbox-title">\n        <div class="row no-gutters">\n            <canvas class="avatar" height="36" width="36"></canvas>\n            <div class="col chat-title" title="' +
 __e(o.jid) +
 '">\n                ';
  if (o.url) { ;
@@ -93028,7 +93026,7 @@ __e( o.status ) +
 __e(o.info_close) +
 '"></a>\n        <a class="chatbox-btn show-user-details-modal fa fa-id-card" title="' +
 __e(o.info_details) +
-'"></a>\n    </div> -->\n</div>\n';
+'"></a>\n    </div> -->\n<!-- </div> -->\n';
 return __p
 };
 
@@ -93127,7 +93125,7 @@ return __p
 var _ = {escape:__webpack_require__(/*! ./node_modules/lodash/escape.js */ "./node_modules/lodash/escape.js")};
 module.exports = function(o) {
 var __t, __p = '';
-__p += '<!-- src/templates/chatroom.html -->\n<div class="flyout box-flyout">\n        \n    <div class="chat-head chat-head-chatroom row no-gutters"></div>\n    <div class="chat-body chatroom-body row no-gutters">\n        <div class="disconnect-container hidden"></div>\n    </div>\n</div>\n';
+__p += '<!-- src/templates/chatroom.html -->\n<div class="flyout box-flyout">\n        \n    <!-- <div class="chat-head chat-head-chatroom row no-gutters"></div> -->\n    <div class="chat-body chatroom-body row no-gutters">\n        <div class="disconnect-container hidden"></div>\n    </div>\n</div>\n';
 return __p
 };
 
