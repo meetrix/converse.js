@@ -159,6 +159,7 @@ converse.plugins.add('converse-chatview', {
 
 
         _converse.ChatBoxHeading = _converse.ViewWithAvatar.extend({
+            className: 'chat-box-header',
             initialize () {
                 this.model.on('change:status', this.onStatusMessageChanged, this);
                 this.model.vcard.on('change', this.render, this);

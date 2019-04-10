@@ -49091,6 +49091,8 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
 
     });
     _converse.ChatBoxHeading = _converse.ViewWithAvatar.extend({
+      className: 'chat-box-header',
+
       initialize() {
         this.model.on('change:status', this.onStatusMessageChanged, this);
         this.model.vcard.on('change', this.render, this);
