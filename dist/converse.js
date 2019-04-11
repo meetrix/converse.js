@@ -53681,6 +53681,7 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
         const div = document.createElement('div');
         div.innerHTML = templates_room_item_html__WEBPACK_IMPORTED_MODULE_24___default()({
           'name': Strophe.xmlunescape(name),
+          'display_name': Strophe.xmlunescape(name).split('@')[0],
           'jid': groupchat.getAttribute('jid'),
           'open_title': __('Click to open this groupchat'),
           'info_title': __('Show more information on this groupchat')
@@ -58981,15 +58982,27 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_0__["default"].plugins
       },
 
       getRoomsListElementName() {
+        let name = '';
+
         if (this.model.get('bookmarked') && _converse.bookmarksview) {
           const bookmark = _.head(_converse.bookmarksview.model.where({
             'jid': this.model.get('jid')
           }));
 
-          return bookmark.get('name');
+          name = bookmark.get('name');
         } else {
-          return this.model.get('name');
+          name = this.model.get('name');
         }
+
+        if (!name) {
+          name = this.model.get('jid');
+        }
+
+        if (name) {
+          name = name.split('@')[0];
+        }
+
+        return name;
       },
 
       createAvatar(nickname, width, height, font) {
@@ -93032,7 +93045,7 @@ var _ = {escape:__webpack_require__(/*! ./node_modules/lodash/escape.js */ "./no
 module.exports = function(o) {
 var __t, __p = '', __j = Array.prototype.join;
 function print() { __p += __j.call(arguments, '') }
-__p += '<!-- src/templates/chatarea.html -->\n<div class="chat-area col-md-9 col-8">\n    <!-- <div class="chat-upper-toolbar"></div> -->\n    <div class="top-toolbar container-fluid">\n        <div class="row">\n            <div class="col-sm-6 room-description">Announcement</div>\n            <div class="col-sm-6 room-controls">\n                <ul class="top-toolbar-menu">\n                    <li class="top-toolbar-video-cal">\n                        <i class="fa fa-video"></i>\n                    </li>\n                    <li class="top-toolbar-audio-cal">\n                        <i class="fa fa-phone"></i>\n                    </li>\n                    <li class="top-toolbar-file-attach">\n                        <i class="fa fa-paperclip"></i>\n                    </li>\n                </ul>\n            </div>\n        </div>\n    </div>\n    <div class="chat-content ';
+__p += '<!-- src/templates/chatarea.html -->\n<div class="chat-area col-md-9 col-8">\n    <!-- <div class="chat-upper-toolbar"></div> -->\n    <div class="top-toolbar">\n        <div class="container-fluid">\n            <div class="row">\n                <div class="col-sm-6 room-description">\n                    <div class="container-fluid">\n                        <div class="row channel-name">\n                            #Announcement\n                        </div>\n                        <div class="row channel-summary">\n                                <ul class="m-0 pl-0 d-block list-unstyled channel-info">\n                                <li>\n                                    <span class="favorite"><i class="fas fa-star"></i></span>\n                                </li>\n                                <li>\n                                    <span class="mr-1">13</span>\n                                    <i class="far fa-user"></i>\n                                </li>\n                                <li>\n                                    <span class="channel-desc">Company-wide announcements and work-based\n                                        matters</span>\n                                </li>\n                            </ul>\n                        </div>\n                    </div>\n                    </div>\n                <div class="col-sm-6 room-controls">\n                    <ul class="top-toolbar-menu">\n                        <li class="top-toolbar-video-cal">\n                            <i class="fa fa-video"></i>\n                        </li>\n                        <li class="top-toolbar-audio-cal">\n                            <i class="fa fa-phone"></i>\n                        </li>\n                        <li class="top-toolbar-file-attach">\n                            <i class="fa fa-paperclip"></i>\n                        </li>\n                    </ul>\n                </div>\n            </div>\n        </div>\n    </div>\n    <div class="chat-content ';
  if (o.show_send_button) { ;
 __p += 'chat-content-sendbutton';
  } ;
@@ -93053,7 +93066,7 @@ var _ = {escape:__webpack_require__(/*! ./node_modules/lodash/escape.js */ "./no
 module.exports = function(o) {
 var __t, __p = '', __j = Array.prototype.join;
 function print() { __p += __j.call(arguments, '') }
-__p += '<!-- src/templates/chatbox.html -->\n<div class="flyout box-flyout">\n    <div class="chat-body">\n        <div class="top-toolbar container-fluid">\n            <div class="row">\n                <div class="col-sm-6 room-description">Announcement</div>\n                <div class="col-sm-6 room-controls">\n                    <ul class="top-toolbar-menu">\n                        <li class="top-toolbar-video-cal">\n                            <i class="fa fa-video"></i>\n                        </li>\n                        <li class="top-toolbar-audio-cal">\n                            <i class="fa fa-phone"></i>\n                        </li>\n                        <li class="top-toolbar-file-attach">\n                            <i class="fa fa-paperclip"></i>\n                        </li>\n                    </ul>\n                </div>\n            </div>\n        </div>\n        <div class="chat-content ';
+__p += '<!-- src/templates/chatbox.html -->\n<div class="flyout box-flyout">\n    <div class="chat-body">\n        <div class="top-toolbar">\n            <div class="container-fluid">\n                <div class="row">\n                    <div class="col-sm-6 room-description">\n                        <div class="container-fluid">\n                            <div class="row channel-name">\n                                #Announcement\n                            </div>\n                            <div class="row channel-summary">\n                                    <ul class="m-0 pl-0 d-block list-unstyled channel-info">\n                                    <li>\n                                        <span class="favorite"><i class="fas fa-star"></i></span>\n                                    </li>\n                                    <li>\n                                        <span class="mr-1">13</span>\n                                        <i class="far fa-user"></i>\n                                    </li>\n                                    <li>\n                                        <span class="channel-desc">Company-wide announcements and work-based\n                                            matters</span>\n                                    </li>\n                                </ul>\n                            </div>\n                        </div>\n                        </div>\n                    <div class="col-sm-6 room-controls">\n                        <ul class="top-toolbar-menu">\n                            <li class="top-toolbar-video-cal">\n                                <i class="fa fa-video"></i>\n                            </li>\n                            <li class="top-toolbar-audio-cal">\n                                <i class="fa fa-phone"></i>\n                            </li>\n                            <li class="top-toolbar-file-attach">\n                                <i class="fa fa-paperclip"></i>\n                            </li>\n                        </ul>\n                    </div>\n                </div>\n            </div>\n        </div>\n        <div class="chat-content ';
  if (o.show_send_button) { ;
 __p += 'chat-content-sendbutton';
  } ;
@@ -95274,7 +95287,7 @@ __e(o.name) +
 '"\n       title="' +
 __e(o.open_title) +
 '"\n       href="#">' +
-__e(o.name) +
+__e(o.display_name) +
 '</a>\n    <a class="right room-info icon-room-info"\n       data-room-jid="' +
 __e(o.jid) +
 '"\n       title="' +

@@ -327,6 +327,7 @@ converse.plugins.add('converse-muc-views', {
                 const div = document.createElement('div');
                 div.innerHTML = tpl_room_item({
                     'name': Strophe.xmlunescape(name),
+                    'display_name': Strophe.xmlunescape(name).split('@')[0],
                     'jid': groupchat.getAttribute('jid'),
                     'open_title': __('Click to open this groupchat'),
                     'info_title': __('Show more information on this groupchat')

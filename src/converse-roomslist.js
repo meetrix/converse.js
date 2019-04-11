@@ -139,12 +139,20 @@ converse.plugins.add('converse-roomslist', {
             },
 
             getRoomsListElementName () {
+                let name = '';
                 if (this.model.get('bookmarked') && _converse.bookmarksview) {
                     const bookmark = _.head(_converse.bookmarksview.model.where({'jid': this.model.get('jid')}));
-                    return bookmark.get('name');
+                     name = bookmark.get('name');
                 } else {
-                    return this.model.get('name');
+                    name =  this.model.get('name');
                 }
+                if(!name){
+                    name = this.model.get('jid')
+                }
+                if(name){
+                    name = name.split('@')[0]
+                }
+                return name
             },
             createAvatar(nickname, width, height, font)
             {
