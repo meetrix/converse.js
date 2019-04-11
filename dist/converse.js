@@ -53998,7 +53998,7 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
           }));
           container_el.insertAdjacentElement('beforeend', this.occupantsview.el);
           this.content = this.el.querySelector('.chat-content');
-          this.toggleOccupants(null, true);
+          this.toggleOccupants(null, false);
         }
 
         return this;

@@ -617,7 +617,7 @@ converse.plugins.add('converse-muc-views', {
                     }));
                     container_el.insertAdjacentElement('beforeend', this.occupantsview.el);
                     this.content = this.el.querySelector('.chat-content');
-                    this.toggleOccupants(null, true);
+                    this.toggleOccupants(null, false);
                 }
                 return this;
             },
