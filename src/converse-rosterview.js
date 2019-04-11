@@ -124,7 +124,7 @@ converse.plugins.add('converse-rosterview', {
                     'heading_new_contact': __('Add a Contact'),
                     'label_xmpp_address': __('User Address'),//__('XMPP Address')
                     'label_nickname': label_nickname,
-                    'contact_placeholder': __('name@'+_converse.api.settings.get("default_domain")),//__('name@example.org'),
+                    'contact_placeholder': __('name'),//__('name@example.org'),
                     'label_add': __('Add'),
                     'error_message': __('Please enter a valid XMPP address')
                 }));
@@ -235,10 +235,10 @@ converse.plugins.add('converse-rosterview', {
             addContactFromForm (ev) {
                 ev.preventDefault();
                 const data = new FormData(ev.target)
-                const jid = data.get('jid');
-                // if(_.compact(jid.split('@')).length < 2){
-                //     jid = _.compact(jid.split('@'))[0]+'@'+_converse.api.settings.get("default_domain");
-                // }
+                let jid = data.get('jid');
+                if(_.compact(jid.split('@')).length < 2){
+                    jid = _.compact(jid.split('@'))[0]+'@'+_converse.api.settings.get("default_domain");
+                }
                 if (!jid && _converse.xhr_user_search_url && _.isString(_converse.xhr_user_search_url)) {
                     const input_el = this.el.querySelector('input[name="name"]');
                     this.xhr.open("GET", `${_converse.xhr_user_search_url}q=${input_el.value}`, true);
@@ -460,8 +460,8 @@ converse.plugins.add('converse-rosterview', {
                     this.el.classList.add('pending-xmpp-contact');
                     this.el.innerHTML = tpl_pending_contact(
                         _.extend(this.model.toJSON(), {
-                            'display_name': display_name,
-                            'desc_remove': __('Click to remove %1$s as a contact', display_name),
+                            'display_name': display_name.split('@')[0],
+                            'desc_remove': __('Click to remove %1$s as a contact', display_name.split('@')[0]),
                             'allow_chat_pending_contacts': _converse.allow_chat_pending_contacts
                         })
                     );
@@ -470,9 +470,9 @@ converse.plugins.add('converse-rosterview', {
                     this.el.classList.add('requesting-xmpp-contact');
                     this.el.innerHTML = tpl_requesting_contact(
                         _.extend(this.model.toJSON(), {
-                            'display_name': display_name,
-                            'desc_accept': __("Click to accept the contact request from %1$s", display_name),
-                            'desc_decline': __("Click to decline the contact request from %1$s", display_name),
+                            'display_name': display_name.split('@')[0],
+                            'desc_accept': __("Click to accept the contact request from %1$s", display_name.split('@')[0]),
+                            'desc_decline': __("Click to decline the contact request from %1$s", display_name.split('@')[0]),
                             'allow_chat_pending_contacts': _converse.allow_chat_pending_contacts
                         })
                     );
@@ -513,7 +513,7 @@ converse.plugins.add('converse-rosterview', {
                 const display_name = item.getDisplayName();
                 this.el.innerHTML = tpl_roster_item(
                     _.extend(item.toJSON(), {
-                        'display_name': display_name,
+                        'display_name': display_name.split('@')[0],
                         'desc_status': STATUSES[show],
                         'status_icon': status_icon,
                         'desc_chat': __('Click to chat with %1$s (JID: %2$s)', display_name, item.get('jid')),
