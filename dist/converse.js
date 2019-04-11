@@ -93127,7 +93127,7 @@ var __t, __p = '', __e = _.escape, __j = Array.prototype.join;
 function print() { __p += __j.call(arguments, '') }
 __p += '<!-- src/templates/chatbox_message_form.html -->\n<div class="message-form-container">\n<div class="new-msgs-indicator hidden">▼ ' +
 __e( o.unread_msgs ) +
-' ▼</div>\n<form class="sendXMPPMessage">\n    <div class="row">\n        <div class="col-sm-6 messag-input-area">\n            <input type="text" placeholder="' +
+' ▼</div>\n<form class="sendXMPPMessage">\n    <div class="row">\n        <div class="col-sm-6 message-input-area">\n            <input type="text" placeholder="' +
 ((__t = (o.label_spoiler_hint)) == null ? '' : __t) +
 '" value="' +
 ((__t = ( o.hint_value )) == null ? '' : __t) +
@@ -95842,7 +95842,7 @@ return __p
 var _ = {escape:__webpack_require__(/*! ./node_modules/lodash/escape.js */ "./node_modules/lodash/escape.js")};
 module.exports = function(o) {
 var __t, __p = '', __e = _.escape;
-__p += '<!-- src/templates/toolbar_fileupload.html -->\n<li class="upload-file">\n    <a class="fa fa-paperclip" title="' +
+__p += '<!-- src/templates/toolbar_fileupload.html -->\n<li class="upload-file" style="display:none">\n    <a class="fa fa-paperclip" title="' +
 __e(o.tooltip_upload_file) +
 '"></a>\n    <input type="file" class="fileupload" multiple="" style="display:none"/>\n</li> \n';
 return __p
