@@ -244,6 +244,7 @@ converse.plugins.add('converse-profile', {
                     'fullname': this.model.vcard.get('fullname') || _converse.bare_jid.split('@')[0],
                     'status_message': this.model.get('status_message') ||
                                         __("I am %1$s", this.getPrettyStatus(chat_status)),
+                    'role': this.model.vcard.get('role') || '',                    
                     'chat_status': chat_status,
                     '_converse': _converse,
                     'title_change_settings': __('Change settings'),

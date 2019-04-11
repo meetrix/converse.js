@@ -2,18 +2,18 @@
 <div class="new-msgs-indicator hidden">▼ {{{ o.unread_msgs }}} ▼</div>
 <form class="sendXMPPMessage">
     <div class="row">
-        <div class="col-sm-6 red">
+        <div class="col-sm-6 messag-input-area">
             <input type="text" placeholder="{{o.label_spoiler_hint}}" value="{{ o.hint_value }}"
             class="{[ if (!o.composing_spoiler) { ]} hidden {[ } ]} spoiler-hint"/>
      
             <div class="suggestion-box">
                 <ul class="suggestion-box__results suggestion-box__results--above" hidden=""></ul>
-                <textarea
+                <input
                     type="text"
                     class="chat-textarea suggestion-box__input
                         {[ if (o.show_send_button) { ]} chat-textarea-send-button {[ } ]}
                         {[ if (o.composing_spoiler) { ]} spoiler {[ } ]}"
-                    placeholder="{{{o.label_message}}}">{{ o.message_value }}</textarea>
+                    placeholder="{{{o.label_message}}}">{{ o.message_value }}</input>
                 <span class="suggestion-box__additions visually-hidden" role="status" aria-live="assertive" aria-relevant="additions"></span>
         
                 {[ if (o.show_send_button) { ]}
@@ -21,7 +21,7 @@
                 {[ } ]}
             </div>
         </div>
-        <div class="col-sm-6 blue">
+        <div class="col-sm-6 message-toolbar">
             {[ if (o.show_toolbar) { ]}
                 <ul class="chat-toolbar no-text-select"></ul>
             {[ } ]}

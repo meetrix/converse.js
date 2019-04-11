@@ -57789,6 +57789,7 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_4__["default"].plugins
           '__': __,
           'fullname': this.model.vcard.get('fullname') || _converse.bare_jid.split('@')[0],
           'status_message': this.model.get('status_message') || __("I am %1$s", this.getPrettyStatus(chat_status)),
+          'role': this.model.vcard.get('role') || '',
           'chat_status': chat_status,
           '_converse': _converse,
           'title_change_settings': __('Change settings'),
@@ -93045,7 +93046,7 @@ var _ = {escape:__webpack_require__(/*! ./node_modules/lodash/escape.js */ "./no
 module.exports = function(o) {
 var __t, __p = '', __j = Array.prototype.join;
 function print() { __p += __j.call(arguments, '') }
-__p += '<!-- src/templates/chatarea.html -->\n<div class="chat-area col-md-9 col-8">\n    <!-- <div class="chat-upper-toolbar"></div> -->\n    <div class="top-toolbar">\n        <div class="container-fluid">\n            <div class="row">\n                <div class="col-sm-6 room-description">\n                    <div class="container-fluid">\n                        <div class="row channel-name">\n                            #Announcement\n                        </div>\n                        <div class="row channel-summary">\n                                <ul class="m-0 pl-0 d-block list-unstyled channel-info">\n                                <li>\n                                    <span class="favorite"><i class="fas fa-star"></i></span>\n                                </li>\n                                <li>\n                                    <span class="mr-1">13</span>\n                                    <i class="far fa-user"></i>\n                                </li>\n                                <li>\n                                    <span class="channel-desc">Company-wide announcements and work-based\n                                        matters</span>\n                                </li>\n                            </ul>\n                        </div>\n                    </div>\n                    </div>\n                <div class="col-sm-6 room-controls">\n                    <ul class="top-toolbar-menu">\n                        <li class="top-toolbar-video-cal">\n                            <i class="fa fa-video"></i>\n                        </li>\n                        <li class="top-toolbar-audio-cal">\n                            <i class="fa fa-phone"></i>\n                        </li>\n                        <li class="top-toolbar-file-attach">\n                            <i class="fa fa-paperclip"></i>\n                        </li>\n                    </ul>\n                </div>\n            </div>\n        </div>\n    </div>\n    <div class="chat-content ';
+__p += '<!-- src/templates/chatarea.html -->\n<div class="chat-area col-md-9 col-8">\n    <!-- <div class="chat-upper-toolbar"></div> -->\n    <div class="top-toolbar">\n        <div class="container-fluid">\n            <div class="row">\n                <div class="col-sm-6 room-description">\n                    <div class="container-fluid">\n                        <div class="row channel-name">\n                            #Announcement\n                        </div>\n                        <div class="row channel-summary">\n                                <ul class="m-0 pl-0 d-block list-unstyled channel-info">\n                                <li class="favorite-star">\n                                    <span class="favorite"><i class="fas fa-star"></i></span>\n                                </li>\n                                <li class="favorite-user">\n                                    <span class="mr-1 ">13</span>\n                                    <i class="far fa-user"></i>\n                                </li>\n                                <li class="favorite-channel">\n                                    <span class="channel-desc ">Company-wide announcements and work-based\n                                        matters</span>\n                                </li>\n                            </ul>\n                        </div>\n                    </div>\n                    </div>\n                <div class="col-sm-6 room-controls">\n                    <ul class="top-toolbar-menu">\n                        <li class="top-toolbar-video-cal">\n                            <i class="fa fa-video"></i>\n                        </li>\n                        <li class="top-toolbar-audio-cal">\n                            <i class="fa fa-phone"></i>\n                        </li>\n                        <li class="top-toolbar-file-attach">\n                            <i class="fa fa-paperclip"></i>\n                        </li>\n                    </ul>\n                </div>\n            </div>\n        </div>\n    </div>\n    <div class="chat-content ';
  if (o.show_send_button) { ;
 __p += 'chat-content-sendbutton';
  } ;
@@ -93066,7 +93067,7 @@ var _ = {escape:__webpack_require__(/*! ./node_modules/lodash/escape.js */ "./no
 module.exports = function(o) {
 var __t, __p = '', __j = Array.prototype.join;
 function print() { __p += __j.call(arguments, '') }
-__p += '<!-- src/templates/chatbox.html -->\n<div class="flyout box-flyout">\n    <div class="chat-body">\n        <div class="top-toolbar">\n            <div class="container-fluid">\n                <div class="row">\n                    <div class="col-sm-6 room-description">\n                        <div class="container-fluid">\n                            <div class="row channel-name">\n                                #Announcement\n                            </div>\n                            <div class="row channel-summary">\n                                    <ul class="m-0 pl-0 d-block list-unstyled channel-info">\n                                    <li>\n                                        <span class="favorite"><i class="fas fa-star"></i></span>\n                                    </li>\n                                    <li>\n                                        <span class="mr-1">13</span>\n                                        <i class="far fa-user"></i>\n                                    </li>\n                                    <li>\n                                        <span class="channel-desc">Company-wide announcements and work-based\n                                            matters</span>\n                                    </li>\n                                </ul>\n                            </div>\n                        </div>\n                        </div>\n                    <div class="col-sm-6 room-controls">\n                        <ul class="top-toolbar-menu">\n                            <li class="top-toolbar-video-cal">\n                                <i class="fa fa-video"></i>\n                            </li>\n                            <li class="top-toolbar-audio-cal">\n                                <i class="fa fa-phone"></i>\n                            </li>\n                            <li class="top-toolbar-file-attach">\n                                <i class="fa fa-paperclip"></i>\n                            </li>\n                        </ul>\n                    </div>\n                </div>\n            </div>\n        </div>\n        <div class="chat-content ';
+__p += '<!-- src/templates/chatbox.html -->\n<div class="flyout box-flyout">\n    <div class="chat-body">\n        <div class="top-toolbar">\n            <div class="container-fluid">\n                <div class="row">\n                    <div class="col-sm-6 room-description">\n                        <div class="container-fluid">\n                            <div class="row channel-name">\n                                #Announcement\n                            </div>\n                            <div class="row channel-summary">\n                                    <ul class="m-0 pl-0 d-block list-unstyled channel-info">\n                                    <li class="favorite-star">\n                                        <span class="favorite"><i class="fas fa-star"></i></span>\n                                    </li>\n                                    <li class="favorite-user">\n                                        <span class="mr-1 ">13</span>\n                                        <i class="far fa-user"></i>\n                                    </li>\n                                    <li class="favorite-channel">\n                                        <span class="channel-desc ">Company-wide announcements and work-based\n                                            matters</span>\n                                    </li>\n                                </ul>\n                            </div>\n                        </div>\n                        </div>\n                    <div class="col-sm-6 room-controls">\n                        <ul class="top-toolbar-menu">\n                            <li class="top-toolbar-video-cal">\n                                <i class="fa fa-video"></i>\n                            </li>\n                            <li class="top-toolbar-audio-cal">\n                                <i class="fa fa-phone"></i>\n                            </li>\n                            <li class="top-toolbar-file-attach">\n                                <i class="fa fa-paperclip"></i>\n                            </li>\n                        </ul>\n                    </div>\n                </div>\n            </div>\n        </div>\n        <div class="chat-content ';
  if (o.show_send_button) { ;
 __p += 'chat-content-sendbutton';
  } ;
@@ -93126,7 +93127,7 @@ var __t, __p = '', __e = _.escape, __j = Array.prototype.join;
 function print() { __p += __j.call(arguments, '') }
 __p += '<!-- src/templates/chatbox_message_form.html -->\n<div class="message-form-container">\n<div class="new-msgs-indicator hidden">▼ ' +
 __e( o.unread_msgs ) +
-' ▼</div>\n<form class="sendXMPPMessage">\n    <div class="row">\n        <div class="col-sm-6 red">\n            <input type="text" placeholder="' +
+' ▼</div>\n<form class="sendXMPPMessage">\n    <div class="row">\n        <div class="col-sm-6 messag-input-area">\n            <input type="text" placeholder="' +
 ((__t = (o.label_spoiler_hint)) == null ? '' : __t) +
 '" value="' +
 ((__t = ( o.hint_value )) == null ? '' : __t) +
@@ -93134,7 +93135,7 @@ __e( o.unread_msgs ) +
  if (!o.composing_spoiler) { ;
 __p += ' hidden ';
  } ;
-__p += ' spoiler-hint"/>\n     \n            <div class="suggestion-box">\n                <ul class="suggestion-box__results suggestion-box__results--above" hidden=""></ul>\n                <textarea\n                    type="text"\n                    class="chat-textarea suggestion-box__input\n                        ';
+__p += ' spoiler-hint"/>\n     \n            <div class="suggestion-box">\n                <ul class="suggestion-box__results suggestion-box__results--above" hidden=""></ul>\n                <input\n                    type="text"\n                    class="chat-textarea suggestion-box__input\n                        ';
  if (o.show_send_button) { ;
 __p += ' chat-textarea-send-button ';
  } ;
@@ -93146,13 +93147,13 @@ __p += '"\n                    placeholder="' +
 __e(o.label_message) +
 '">' +
 ((__t = ( o.message_value )) == null ? '' : __t) +
-'</textarea>\n                <span class="suggestion-box__additions visually-hidden" role="status" aria-live="assertive" aria-relevant="additions"></span>\n        \n                ';
+'</input>\n                <span class="suggestion-box__additions visually-hidden" role="status" aria-live="assertive" aria-relevant="additions"></span>\n        \n                ';
  if (o.show_send_button) { ;
 __p += '\n                    <button type="submit" class="pure-button send-button">' +
 __e( o.label_send ) +
 '</button>\n                ';
  } ;
-__p += '\n            </div>\n        </div>\n        <div class="col-sm-6 blue">\n            ';
+__p += '\n            </div>\n        </div>\n        <div class="col-sm-6 message-toolbar">\n            ';
  if (o.show_toolbar) { ;
 __p += '\n                <ul class="chat-toolbar no-text-select"></ul>\n            ';
  } ;
@@ -94986,7 +94987,9 @@ __e(o.status_message) +
 __e(o.title_change_status) +
 '" data-toggle="modal" data-target="#changeStatusModal"></a> -->\n            </div>\n    </a>\n    <div class="media-body dropdown">\n        <a href="#" data-toggle="dropdown" class="profile-menu media-title dropdown-toggle font-weight-semibold" aria-expanded="false">' +
 __e(o.fullname) +
-'</a>\n        <div class="dropdown-menu animate slideIn">\n            <a href="javascript:void(0);" class="dropdown-item show-profile">Profile &amp; Account</a>\n            <!-- <a href="javascript:void(0);" class="dropdown-item">Preferences</a> -->\n            <!-- <a href="javascript:void(0);" class="dropdown-item">Help &amp; feedback</a> -->\n            <a href="javascript:void(0);" class="dropdown-item logout align-self-center">Log out</a>\n        </div>\n        <div class="user-role font-size-xs opacity-75">\n\n        </div>\n    </div>\n    <!-- <span class="username w-100 align-self-center">' +
+'</a>\n        <div class="dropdown-menu animate slideIn">\n            <a href="javascript:void(0);" class="dropdown-item show-profile">Profile &amp; Account</a>\n            <!-- <a href="javascript:void(0);" class="dropdown-item">Preferences</a> -->\n            <!-- <a href="javascript:void(0);" class="dropdown-item">Help &amp; feedback</a> -->\n            <a href="javascript:void(0);" class="dropdown-item logout align-self-center">Log out</a>\n        </div>\n        <div class="user-role font-size-xs opacity-75">\n                ' +
+__e(o.role) +
+'\n        </div>\n    </div>\n    <!-- <span class="username w-100 align-self-center">' +
 __e(o.fullname) +
 '</span>\n    ';
  if (o._converse.show_client_info) { ;
