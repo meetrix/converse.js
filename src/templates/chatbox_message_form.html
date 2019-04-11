@@ -2,7 +2,12 @@
 <div class="new-msgs-indicator hidden">▼ {{{ o.unread_msgs }}} ▼</div>
 <form class="sendXMPPMessage">
     <div class="row">
-        <div class="col-sm-6 message-input-area">
+        <div class="col-sm-2" >
+            <a href="javascript:void(0);" class="add-message m-auto">
+                <i class="fal fa-plus fa-2x"></i>
+            </a>
+        </div>
+        <div class="col-sm-7 message-input-area">
             <input type="text" placeholder="{{o.label_spoiler_hint}}" value="{{ o.hint_value }}"
             class="{[ if (!o.composing_spoiler) { ]} hidden {[ } ]} spoiler-hint"/>
      
@@ -21,7 +26,7 @@
                 {[ } ]}
             </div>
         </div>
-        <div class="col-sm-6 message-toolbar">
+        <div class="col-sm-3 message-toolbar">
             {[ if (o.show_toolbar) { ]}
                 <ul class="chat-toolbar no-text-select"></ul>
             {[ } ]}
