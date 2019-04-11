@@ -2,12 +2,12 @@
 <div class="new-msgs-indicator hidden">▼ {{{ o.unread_msgs }}} ▼</div>
 <form class="sendXMPPMessage">
     <div class="row">
-        <div class="col-sm-2" >
+        <div class="col-sm-auto" >
             <a href="javascript:void(0);" class="add-message m-auto">
-                <i class="fal fa-plus fa-2x"></i>
+                <i class="fa fa-plus fa-2x"></i>
             </a>
         </div>
-        <div class="col-sm-7 message-input-area">
+        <div class="col-sm-8 message-input-area">
             <input type="text" placeholder="{{o.label_spoiler_hint}}" value="{{ o.hint_value }}"
             class="{[ if (!o.composing_spoiler) { ]} hidden {[ } ]} spoiler-hint"/>
      
