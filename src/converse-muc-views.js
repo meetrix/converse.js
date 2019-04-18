@@ -815,6 +815,29 @@ converse.plugins.add('converse-muc-views', {
                 }
                 this.occupantsview.setOccupantsHeight();
             },
+            setConferenceOccupantsVisibility () {
+                const icon_el = this.el.querySelector('.toggle-conference-occupants');
+                if (this.model.get('hidden_conference_occupants')) {
+                    u.removeClass('fa-microphone-alt', icon_el);
+                    u.addClass('fa-microphone-alt-slash', icon_el);
+                    const chat_area = this.el.querySelector('.chat-area');
+                    u.removeClass('col-md-9', chat_area);
+                    u.removeClass('col-8', chat_area);
+                    u.addClass('full', chat_area);
+                    u.addClass('col-12', chat_area);
+                    u.hideElement(this.el.querySelector('.conference-occupants'));
+                } else {
+                    const chat_area = this.el.querySelector('.chat-area');
+                    u.addClass('fa-microphone-alt', icon_el);
+                    u.removeClass('fa-microphone-alt-slash', icon_el);
+                    u.removeClass('hidden', this.el.querySelector('.conference-occupants'));
+                    u.removeClass('full', chat_area);
+                    u.removeClass('col-12', chat_area);
+                    u.addClass('col-md-9', chat_area);
+                    u.addClass('col-8', chat_area);
+                }
+                this.conferenceoccupantsview.setConferenceOccupantsHeight();
+            },
 
             hideOccupants (ev, preserve_state) {
                 /* Show or hide the right sidebar containing the chat
@@ -826,6 +849,18 @@ converse.plugins.add('converse-muc-views', {
                 }
                 this.model.save({'hidden_occupants': true});
                 this.setOccupantsVisibility();
+                this.scrollDown();
+            },
+            hideConferenceOccupants (ev, preserve_state) {
+                /* Show or hide the right sidebar containing the chat
+                 * occupants (and the invite widget).
+                 */
+                if (ev) {
+                    ev.preventDefault();
+                    ev.stopPropagation();
+                }
+                this.model.save({'hidden_conference_occupants': true});
+                this.setConferenceOccupantsVisibility();
                 this.scrollDown();
             },
 
@@ -843,8 +878,17 @@ converse.plugins.add('converse-muc-views', {
                 this.setOccupantsVisibility();
                 this.scrollDown();
             },
-            toggleConference(){
+            toggleConference(ev, preserve_state){
                 console.log('toggle conference')
+                if (ev) {
+                    ev.preventDefault();
+                    ev.stopPropagation();
+                }
+                if (!preserve_state) {
+                    this.model.set({'hidden_conference_occupants': !this.model.get('hidden_conference_occupants')});
+                }
+                this.setConferenceOccupantsVisibility();
+                this.scrollDown();
             },
 
             onOccupantClicked (ev) {
@@ -2016,7 +2060,7 @@ converse.plugins.add('converse-muc-views', {
                 this.el.querySelector('.occupant-list').style.cssText =
                     `height: calc(100% - ${el.offsetHeight}px - 5em);`;
             },
-
+           
 
             promptForInvite (suggestion) {
                 let reason = '';
@@ -2154,12 +2198,12 @@ converse.plugins.add('converse-muc-views', {
                 if (_.reduce(_.values(picks), iteratee)) {
                     const el = this.el.querySelector('.chatroom-features');
                     el.innerHTML = tpl_chatroom_features(_.extend(features.toJSON(), {__}));
-                    this.setOccupantsHeight();
+                    this.setConferenceOccupantsHeight();
                 }
                 return this;
             },
 
-            setOccupantsHeight () {
+            setConferenceOccupantsHeight () {
                 const el = this.el.querySelector('.chatroom-features');
                 this.el.querySelector('.conference-occupant-list').style.cssText =
                     `height: calc(100% - ${el.offsetHeight}px - 5em);`;

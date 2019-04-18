@@ -54225,6 +54225,32 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
         this.occupantsview.setOccupantsHeight();
       },
 
+      setConferenceOccupantsVisibility() {
+        const icon_el = this.el.querySelector('.toggle-conference-occupants');
+
+        if (this.model.get('hidden_conference_occupants')) {
+          u.removeClass('fa-microphone-alt', icon_el);
+          u.addClass('fa-microphone-alt-slash', icon_el);
+          const chat_area = this.el.querySelector('.chat-area');
+          u.removeClass('col-md-9', chat_area);
+          u.removeClass('col-8', chat_area);
+          u.addClass('full', chat_area);
+          u.addClass('col-12', chat_area);
+          u.hideElement(this.el.querySelector('.conference-occupants'));
+        } else {
+          const chat_area = this.el.querySelector('.chat-area');
+          u.addClass('fa-microphone-alt', icon_el);
+          u.removeClass('fa-microphone-alt-slash', icon_el);
+          u.removeClass('hidden', this.el.querySelector('.conference-occupants'));
+          u.removeClass('full', chat_area);
+          u.removeClass('col-12', chat_area);
+          u.addClass('col-md-9', chat_area);
+          u.addClass('col-8', chat_area);
+        }
+
+        this.conferenceoccupantsview.setConferenceOccupantsHeight();
+      },
+
       hideOccupants(ev, preserve_state) {
         /* Show or hide the right sidebar containing the chat
          * occupants (and the invite widget).
@@ -54238,6 +54264,22 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
           'hidden_occupants': true
         });
         this.setOccupantsVisibility();
+        this.scrollDown();
+      },
+
+      hideConferenceOccupants(ev, preserve_state) {
+        /* Show or hide the right sidebar containing the chat
+         * occupants (and the invite widget).
+         */
+        if (ev) {
+          ev.preventDefault();
+          ev.stopPropagation();
+        }
+
+        this.model.save({
+          'hidden_conference_occupants': true
+        });
+        this.setConferenceOccupantsVisibility();
         this.scrollDown();
       },
 
@@ -54260,8 +54302,22 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
         this.scrollDown();
       },
 
-      toggleConference() {
+      toggleConference(ev, preserve_state) {
         console.log('toggle conference');
+
+        if (ev) {
+          ev.preventDefault();
+          ev.stopPropagation();
+        }
+
+        if (!preserve_state) {
+          this.model.set({
+            'hidden_conference_occupants': !this.model.get('hidden_conference_occupants')
+          });
+        }
+
+        this.setConferenceOccupantsVisibility();
+        this.scrollDown();
       },
 
       onOccupantClicked(ev) {
@@ -55643,13 +55699,13 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
           el.innerHTML = templates_chatroom_features_html__WEBPACK_IMPORTED_MODULE_13___default()(_.extend(features.toJSON(), {
             __
           }));
-          this.setOccupantsHeight();
+          this.setConferenceOccupantsHeight();
         }
 
         return this;
       },
 
-      setOccupantsHeight() {
+      setConferenceOccupantsHeight() {
         const el = this.el.querySelector('.chatroom-features');
         this.el.querySelector('.conference-occupant-list').style.cssText = `height: calc(100% - ${el.offsetHeight}px - 5em);`;
       },
