@@ -11,3 +11,7 @@
 <li class="toggle-occupants fa {[ if (o.hidden_occupants)  { ]} fa-angle-double-left {[ } else { ]} fa-angle-double-right {[ } ]}"
     title="{{{o.label_hide_occupants}}}"></li>
 {[ } ]}
+{[ if (o.show_conference_occupants_toggle)  { ]}
+<li class="toggle-conference-occupants fa {[ if (o.hidden_conference_occupants)  { ]} fa-microphone-alt-slash {[ } else { ]} fa-microphone-alt {[ } ]}"
+    title="{{{o.label_hide_conference_occupants}}}"></li>
+{[ } ]}

@@ -53331,24 +53331,26 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var templates_chatroom_password_form_html__WEBPACK_IMPORTED_MODULE_18___default = /*#__PURE__*/__webpack_require__.n(templates_chatroom_password_form_html__WEBPACK_IMPORTED_MODULE_18__);
 /* harmony import */ var templates_chatroom_sidebar_html__WEBPACK_IMPORTED_MODULE_19__ = __webpack_require__(/*! templates/chatroom_sidebar.html */ "./src/templates/chatroom_sidebar.html");
 /* harmony import */ var templates_chatroom_sidebar_html__WEBPACK_IMPORTED_MODULE_19___default = /*#__PURE__*/__webpack_require__.n(templates_chatroom_sidebar_html__WEBPACK_IMPORTED_MODULE_19__);
-/* harmony import */ var templates_info_html__WEBPACK_IMPORTED_MODULE_20__ = __webpack_require__(/*! templates/info.html */ "./src/templates/info.html");
-/* harmony import */ var templates_info_html__WEBPACK_IMPORTED_MODULE_20___default = /*#__PURE__*/__webpack_require__.n(templates_info_html__WEBPACK_IMPORTED_MODULE_20__);
-/* harmony import */ var templates_list_chatrooms_modal_html__WEBPACK_IMPORTED_MODULE_21__ = __webpack_require__(/*! templates/list_chatrooms_modal.html */ "./src/templates/list_chatrooms_modal.html");
-/* harmony import */ var templates_list_chatrooms_modal_html__WEBPACK_IMPORTED_MODULE_21___default = /*#__PURE__*/__webpack_require__.n(templates_list_chatrooms_modal_html__WEBPACK_IMPORTED_MODULE_21__);
-/* harmony import */ var templates_occupant_html__WEBPACK_IMPORTED_MODULE_22__ = __webpack_require__(/*! templates/occupant.html */ "./src/templates/occupant.html");
-/* harmony import */ var templates_occupant_html__WEBPACK_IMPORTED_MODULE_22___default = /*#__PURE__*/__webpack_require__.n(templates_occupant_html__WEBPACK_IMPORTED_MODULE_22__);
-/* harmony import */ var templates_room_description_html__WEBPACK_IMPORTED_MODULE_23__ = __webpack_require__(/*! templates/room_description.html */ "./src/templates/room_description.html");
-/* harmony import */ var templates_room_description_html__WEBPACK_IMPORTED_MODULE_23___default = /*#__PURE__*/__webpack_require__.n(templates_room_description_html__WEBPACK_IMPORTED_MODULE_23__);
-/* harmony import */ var templates_room_item_html__WEBPACK_IMPORTED_MODULE_24__ = __webpack_require__(/*! templates/room_item.html */ "./src/templates/room_item.html");
-/* harmony import */ var templates_room_item_html__WEBPACK_IMPORTED_MODULE_24___default = /*#__PURE__*/__webpack_require__.n(templates_room_item_html__WEBPACK_IMPORTED_MODULE_24__);
-/* harmony import */ var templates_room_panel_html__WEBPACK_IMPORTED_MODULE_25__ = __webpack_require__(/*! templates/room_panel.html */ "./src/templates/room_panel.html");
-/* harmony import */ var templates_room_panel_html__WEBPACK_IMPORTED_MODULE_25___default = /*#__PURE__*/__webpack_require__.n(templates_room_panel_html__WEBPACK_IMPORTED_MODULE_25__);
-/* harmony import */ var templates_rooms_results_html__WEBPACK_IMPORTED_MODULE_26__ = __webpack_require__(/*! templates/rooms_results.html */ "./src/templates/rooms_results.html");
-/* harmony import */ var templates_rooms_results_html__WEBPACK_IMPORTED_MODULE_26___default = /*#__PURE__*/__webpack_require__.n(templates_rooms_results_html__WEBPACK_IMPORTED_MODULE_26__);
-/* harmony import */ var templates_spinner_html__WEBPACK_IMPORTED_MODULE_27__ = __webpack_require__(/*! templates/spinner.html */ "./src/templates/spinner.html");
-/* harmony import */ var templates_spinner_html__WEBPACK_IMPORTED_MODULE_27___default = /*#__PURE__*/__webpack_require__.n(templates_spinner_html__WEBPACK_IMPORTED_MODULE_27__);
-/* harmony import */ var xss__WEBPACK_IMPORTED_MODULE_28__ = __webpack_require__(/*! xss */ "./node_modules/xss/dist/xss.js");
-/* harmony import */ var xss__WEBPACK_IMPORTED_MODULE_28___default = /*#__PURE__*/__webpack_require__.n(xss__WEBPACK_IMPORTED_MODULE_28__);
+/* harmony import */ var templates_chatroom_conference_html__WEBPACK_IMPORTED_MODULE_20__ = __webpack_require__(/*! templates/chatroom_conference.html */ "./src/templates/chatroom_conference.html");
+/* harmony import */ var templates_chatroom_conference_html__WEBPACK_IMPORTED_MODULE_20___default = /*#__PURE__*/__webpack_require__.n(templates_chatroom_conference_html__WEBPACK_IMPORTED_MODULE_20__);
+/* harmony import */ var templates_info_html__WEBPACK_IMPORTED_MODULE_21__ = __webpack_require__(/*! templates/info.html */ "./src/templates/info.html");
+/* harmony import */ var templates_info_html__WEBPACK_IMPORTED_MODULE_21___default = /*#__PURE__*/__webpack_require__.n(templates_info_html__WEBPACK_IMPORTED_MODULE_21__);
+/* harmony import */ var templates_list_chatrooms_modal_html__WEBPACK_IMPORTED_MODULE_22__ = __webpack_require__(/*! templates/list_chatrooms_modal.html */ "./src/templates/list_chatrooms_modal.html");
+/* harmony import */ var templates_list_chatrooms_modal_html__WEBPACK_IMPORTED_MODULE_22___default = /*#__PURE__*/__webpack_require__.n(templates_list_chatrooms_modal_html__WEBPACK_IMPORTED_MODULE_22__);
+/* harmony import */ var templates_occupant_html__WEBPACK_IMPORTED_MODULE_23__ = __webpack_require__(/*! templates/occupant.html */ "./src/templates/occupant.html");
+/* harmony import */ var templates_occupant_html__WEBPACK_IMPORTED_MODULE_23___default = /*#__PURE__*/__webpack_require__.n(templates_occupant_html__WEBPACK_IMPORTED_MODULE_23__);
+/* harmony import */ var templates_room_description_html__WEBPACK_IMPORTED_MODULE_24__ = __webpack_require__(/*! templates/room_description.html */ "./src/templates/room_description.html");
+/* harmony import */ var templates_room_description_html__WEBPACK_IMPORTED_MODULE_24___default = /*#__PURE__*/__webpack_require__.n(templates_room_description_html__WEBPACK_IMPORTED_MODULE_24__);
+/* harmony import */ var templates_room_item_html__WEBPACK_IMPORTED_MODULE_25__ = __webpack_require__(/*! templates/room_item.html */ "./src/templates/room_item.html");
+/* harmony import */ var templates_room_item_html__WEBPACK_IMPORTED_MODULE_25___default = /*#__PURE__*/__webpack_require__.n(templates_room_item_html__WEBPACK_IMPORTED_MODULE_25__);
+/* harmony import */ var templates_room_panel_html__WEBPACK_IMPORTED_MODULE_26__ = __webpack_require__(/*! templates/room_panel.html */ "./src/templates/room_panel.html");
+/* harmony import */ var templates_room_panel_html__WEBPACK_IMPORTED_MODULE_26___default = /*#__PURE__*/__webpack_require__.n(templates_room_panel_html__WEBPACK_IMPORTED_MODULE_26__);
+/* harmony import */ var templates_rooms_results_html__WEBPACK_IMPORTED_MODULE_27__ = __webpack_require__(/*! templates/rooms_results.html */ "./src/templates/rooms_results.html");
+/* harmony import */ var templates_rooms_results_html__WEBPACK_IMPORTED_MODULE_27___default = /*#__PURE__*/__webpack_require__.n(templates_rooms_results_html__WEBPACK_IMPORTED_MODULE_27__);
+/* harmony import */ var templates_spinner_html__WEBPACK_IMPORTED_MODULE_28__ = __webpack_require__(/*! templates/spinner.html */ "./src/templates/spinner.html");
+/* harmony import */ var templates_spinner_html__WEBPACK_IMPORTED_MODULE_28___default = /*#__PURE__*/__webpack_require__.n(templates_spinner_html__WEBPACK_IMPORTED_MODULE_28__);
+/* harmony import */ var xss__WEBPACK_IMPORTED_MODULE_29__ = __webpack_require__(/*! xss */ "./node_modules/xss/dist/xss.js");
+/* harmony import */ var xss__WEBPACK_IMPORTED_MODULE_29___default = /*#__PURE__*/__webpack_require__.n(xss__WEBPACK_IMPORTED_MODULE_29__);
 // Converse.js
 // https://conversejs.org
 //
@@ -53374,6 +53376,8 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
+
+ // eslint-disable-next-line sort-imports
 
 
 
@@ -53473,7 +53477,8 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
       'muc_show_join_leave': true,
       'roomconfig_whitelist': [],
       'visible_toolbar_buttons': {
-        'toggle_occupants': true
+        'toggle_occupants': true,
+        'toggle_conference_occupants': true
       }
     });
 
@@ -53567,7 +53572,7 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
       // All MUC features found here: https://xmpp.org/registrar/disco-features.html
       el.querySelector('span.spinner').remove();
       el.querySelector('a.room-info').classList.add('selected');
-      el.insertAdjacentHTML('beforeEnd', templates_room_description_html__WEBPACK_IMPORTED_MODULE_23___default()({
+      el.insertAdjacentHTML('beforeEnd', templates_room_description_html__WEBPACK_IMPORTED_MODULE_24___default()({
         'jid': stanza.getAttribute('from'),
         'desc': _.get(_.head(sizzle('field[var="muc#roominfo_description"] value', stanza)), 'textContent'),
         'occ': _.get(_.head(sizzle('field[var="muc#roominfo_occupants"] value', stanza)), 'textContent'),
@@ -53609,7 +53614,7 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
         u.slideIn(div_el).then(u.removeElement);
         parent_el.querySelector('a.room-info').classList.remove('selected');
       } else {
-        parent_el.insertAdjacentHTML('beforeend', templates_spinner_html__WEBPACK_IMPORTED_MODULE_27___default()());
+        parent_el.insertAdjacentHTML('beforeend', templates_spinner_html__WEBPACK_IMPORTED_MODULE_28___default()());
 
         _converse.api.disco.info(ev.target.getAttribute('data-room-jid'), null).then(stanza => insertRoomInfo(parent_el, stanza)).catch(_.partial(_converse.log, _, Strophe.LogLevel.ERROR));
       }
@@ -53637,7 +53642,7 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
       toHTML() {
         const muc_domain = this.model.get('muc_domain') || _converse.muc_domain;
 
-        return templates_list_chatrooms_modal_html__WEBPACK_IMPORTED_MODULE_21___default()(_.extend(this.model.toJSON(), {
+        return templates_list_chatrooms_modal_html__WEBPACK_IMPORTED_MODULE_22___default()(_.extend(this.model.toJSON(), {
           'heading_list_chatrooms': __('List Channels'),
           'label_server_address': __('Server address'),
           'label_query': __('Show Channels'),
@@ -53679,7 +53684,7 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
       roomStanzaItemToHTMLElement(groupchat) {
         const name = Strophe.unescapeNode(groupchat.getAttribute('name') || groupchat.getAttribute('jid'));
         const div = document.createElement('div');
-        div.innerHTML = templates_room_item_html__WEBPACK_IMPORTED_MODULE_24___default()({
+        div.innerHTML = templates_room_item_html__WEBPACK_IMPORTED_MODULE_25___default()({
           'name': Strophe.xmlunescape(name),
           'display_name': Strophe.xmlunescape(name).split('@')[0],
           'jid': groupchat.getAttribute('jid'),
@@ -53695,7 +53700,7 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
 
       informNoRoomsFound() {
         const chatrooms_el = this.el.querySelector('.available-chatrooms');
-        chatrooms_el.innerHTML = templates_rooms_results_html__WEBPACK_IMPORTED_MODULE_26___default()({
+        chatrooms_el.innerHTML = templates_rooms_results_html__WEBPACK_IMPORTED_MODULE_27___default()({
           'feedback_text': __('No Channels found')
         });
         const input_el = this.el.querySelector('input[name="server"]');
@@ -53711,7 +53716,7 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
         this.rooms = iq.querySelectorAll('query item');
 
         if (this.rooms.length) {
-          available_chatrooms.innerHTML = templates_rooms_results_html__WEBPACK_IMPORTED_MODULE_26___default()({
+          available_chatrooms.innerHTML = templates_rooms_results_html__WEBPACK_IMPORTED_MODULE_27___default()({
             'feedback_text': __('Channels found:')
           });
           const fragment = document.createDocumentFragment();
@@ -53859,7 +53864,7 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
           'display_name': __('Groupchat info for %1$s', this.model.getDisplayName()),
           'features': this.model.features.toJSON(),
           'num_occupants': this.model.occupants.length,
-          'topic': u.addHyperlinks(xss__WEBPACK_IMPORTED_MODULE_28___default.a.filterXSS(_.get(this.model.get('subject'), 'text'), {
+          'topic': u.addHyperlinks(xss__WEBPACK_IMPORTED_MODULE_29___default.a.filterXSS(_.get(this.model.get('subject'), 'text'), {
             'whiteList': {}
           }))
         }));
@@ -53904,7 +53909,8 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
         'dragover .chat-textarea': 'onDragOver',
         'drop .chat-textarea': 'onDrop',
         'click .top-toolbar-video-cal': 'videoCall',
-        'click .top-toolbar-file-attach': 'toggleFileUpload'
+        'click .top-toolbar-file-attach': 'toggleFileUpload',
+        'click .toggle-conference-occupants': 'toggleConference'
       },
 
       initialize() {
@@ -53982,7 +53988,7 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
 
       renderHeading() {
         /* Render the heading UI of the groupchat. */
-        document.getElementsByClassName('room-description').innerHTML = u.addHyperlinks(xss__WEBPACK_IMPORTED_MODULE_28___default.a.filterXSS(_.get(this.model.get('subject'), 'text'), {
+        document.getElementsByClassName('room-description').innerHTML = u.addHyperlinks(xss__WEBPACK_IMPORTED_MODULE_29___default.a.filterXSS(_.get(this.model.get('subject'), 'text'), {
           'whiteList': {}
         })); //this.el.querySelector('.chat-head-chatroom').innerHTML = this.generateHeadingHTML();
       },
@@ -53997,6 +54003,7 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
             'show_send_button': _converse.show_send_button
           }));
           container_el.insertAdjacentElement('beforeend', this.occupantsview.el);
+          container_el.insertAdjacentElement('beforeend', this.conferenceoccupantsview.el);
           this.content = this.el.querySelector('.chat-content');
           this.toggleOccupants(null, false);
         }
@@ -54058,6 +54065,9 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
          */
         this.model.occupants.chatroomview = this;
         this.occupantsview = new _converse.ChatRoomOccupantsView({
+          'model': this.model.occupants
+        });
+        this.conferenceoccupantsview = new _converse.ChatRoomConferenceOccupantsView({
           'model': this.model.occupants
         });
         return this;
@@ -54122,7 +54132,7 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
           'info_close': __('Close and leave this groupchat'),
           'info_configure': __('Configure this groupchat'),
           'info_details': __('Show more details about this groupchat'),
-          'description': u.addHyperlinks(xss__WEBPACK_IMPORTED_MODULE_28___default.a.filterXSS(_.get(this.model.get('subject'), 'text'), {
+          'description': u.addHyperlinks(xss__WEBPACK_IMPORTED_MODULE_29___default.a.filterXSS(_.get(this.model.get('subject'), 'text'), {
             'whiteList': {}
           }))
         }));
@@ -54168,7 +54178,9 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
       getToolbarOptions() {
         return _.extend(_converse.ChatBoxView.prototype.getToolbarOptions.apply(this, arguments), {
           'label_hide_occupants': __('Hide the list of participants'),
-          'show_occupants_toggle': this.is_chatroom && _converse.visible_toolbar_buttons.toggle_occupants
+          'show_occupants_toggle': this.is_chatroom && _converse.visible_toolbar_buttons.toggle_occupants,
+          'label_hide_conference_occupants': __('Hide the list of conference'),
+          'show_conference_occupants_toggle': this.is_chatroom && _converse.visible_toolbar_buttons.toggle_conference_occupants
         });
       },
 
@@ -54246,6 +54258,10 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
 
         this.setOccupantsVisibility();
         this.scrollDown();
+      },
+
+      toggleConference() {
+        console.log('toggle conference');
       },
 
       onOccupantClicked(ev) {
@@ -54695,7 +54711,7 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
           nick_el.classList.remove('error');
         }
 
-        this.el.querySelector('.chatroom-form-container').outerHTML = templates_spinner_html__WEBPACK_IMPORTED_MODULE_27___default()();
+        this.el.querySelector('.chatroom-form-container').outerHTML = templates_spinner_html__WEBPACK_IMPORTED_MODULE_28___default()();
         this.join(nick);
       },
 
@@ -54992,7 +55008,7 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
         }
 
         _.each(notification.messages, message => {
-          this.content.insertAdjacentHTML('beforeend', templates_info_html__WEBPACK_IMPORTED_MODULE_20___default()({
+          this.content.insertAdjacentHTML('beforeend', templates_info_html__WEBPACK_IMPORTED_MODULE_21___default()({
             'isodate': moment().format(),
             'extra_classes': 'chat-event',
             'message': message
@@ -55084,7 +55100,7 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
             'message': message
           };
           this.content.removeChild(prev_info_el);
-          this.content.insertAdjacentHTML('beforeend', templates_info_html__WEBPACK_IMPORTED_MODULE_20___default()(data));
+          this.content.insertAdjacentHTML('beforeend', templates_info_html__WEBPACK_IMPORTED_MODULE_21___default()(data));
           const el = this.content.lastElementChild;
           setTimeout(() => u.addClass('fade-out', el), 5000);
           setTimeout(() => el.parentElement && el.parentElement.removeChild(el), 5500);
@@ -55107,9 +55123,9 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
 
           if (prev_info_el) {
             this.content.removeChild(prev_info_el);
-            this.content.insertAdjacentHTML('beforeend', templates_info_html__WEBPACK_IMPORTED_MODULE_20___default()(data));
+            this.content.insertAdjacentHTML('beforeend', templates_info_html__WEBPACK_IMPORTED_MODULE_21___default()(data));
           } else {
-            this.content.insertAdjacentHTML('beforeend', templates_info_html__WEBPACK_IMPORTED_MODULE_20___default()(data));
+            this.content.insertAdjacentHTML('beforeend', templates_info_html__WEBPACK_IMPORTED_MODULE_21___default()(data));
             this.insertDayIndicator(this.content.lastElementChild);
           }
         }
@@ -55144,7 +55160,7 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
             'message': message
           };
           this.content.removeChild(prev_info_el);
-          this.content.insertAdjacentHTML('beforeend', templates_info_html__WEBPACK_IMPORTED_MODULE_20___default()(data));
+          this.content.insertAdjacentHTML('beforeend', templates_info_html__WEBPACK_IMPORTED_MODULE_21___default()(data));
           const el = this.content.lastElementChild;
           setTimeout(() => u.addClass('fade-out', el), 5000);
           setTimeout(() => el.parentElement && el.parentElement.removeChild(el), 5500);
@@ -55167,9 +55183,9 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
 
           if (prev_info_el) {
             this.content.removeChild(prev_info_el);
-            this.content.insertAdjacentHTML('beforeend', templates_info_html__WEBPACK_IMPORTED_MODULE_20___default()(data));
+            this.content.insertAdjacentHTML('beforeend', templates_info_html__WEBPACK_IMPORTED_MODULE_21___default()(data));
           } else {
-            this.content.insertAdjacentHTML('beforeend', templates_info_html__WEBPACK_IMPORTED_MODULE_20___default()(data));
+            this.content.insertAdjacentHTML('beforeend', templates_info_html__WEBPACK_IMPORTED_MODULE_21___default()(data));
             this.insertDayIndicator(this.content.lastElementChild);
           }
         }
@@ -55258,7 +55274,7 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
         u.removeElement(this.el.querySelector('.spinner'));
         const container_el = this.el.querySelector('.chatroom-body');
         const children = Array.prototype.slice.call(container_el.children, 0);
-        container_el.insertAdjacentHTML('afterbegin', templates_spinner_html__WEBPACK_IMPORTED_MODULE_27___default()());
+        container_el.insertAdjacentHTML('afterbegin', templates_spinner_html__WEBPACK_IMPORTED_MODULE_28___default()());
 
         _.each(children, u.hideElement);
       },
@@ -55285,17 +55301,17 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
         const subject = this.model.get('subject'),
               message = subject.text ? __('Topic set by %1$s', subject.author) : __('Topic cleared by %1$s', subject.author),
               date = moment().format();
-        this.content.insertAdjacentHTML('beforeend', templates_info_html__WEBPACK_IMPORTED_MODULE_20___default()({
+        this.content.insertAdjacentHTML('beforeend', templates_info_html__WEBPACK_IMPORTED_MODULE_21___default()({
           'isodate': date,
           'extra_classes': 'chat-event',
           'message': message
         }));
 
         if (subject.text) {
-          this.content.insertAdjacentHTML('beforeend', templates_info_html__WEBPACK_IMPORTED_MODULE_20___default()({
+          this.content.insertAdjacentHTML('beforeend', templates_info_html__WEBPACK_IMPORTED_MODULE_21___default()({
             'isodate': date,
             'extra_classes': 'chat-topic',
-            'message': u.addHyperlinks(xss__WEBPACK_IMPORTED_MODULE_28___default.a.filterXSS(_.get(this.model.get('subject'), 'text'), {
+            'message': u.addHyperlinks(xss__WEBPACK_IMPORTED_MODULE_29___default.a.filterXSS(_.get(this.model.get('subject'), 'text'), {
               'whiteList': {}
             })),
             'render_message': true
@@ -55319,7 +55335,7 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
       },
 
       render() {
-        this.el.innerHTML = templates_room_panel_html__WEBPACK_IMPORTED_MODULE_25___default()({
+        this.el.innerHTML = templates_room_panel_html__WEBPACK_IMPORTED_MODULE_26___default()({
           'heading_chatrooms': __('Channels'),
           'title_new_room': __('Add a new groupchat'),
           'title_list_rooms': __('Query for groupchats')
@@ -55357,7 +55373,38 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
 
       toHTML() {
         const show = this.model.get('show');
-        return templates_occupant_html__WEBPACK_IMPORTED_MODULE_22___default()(_.extend({
+        return templates_occupant_html__WEBPACK_IMPORTED_MODULE_23___default()(_.extend({
+          '_': _,
+          'jid': '',
+          'show': show,
+          'hint_show': _converse.PRETTY_CHAT_STATUS[show],
+          'hint_occupant': __('Click to mention %1$s in your message.', this.model.get('nick')),
+          'desc_moderator': __('This user is a moderator.'),
+          'desc_participant': __('This user can send messages in this groupchat.'),
+          'desc_visitor': __('This user can NOT send messages in this groupchat.'),
+          'label_moderator': __('Moderator'),
+          'label_visitor': __('Visitor'),
+          'label_owner': __('Owner'),
+          'label_member': __('Member'),
+          'label_admin': __('Admin')
+        }, this.model.toJSON()));
+      },
+
+      destroy() {
+        this.el.parentElement.removeChild(this.el);
+      }
+
+    });
+    _converse.ChatRoomConferenceOccupantView = Backbone.VDOMView.extend({
+      tagName: 'li',
+
+      initialize() {
+        this.model.on('change', this.render, this);
+      },
+
+      toHTML() {
+        const show = this.model.get('show');
+        return templates_occupant_html__WEBPACK_IMPORTED_MODULE_23___default()(_.extend({
           '_': _,
           'jid': '',
           'show': show,
@@ -55452,6 +55499,159 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
       setOccupantsHeight() {
         const el = this.el.querySelector('.chatroom-features');
         this.el.querySelector('.occupant-list').style.cssText = `height: calc(100% - ${el.offsetHeight}px - 5em);`;
+      },
+
+      promptForInvite(suggestion) {
+        let reason = '';
+
+        if (!_converse.auto_join_on_invite) {
+          reason = prompt(__('You are about to invite %1$s to the groupchat "%2$s". ' + 'You may optionally include a message, explaining the reason for the invitation.', suggestion.text.label, this.model.get('id')));
+        }
+
+        if (reason !== null) {
+          this.chatroomview.model.directInvite(suggestion.text.value, reason);
+        }
+
+        const form = this.el.querySelector('.room-invite form'),
+              input = form.querySelector('.invited-contact'),
+              error = form.querySelector('.error');
+
+        if (!_.isNull(error)) {
+          error.parentNode.removeChild(error);
+        }
+
+        input.value = '';
+      },
+
+      inviteFormSubmitted(evt) {
+        evt.preventDefault();
+        const el = evt.target.querySelector('input.invited-contact'),
+              jid = el.value;
+
+        if (!jid || _.compact(jid.split('@')).length < 2) {
+          evt.target.outerHTML = templates_chatroom_invite_html__WEBPACK_IMPORTED_MODULE_16___default()({
+            'error_message': __('Please enter a valid XMPP address'),
+            'label_invitation': __('Invite')
+          });
+          this.initInviteWidget();
+          return;
+        }
+
+        this.promptForInvite({
+          'target': el,
+          'text': {
+            'label': jid,
+            'value': jid
+          }
+        });
+      },
+
+      shouldInviteWidgetBeShown() {
+        return _converse.allow_muc_invitations && (this.chatroomview.model.features.get('open') || this.chatroomview.model.get('affiliation') === "owner");
+      },
+
+      initInviteWidget() {
+        const form = this.el.querySelector('.room-invite form');
+
+        if (_.isNull(form)) {
+          return;
+        }
+
+        form.addEventListener('submit', this.inviteFormSubmitted.bind(this), false);
+
+        const list = _converse.roster.map(i => ({
+          'label': i.get('fullname') || i.get('jid'),
+          'value': i.get('jid')
+        }));
+
+        const el = this.el.querySelector('.suggestion-box').parentElement;
+
+        if (this.invite_auto_complete) {
+          this.invite_auto_complete.destroy();
+        }
+
+        this.invite_auto_complete = new _converse.AutoComplete(el, {
+          'min_chars': 1,
+          'list': list
+        });
+        this.invite_auto_complete.on('suggestion-box-selectcomplete', ev => this.promptForInvite(ev));
+        this.invite_auto_complete.ul.setAttribute('style', `max-height: calc(${this.el.offsetHeight}px - 80px);`);
+      }
+
+    });
+    _converse.ChatRoomConferenceOccupantsView = Backbone.OrderedListView.extend({
+      tagName: 'div',
+      className: 'conference-occupants col-md-3 col-4',
+      listItems: 'model',
+      sortEvent: 'change:role',
+      listSelector: '.conference-occupant-list',
+      ItemView: _converse.ChatRoomConferenceOccupantView,
+
+      initialize() {
+        Backbone.OrderedListView.prototype.initialize.apply(this, arguments);
+        this.chatroomview = this.model.chatroomview;
+        this.chatroomview.model.on('change:affiliation', this.renderInviteWidget, this);
+        this.chatroomview.model.features.on('change:open', this.renderInviteWidget, this);
+        this.chatroomview.model.features.on('change', this.renderRoomFeatures, this);
+        this.render();
+        this.model.fetch({
+          'add': true,
+          'silent': true,
+          'success': this.sortAndPositionAllItems.bind(this)
+        });
+      },
+
+      render() {
+        this.el.innerHTML = templates_chatroom_conference_html__WEBPACK_IMPORTED_MODULE_20___default()(_.extend(this.chatroomview.model.toJSON(), {
+          'allow_muc_invitations': _converse.allow_muc_invitations,
+          'label_conference_occupants': __('Participants')
+        }));
+
+        if (_converse.allow_muc_invitations) {
+          _converse.api.waitUntil('rosterContactsFetched').then(() => this.renderInviteWidget());
+        }
+
+        return this.renderRoomFeatures();
+      },
+
+      renderInviteWidget() {
+        const widget = this.el.querySelector('.room-invite');
+
+        if (this.shouldInviteWidgetBeShown()) {
+          if (_.isNull(widget)) {
+            const heading = this.el.querySelector('.conference-occupants-heading');
+            heading.insertAdjacentHTML('afterend', templates_chatroom_invite_html__WEBPACK_IMPORTED_MODULE_16___default()({
+              'error_message': null,
+              'label_invitation': __('Invite')
+            }));
+            this.initInviteWidget();
+          }
+        } else if (!_.isNull(widget)) {
+          widget.remove();
+        }
+
+        return this;
+      },
+
+      renderRoomFeatures() {
+        const features = this.chatroomview.model.features,
+              picks = _.pick(features.attributes, _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].ROOM_FEATURES),
+              iteratee = (a, v) => a || v;
+
+        if (_.reduce(_.values(picks), iteratee)) {
+          const el = this.el.querySelector('.chatroom-features');
+          el.innerHTML = templates_chatroom_features_html__WEBPACK_IMPORTED_MODULE_13___default()(_.extend(features.toJSON(), {
+            __
+          }));
+          this.setOccupantsHeight();
+        }
+
+        return this;
+      },
+
+      setOccupantsHeight() {
+        const el = this.el.querySelector('.chatroom-features');
+        this.el.querySelector('.conference-occupant-list').style.cssText = `height: calc(100% - ${el.offsetHeight}px - 5em);`;
       },
 
       promptForInvite(suggestion) {
@@ -93268,6 +93468,24 @@ return __p
 
 /***/ }),
 
+/***/ "./src/templates/chatroom_conference.html":
+/*!************************************************!*\
+  !*** ./src/templates/chatroom_conference.html ***!
+  \************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+var _ = {escape:__webpack_require__(/*! ./node_modules/lodash/escape.js */ "./node_modules/lodash/escape.js")};
+module.exports = function(o) {
+var __t, __p = '', __e = _.escape;
+__p += '<!-- src/templates/chatroom_conference.html -->\n<!-- <div class="occupants"> -->\n  <div class="conference-occupants-header">\n    <i class="hide-conference-occupants fa fa-times"></i>\n    <p class="conference-occupants-heading">' +
+__e(o.label_conference_occupants) +
+'</p>\n</div>\n<ul class="conference-occupant-list"></ul>\n<div class="chatroom-features"></div>\n<!-- </div> -->\n';
+return __p
+};
+
+/***/ }),
+
 /***/ "./src/templates/chatroom_destroyed.html":
 /*!***********************************************!*\
   !*** ./src/templates/chatroom_destroyed.html ***!
@@ -95824,6 +96042,18 @@ __p += ' fa-angle-double-right ';
  } ;
 __p += '"\n    title="' +
 __e(o.label_hide_occupants) +
+'"></li>\n';
+ } ;
+__p += '\n';
+ if (o.show_conference_occupants_toggle)  { ;
+__p += '\n<li class="toggle-conference-occupants fa ';
+ if (o.hidden_conference_occupants)  { ;
+__p += ' fa-microphone-alt-slash ';
+ } else { ;
+__p += ' fa-microphone-alt ';
+ } ;
+__p += '"\n    title="' +
+__e(o.label_hide_conference_occupants) +
 '"></li>\n';
  } ;
 __p += '\n';
