@@ -26,8 +26,6 @@ import tpl_chatroom_invite from "templates/chatroom_invite.html";
 import tpl_chatroom_nickname_form from "templates/chatroom_nickname_form.html";
 import tpl_chatroom_password_form from "templates/chatroom_password_form.html";
 import tpl_chatroom_sidebar from "templates/chatroom_sidebar.html";
-// eslint-disable-next-line sort-imports
-import tpl_chatroom_conference from "templates/chatroom_conference.html";
 import tpl_info from "templates/info.html";
 import tpl_list_chatrooms_modal from "templates/list_chatrooms_modal.html";
 import tpl_occupant from "templates/occupant.html";
@@ -533,7 +531,6 @@ converse.plugins.add('converse-muc-views', {
                 'drop .chat-textarea': 'onDrop',
                 'click .top-toolbar-video-cal': 'videoCall',
                 'click .top-toolbar-file-attach': 'toggleFileUpload',
-                'click .toggle-conference-occupants': 'toggleConference',
             },
 
             initialize () {
@@ -620,7 +617,6 @@ converse.plugins.add('converse-muc-views', {
                         'show_send_button': _converse.show_send_button,
                     }));
                     container_el.insertAdjacentElement('beforeend', this.occupantsview.el);
-                    container_el.insertAdjacentElement('beforeend', this.conferenceoccupantsview.el);
                     this.content = this.el.querySelector('.chat-content');
                     this.toggleOccupants(null, false);
                 }
@@ -672,7 +668,6 @@ converse.plugins.add('converse-muc-views', {
                  */
                 this.model.occupants.chatroomview = this;
                 this.occupantsview = new _converse.ChatRoomOccupantsView({'model': this.model.occupants});
-                this.conferenceoccupantsview = new _converse.ChatRoomConferenceOccupantsView({'model': this.model.occupants});
                 return this;
             },
 
@@ -815,29 +810,6 @@ converse.plugins.add('converse-muc-views', {
                 }
                 this.occupantsview.setOccupantsHeight();
             },
-            setConferenceOccupantsVisibility () {
-                const icon_el = this.el.querySelector('.toggle-conference-occupants');
-                if (this.model.get('hidden_conference_occupants')) {
-                    u.removeClass('fa-microphone-alt', icon_el);
-                    u.addClass('fa-microphone-alt-slash', icon_el);
-                    const chat_area = this.el.querySelector('.chat-area');
-                    u.removeClass('col-md-9', chat_area);
-                    u.removeClass('col-8', chat_area);
-                    u.addClass('full', chat_area);
-                    u.addClass('col-12', chat_area);
-                    u.hideElement(this.el.querySelector('.conference-occupants'));
-                } else {
-                    const chat_area = this.el.querySelector('.chat-area');
-                    u.addClass('fa-microphone-alt', icon_el);
-                    u.removeClass('fa-microphone-alt-slash', icon_el);
-                    u.removeClass('hidden', this.el.querySelector('.conference-occupants'));
-                    u.removeClass('full', chat_area);
-                    u.removeClass('col-12', chat_area);
-                    u.addClass('col-md-9', chat_area);
-                    u.addClass('col-8', chat_area);
-                }
-                this.conferenceoccupantsview.setConferenceOccupantsHeight();
-            },
 
             hideOccupants (ev, preserve_state) {
                 /* Show or hide the right sidebar containing the chat
@@ -849,18 +821,6 @@ converse.plugins.add('converse-muc-views', {
                 }
                 this.model.save({'hidden_occupants': true});
                 this.setOccupantsVisibility();
-                this.scrollDown();
-            },
-            hideConferenceOccupants (ev, preserve_state) {
-                /* Show or hide the right sidebar containing the chat
-                 * occupants (and the invite widget).
-                 */
-                if (ev) {
-                    ev.preventDefault();
-                    ev.stopPropagation();
-                }
-                this.model.save({'hidden_conference_occupants': true});
-                this.setConferenceOccupantsVisibility();
                 this.scrollDown();
             },
 
@@ -876,18 +836,6 @@ converse.plugins.add('converse-muc-views', {
                     this.model.set({'hidden_occupants': !this.model.get('hidden_occupants')});
                 }
                 this.setOccupantsVisibility();
-                this.scrollDown();
-            },
-            toggleConference(ev, preserve_state){
-                console.log('toggle conference')
-                if (ev) {
-                    ev.preventDefault();
-                    ev.stopPropagation();
-                }
-                if (!preserve_state) {
-                    this.model.set({'hidden_conference_occupants': !this.model.get('hidden_conference_occupants')});
-                }
-                this.setConferenceOccupantsVisibility();
                 this.scrollDown();
             },
 
@@ -1951,39 +1899,6 @@ converse.plugins.add('converse-muc-views', {
                 this.el.parentElement.removeChild(this.el);
             }
         });
-        _converse.ChatRoomConferenceOccupantView = Backbone.VDOMView.extend({
-            tagName: 'li',
-            initialize () {
-                this.model.on('change', this.render, this);
-            },
-
-            toHTML () {
-                const show = this.model.get('show');
-                return tpl_occupant(
-                    _.extend(
-                        { '_': _,
-                          'jid': '',
-                          'show': show,
-                          'hint_show': _converse.PRETTY_CHAT_STATUS[show],
-                          'hint_occupant': __('Click to mention %1$s in your message.', this.model.get('nick')),
-                          'desc_moderator': __('This user is a moderator.'),
-                          'desc_participant': __('This user can send messages in this groupchat.'),
-                          'desc_visitor': __('This user can NOT send messages in this groupchat.'),
-                          'label_moderator': __('Moderator'),
-                          'label_visitor': __('Visitor'),
-                          'label_owner': __('Owner'),
-                          'label_member': __('Member'),
-                          'label_admin': __('Admin')
-                        }, this.model.toJSON())
-                );
-            },
-
-            destroy () {
-                this.el.parentElement.removeChild(this.el);
-            }
-        });
-
-
         _converse.ChatRoomOccupantsView = Backbone.OrderedListView.extend({
             tagName: 'div',
             className: 'occupants col-md-3 col-4',
@@ -2133,156 +2048,6 @@ converse.plugins.add('converse-muc-views', {
                 );
             }
         });
-        _converse.ChatRoomConferenceOccupantsView = Backbone.OrderedListView.extend({
-            tagName: 'div',
-            className: 'conference-occupants col-md-3 col-4',
-            listItems: 'model',
-            sortEvent: 'change:role',
-            listSelector: '.conference-occupant-list',
-
-            ItemView: _converse.ChatRoomConferenceOccupantView,
-
-            initialize () {
-                Backbone.OrderedListView.prototype.initialize.apply(this, arguments);
-
-                this.chatroomview = this.model.chatroomview;
-                this.chatroomview.model.on('change:affiliation', this.renderInviteWidget, this);
-                this.chatroomview.model.features.on('change:open', this.renderInviteWidget, this);
-                this.chatroomview.model.features.on('change', this.renderRoomFeatures, this);
-
-                this.render();
-                this.model.fetch({
-                    'add': true,
-                    'silent': true,
-                    'success': this.sortAndPositionAllItems.bind(this)
-                });
-            },
-
-            render () {
-                this.el.innerHTML = tpl_chatroom_conference(
-                    _.extend(this.chatroomview.model.toJSON(), {
-                        'allow_muc_invitations': _converse.allow_muc_invitations,
-                        'label_conference_occupants': __('Participants')
-                    })
-                );
-                if (_converse.allow_muc_invitations) {
-                    _converse.api.waitUntil('rosterContactsFetched').then(() => this.renderInviteWidget());
-                }
-                return this.renderRoomFeatures();
-            },
-            renderInviteWidget () {
-                const widget = this.el.querySelector('.room-invite');
-                if (this.shouldInviteWidgetBeShown()) {
-                    if (_.isNull(widget)) {
-                        const heading = this.el.querySelector('.conference-occupants-heading');
-                        heading.insertAdjacentHTML(
-                            'afterend',
-                            tpl_chatroom_invite({
-                                'error_message': null,
-                                'label_invitation': __('Invite'),
-                            })
-                        );
-                        this.initInviteWidget();
-                    }
-                } else if (!_.isNull(widget)) {
-                    widget.remove();
-                }
-                return this;
-            },
-
-            renderRoomFeatures () {
-                const features = this.chatroomview.model.features,
-                      picks = _.pick(features.attributes, converse.ROOM_FEATURES),
-                      iteratee = (a, v) => a || v;
-
-                if (_.reduce(_.values(picks), iteratee)) {
-                    const el = this.el.querySelector('.chatroom-features');
-                    el.innerHTML = tpl_chatroom_features(_.extend(features.toJSON(), {__}));
-                    this.setConferenceOccupantsHeight();
-                }
-                return this;
-            },
-
-            setConferenceOccupantsHeight () {
-                const el = this.el.querySelector('.chatroom-features');
-                this.el.querySelector('.conference-occupant-list').style.cssText =
-                    `height: calc(100% - ${el.offsetHeight}px - 5em);`;
-            },
-
-
-            promptForInvite (suggestion) {
-                let reason = '';
-                if (!_converse.auto_join_on_invite) {
-                    reason = prompt(
-                        __('You are about to invite %1$s to the groupchat "%2$s". '+
-                           'You may optionally include a message, explaining the reason for the invitation.',
-                           suggestion.text.label, this.model.get('id'))
-                    );
-                }
-                if (reason !== null) {
-                    this.chatroomview.model.directInvite(suggestion.text.value, reason);
-                }
-                const form = this.el.querySelector('.room-invite form'),
-                      input = form.querySelector('.invited-contact'),
-                      error = form.querySelector('.error');
-                if (!_.isNull(error)) {
-                    error.parentNode.removeChild(error);
-                }
-                input.value = '';
-            },
-
-            inviteFormSubmitted (evt) {
-                evt.preventDefault();
-                const el = evt.target.querySelector('input.invited-contact'),
-                      jid = el.value;
-                if (!jid || _.compact(jid.split('@')).length < 2) {
-                    evt.target.outerHTML = tpl_chatroom_invite({
-                        'error_message': __('Please enter a valid XMPP address'),
-                        'label_invitation': __('Invite'),
-                    });
-                    this.initInviteWidget();
-                    return;
-                }
-                this.promptForInvite({
-                    'target': el,
-                    'text': {
-                        'label': jid,
-                        'value': jid
-                    }});
-            },
-
-            shouldInviteWidgetBeShown () {
-                return _converse.allow_muc_invitations &&
-                    (this.chatroomview.model.features.get('open') ||
-                        this.chatroomview.model.get('affiliation') === "owner"
-                    );
-            },
-
-            initInviteWidget () {
-                const form = this.el.querySelector('.room-invite form');
-                if (_.isNull(form)) {
-                    return;
-                }
-                form.addEventListener('submit', this.inviteFormSubmitted.bind(this), false);
-                const list = _converse.roster.map(i => ({'label': i.get('fullname') || i.get('jid'), 'value': i.get('jid')}));
-                const el = this.el.querySelector('.suggestion-box').parentElement;
-
-                if (this.invite_auto_complete) {
-                    this.invite_auto_complete.destroy();
-                }
-                this.invite_auto_complete = new _converse.AutoComplete(el, {
-                    'min_chars': 1,
-                    'list': list
-                });
-                this.invite_auto_complete.on('suggestion-box-selectcomplete', ev => this.promptForInvite(ev));
-                this.invite_auto_complete.ul.setAttribute(
-                    'style',
-                    `max-height: calc(${this.el.offsetHeight}px - 80px);`
-                );
-            }
-
-        });
-
 
         function setMUCDomain (domain, controlboxview) {
             controlboxview.roomspanel.model.save('muc_domain', Strophe.getDomainFromJid(domain));
