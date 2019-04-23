@@ -161,6 +161,7 @@ function convert (unicode) {
 }
 
 u.isSingleEmoji = function (str) {
+
     if (!str || (str.length > 2 && !str.startsWith(':'))) {
         return;
     }
@@ -169,6 +170,7 @@ u.isSingleEmoji = function (str) {
 }
 
 u.shortnameToUnicode = function (str) {
+
     /* will output unicode from shortname
      * useful for sending emojis back to mobile devices
      */

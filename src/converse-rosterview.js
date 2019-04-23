@@ -229,6 +229,8 @@ converse.plugins.add('converse-rosterview', {
             afterSubmission (form, jid, name) {
                 _converse.roster.addAndSubscribe(jid, name);
                 this.model.clear();
+                const input_el = this.el.querySelector('input[name="jid"]');
+                input_el.value = '';
                 this.modal.hide();
             },
 

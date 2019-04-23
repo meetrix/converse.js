@@ -40756,6 +40756,7 @@ _converse_core__WEBPACK_IMPORTED_MODULE_2__["default"].plugins.add('converse-cha
         const is_spoiler = this.get('composing_spoiler'),
               origin_id = _converse.connection.getUniqueId();
 
+        console.log('string1', text);
         return {
           'jid': this.get('jid'),
           'nickname': this.get('nickname'),

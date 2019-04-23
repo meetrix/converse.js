@@ -59521,6 +59521,8 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_4__["default"].plugins
         _converse.roster.addAndSubscribe(jid, name);
 
         this.model.clear();
+        const input_el = this.el.querySelector('input[name="jid"]');
+        input_el.value = '';
         this.modal.hide();
       },
 
@@ -62401,6 +62403,7 @@ _converse_core__WEBPACK_IMPORTED_MODULE_2__["default"].plugins.add('converse-cha
         const is_spoiler = this.get('composing_spoiler'),
               origin_id = _converse.connection.getUniqueId();
 
+        console.log('string1', text);
         return {
           'jid': this.get('jid'),
           'nickname': this.get('nickname'),

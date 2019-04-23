@@ -498,7 +498,7 @@ converse.plugins.add('converse-chatboxes', {
             getOutgoingMessageAttributes (text, spoiler_hint) {
                 const is_spoiler = this.get('composing_spoiler'),
                       origin_id = _converse.connection.getUniqueId();
-
+                      console.log('string1',text)
                 return {
                     'jid': this.get('jid'),
                     'nickname': this.get('nickname'),
