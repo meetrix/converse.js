@@ -92741,7 +92741,7 @@ var __t, __p = '', __e = _.escape, __j = Array.prototype.join;
 function print() { __p += __j.call(arguments, '') }
 __p += '<!-- src/templates/add_chatroom_modal.html -->\n<div class="modal fade" id="add-chatroom-modal" tabindex="-1" role="dialog" aria-labelledby="add-chatroom-modal-label" aria-hidden="true">\n    <div class="modal-dialog" role="document">\n        <div class="modal-content">\n            <div class="modal-header">\n                <h5 class="modal-title"\n                    id="add-chatroom-modal-label">' +
 __e(o.__('Create New Channel')) +
-'</h5>\n                <button type="button" class="close" data-dismiss="modal" aria-label="Close">\n                    <span aria-hidden="true">×</span>\n                </button>\n            </div>\n            <div class="modal-body">\n                <form class="converse-form add-chatroom">\n                    <div class="form-group">\n                        <label for="chatroom">' +
+'</h5>\n                <button type="button" class="close" data-dismiss="modal" aria-label="Close">\n                    <span aria-hidden="true">X</span>\n                </button>\n            </div>\n            <div class="modal-body">\n                <form class="converse-form add-chatroom">\n                    <div class="form-group">\n                        <label for="chatroom">' +
 __e(o.label_room_address) +
 ':</label>\n                        <input type="text" required="required" name="chatroom" class="form-control" placeholder="' +
 __e(o.chatroom_placeholder) +
@@ -92776,7 +92776,7 @@ var __t, __p = '', __e = _.escape, __j = Array.prototype.join;
 function print() { __p += __j.call(arguments, '') }
 __p += '<!-- src/templates/add_contact_modal.html -->\n<!-- Add contact Modal -->\n<div class="modal fade" id="add-contact-modal" tabindex="-1" role="dialog" aria-labelledby="addContactModalLabel" aria-hidden="true">\n    <div class="modal-dialog" role="document">\n        <div class="modal-content">\n            <div class="modal-header">\n                <h5 class="modal-title" id="addContactModalLabel">' +
 __e(o.heading_new_contact) +
-'</h5>\n                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>\n            </div>\n            <form class="converse-form add-xmpp-contact">\n                <div class="modal-body">\n                    <div class="form-group add-xmpp-contact__jid">\n                        <label class="clearfix" for="jid">' +
+'</h5>\n                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">X</span></button>\n            </div>\n            <form class="converse-form add-xmpp-contact">\n                <div class="modal-body">\n                    <div class="form-group add-xmpp-contact__jid">\n                        <label class="clearfix" for="jid">' +
 __e(o.label_xmpp_address) +
 ':</label>\n                        <div class="suggestion-box suggestion-box__jid">\n                            <ul class="suggestion-box__results suggestion-box__results--above" hidden=""></ul>\n                            <input type="text" name="jid"\n                                   ';
  if (!o._converse.xhr_user_search_url) { ;
@@ -92837,7 +92837,7 @@ __p += '<!-- src/templates/alert_modal.html -->\n<div class="modal" tabindex="-1
 __e(o.type) +
 '">\n        <h5 class="modal-title">' +
 __e(o.title) +
-'</h5>\n        <button type="button" class="close" data-dismiss="modal" aria-label="Close">\n          <span aria-hidden="true">×</span>\n        </button>\n      </div>\n      <div class="modal-body">';
+'</h5>\n        <button type="button" class="close" data-dismiss="modal" aria-label="Close">\n          <span aria-hidden="true">X</span>\n        </button>\n      </div>\n      <div class="modal-body">';
 o.messages.forEach(function (message) { ;
 __p += '\n          <p>' +
 __e(message) +
@@ -93793,7 +93793,7 @@ __p += '<!-- src/templates/client_info_modal.html -->\n<!-- Change status Modal 
 __e(o.modal_title) +
 '</h5>\n                <button type="button" class="close" data-dismiss="modal" aria-label="' +
 __e(o.label_close) +
-'">\n                    <span aria-hidden="true">×</span>\n                </button>\n            </div>\n            <!-- <div class="modal-body">\n                <div class="container brand-heading-container">\n                    <h6 class="brand-heading">Converse</h6>\n                    <p class="brand-subtitle">' +
+'">\n                    <span aria-hidden="true">X</span>\n                </button>\n            </div>\n            <!-- <div class="modal-body">\n                <div class="container brand-heading-container">\n                    <h6 class="brand-heading">Converse</h6>\n                    <p class="brand-subtitle">' +
 __e(o.version_name) +
 '</p>\n                    <p class="brand-subtitle">' +
 ((__t = (o.first_subtitle)) == null ? '' : __t) +
@@ -94433,7 +94433,7 @@ var __t, __p = '', __e = _.escape, __j = Array.prototype.join;
 function print() { __p += __j.call(arguments, '') }
 __p += '<!-- src/templates/list_chatrooms_modal.html -->\n<div class="modal fade" id="list-chatrooms-modal" tabindex="-1" role="dialog" aria-labelledby="list-chatrooms-modal-label" aria-hidden="true">\n    <div class="modal-dialog" role="document">\n        <div class="modal-content">\n            <div class="modal-header">\n                <h5 class="modal-title"\n                    id="list-chatrooms-modal-label">' +
 __e(o.heading_list_chatrooms) +
-'</h5>\n                <button type="button" class="close" data-dismiss="modal" aria-label="Close">\n                    <span aria-hidden="true">×</span>\n                </button>\n            </div>\n            <div class="modal-body d-flex flex-column">\n                ';
+'</h5>\n                <button type="button" class="close" data-dismiss="modal" aria-label="Close">\n                    <span aria-hidden="true">X</span>\n                </button>\n            </div>\n            <div class="modal-body d-flex flex-column">\n                ';
  if (o.show_form) { ;
 __p += '\n                <form class="converse-form list-chatrooms">\n                    <div class="form-group">\n                        <label for="chatroom">' +
 __e(o.label_server_address) +
@@ -94672,7 +94672,7 @@ __p += '<!-- src/templates/message_versions_modal.html -->\n<div class="modal fa
 __e(o.__('Message versions')) +
 '</h4>\n                <button type="button" class="close" data-dismiss="modal" aria-label="' +
 __e(o.label_close) +
-'"><span aria-hidden="true">×</span></button>\n            </div>\n            <div class="modal-body">\n                <h4>Older versions</h4>\n                ';
+'"><span aria-hidden="true">X</span></button>\n            </div>\n            <div class="modal-body">\n                <h4>Older versions</h4>\n                ';
 o.older_versions.forEach(function (text) { ;
 __p += ' <p class="older-msg">' +
 __e(text) +
@@ -94849,7 +94849,7 @@ __p += '<!-- src/templates/profile_modal.html -->\n<div class="modal fade" id="u
 __e(o.heading_profile) +
 '</h5>\n                <button type="button" class="close" data-dismiss="modal" aria-label="' +
 __e(o.label_close) +
-'"><span aria-hidden="true">×</span></button>\n            </div>\n            <div class="modal-body">\n                ';
+'"><span aria-hidden="true">X</span></button>\n            </div>\n            <div class="modal-body">\n                ';
  if (o._converse.pluggable.plugins['converse-omemo'].enabled(o._converse)) { ;
 __p += '\n                <ul class="nav nav-pills justify-content-center">\n                    <li role="presentation" class="nav-item">\n                        <a class="nav-link active" id="profile-tab" href="#profile-tabpanel" aria-controls="profile-tabpanel" role="tab" data-toggle="tab">Profile</a>\n                    </li>\n                    <li role="presentation" class="nav-item">\n                        <a class="nav-link" id="omemo-tab" href="#omemo-tabpanel" aria-controls="omemo-tabpanel" role="tab" data-toggle="tab">OMEMO</a>\n                    </li>\n                </ul>\n                ';
  } ;
@@ -95926,7 +95926,7 @@ __p += '<!-- src/templates/user_details_modal.html -->\n<div class="modal fade" 
 __e(o.display_name) +
 '</h5>\n                <button type="button" class="close" data-dismiss="modal" aria-label="' +
 __e(o.__('Close')) +
-'"><span aria-hidden="true">×</span></button>\n            </div>\n            <div class="modal-body">\n                ';
+'"><span aria-hidden="true">X</span></button>\n            </div>\n            <div class="modal-body">\n                ';
  if (o.image) { ;
 __p += '\n                <img alt="' +
 __e(o.__('The User\'s Profile Image')) +
