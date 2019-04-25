@@ -346,8 +346,8 @@ converse.plugins.add('converse-rosterview', {
             },
 
             shouldBeVisible () {
-                return _converse.roster.length >= 5 || this.isActive();
-                //return true;
+                //not show 
+                return _converse.roster.length >= 999999 || this.isActive();
             },
 
             showOrHide () {

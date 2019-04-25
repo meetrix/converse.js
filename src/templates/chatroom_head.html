@@ -19,3 +19,39 @@
     {[ } ]}
     <a class="chatbox-btn show-room-details-modal fa fa-info-circle" title="{{{o.info_details}}}"></a>
 </div> -->
+<div class="chatbox-title">
+<div class="top-toolbar">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-sm-6 room-description">
+                    <div class="container-fluid">
+                        <div class="row channel-name">
+                            #{{{ o.Strophe.getNodeFromJid(o.jid) }}}
+                        </div>
+                        <div class="row channel-summary">
+                                <ul class="m-0 pl-0 d-block list-unstyled channel-info">
+                                <li class="favorite-star">
+                                    <span class="favorite"><i class="fas fa-star"></i></span>
+                                </li>
+                                <li class="favorite-user">
+                                    <span class="mr-1 ">{{o.occupants}}</span>
+                                    <i class="far fa-user"></i>
+                                </li>
+                                <li class="favorite-channel">
+                                    <span class="channel-desc ">{{o.room_description}}</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    </div>
+                <div class="col-sm-6 room-controls">
+                    <ul class="top-toolbar-menu">
+                        <li class="top-toolbar-file-attach">
+                            <i class="fa fa-paperclip"></i>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+      </div>
+    </div>

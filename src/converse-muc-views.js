@@ -15,6 +15,7 @@ import converse from "@converse/headless/converse-core";
 import muc_utils from "@converse/headless/utils/muc";
 import tpl_add_chatroom_modal from "templates/add_chatroom_modal.html";
 import tpl_chatarea from "templates/chatarea.html";
+import tpl_chatarea_toptoolbar from "templates/chatroom_toptoolbar.html";
 import tpl_chatroom from "templates/chatroom.html";
 import tpl_chatroom_destroyed from "templates/chatroom_destroyed.html";
 import tpl_chatroom_details_modal from "templates/chatroom_details_modal.html";
@@ -554,7 +555,8 @@ converse.plugins.add('converse-muc-views', {
                 this.model.occupants.on('change:show', this.showJoinOrLeaveNotification, this);
                 this.model.occupants.on('change:role', this.informOfOccupantsRoleChange, this);
                 this.model.occupants.on('change:affiliation', this.informOfOccupantsAffiliationChange, this);
-
+                this.model.occupants.on('add', this.renderHeading, this);
+                this.model.occupants.on('remove', this.renderHeading, this);
                 this.createEmojiPicker();
                 this.createOccupantsView();
                 this.render().insertIntoDOM();
@@ -591,7 +593,9 @@ converse.plugins.add('converse-muc-views', {
                 this.el.setAttribute('id', this.model.get('box_id'));
                 this.el.innerHTML = tpl_chatroom();
                 this.renderHeading();
+          
                 this.renderChatArea();
+                // this.renderTopToolBar();
                 this.renderMessageForm();
                 this.initMentionAutoComplete();
                 if (this.model.get('connection_status') !== converse.ROOMSTATUS.ENTERED) {
@@ -603,17 +607,23 @@ converse.plugins.add('converse-muc-views', {
             renderHeading () {
                 /* Render the heading UI of the groupchat. */
                 document.getElementsByClassName('room-description').innerHTML = u.addHyperlinks(xss.filterXSS(_.get(this.model.get('subject'), 'text'), {'whiteList': {}}))
-                 //this.el.querySelector('.chat-head-chatroom').innerHTML = this.generateHeadingHTML();
+                 this.el.querySelector('.chat-head-chatroom').innerHTML = this.generateHeadingHTML();
+
         
             },
-
+            renderTopToolBar(){
+                console.log('toptoolbar',this.el.querySelector('.top-toolbar'));
+                //this.el.querySelector('.top-toolbar').innerHTML = this.generateTopToolBarHTML();
+            },
             renderChatArea () {
                 /* Render the UI container in which groupchat messages will appear.
                  */
                 if (_.isNull(this.el.querySelector('.chat-area'))) {
                     const container_el = this.el.querySelector('.chatroom-body');
                     // console.log('description',u.addHyperlinks(xss.filterXSS(_.get(this.model.get('subject'), 'text'), {'whiteList': {}})));
-                    container_el.insertAdjacentHTML('beforeend', tpl_chatarea({
+                    container_el.insertAdjacentHTML('beforeend', tpl_chatarea( {
+                        '_converse': _converse,
+                        'Strophe': Strophe,
                         'show_send_button': _converse.show_send_button,
                     }));
                     container_el.insertAdjacentElement('beforeend', this.occupantsview.el);
@@ -667,6 +677,7 @@ converse.plugins.add('converse-muc-views', {
                 /* Create the ChatRoomOccupantsView Backbone.NativeView
                  */
                 this.model.occupants.chatroomview = this;
+               
                 this.occupantsview = new _converse.ChatRoomOccupantsView({'model': this.model.occupants});
                 return this;
             },
@@ -725,6 +736,19 @@ converse.plugins.add('converse-muc-views', {
                         'info_configure': __('Configure this groupchat'),
                         'info_details': __('Show more details about this groupchat'),
                         'description': u.addHyperlinks(xss.filterXSS(_.get(this.model.get('subject'), 'text'), {'whiteList': {}})),
+                        'room_description':this.model.description,
+                        'occupants':this.model.occupants.length
+                }));
+            },
+            generateTopToolBarHTML(){
+                return  tpl_chatarea_toptoolbar(_.extend(this.model.toJSON(), {
+                    '_converse': _converse,
+                    'Strophe': Strophe,
+                    'show_send_button': _converse.show_send_button,
+                    'info_close': __('Close and leave this groupchat'),
+                    'info_configure': __('Configure this groupchat'),
+                    'info_details': __('Show more details about this groupchat'),
+                    'occupants':this.model.occupants.length
                 }));
             },
 
