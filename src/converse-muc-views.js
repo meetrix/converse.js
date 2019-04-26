@@ -531,7 +531,6 @@ converse.plugins.add('converse-muc-views', {
                 'dragover .chat-textarea': 'onDragOver',
                 'drop .chat-textarea': 'onDrop',
                 'click .top-toolbar-video-cal': 'videoCall',
-                'click .top-toolbar-file-attach': 'toggleFileUpload',
             },
 
             initialize () {
@@ -595,7 +594,6 @@ converse.plugins.add('converse-muc-views', {
                 this.renderHeading();
           
                 this.renderChatArea();
-                // this.renderTopToolBar();
                 this.renderMessageForm();
                 this.initMentionAutoComplete();
                 if (this.model.get('connection_status') !== converse.ROOMSTATUS.ENTERED) {
@@ -610,10 +608,6 @@ converse.plugins.add('converse-muc-views', {
                  this.el.querySelector('.chat-head-chatroom').innerHTML = this.generateHeadingHTML();
 
         
-            },
-            renderTopToolBar(){
-                console.log('toptoolbar',this.el.querySelector('.top-toolbar'));
-                //this.el.querySelector('.top-toolbar').innerHTML = this.generateTopToolBarHTML();
             },
             renderChatArea () {
                 /* Render the UI container in which groupchat messages will appear.
