@@ -54129,6 +54129,7 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
       generateHeadingHTML() {
         /* Returns the heading HTML to be rendered.
          */
+        console.log('room description', this.model.get('description'));
         return templates_chatroom_head_html__WEBPACK_IMPORTED_MODULE_16___default()(_.extend(this.model.toJSON(), {
           '_converse': _converse,
           'Strophe': Strophe,
@@ -54138,7 +54139,7 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
           'description': u.addHyperlinks(xss__WEBPACK_IMPORTED_MODULE_29___default.a.filterXSS(_.get(this.model.get('subject'), 'text'), {
             'whiteList': {}
           })),
-          'room_description': this.model.description,
+          'room_description': this.model.get('description'),
           'occupants': this.model.occupants.length
         }));
       },
@@ -93701,7 +93702,7 @@ __e( o.Strophe.getNodeFromJid(o.jid) ) +
 '\n                        </div>\n                        <div class="row channel-summary">\n                                <ul class="m-0 pl-0 d-block list-unstyled channel-info">\n                                <li class="favorite-star">\n                                    <span class="favorite"><i class="fas fa-star"></i></span>\n                                </li>\n                                <li class="favorite-user">\n                                    <span class="mr-1 ">' +
 ((__t = (o.occupants)) == null ? '' : __t) +
 '</span>\n                                    <i class="far fa-user"></i>\n                                </li>\n                                <li class="favorite-channel">\n                                    <span class="channel-desc ">' +
-((__t = (o.room_description)) == null ? '' : __t) +
+__e(o.room_description) +
 '</span>\n                                </li>\n                            </ul>\n                        </div>\n                    </div>\n                    </div>\n                <div class="col-sm-6 room-controls">\n                    <ul class="top-toolbar-menu">\n                        <li class="top-toolbar-file-attach">\n                            <i class="fa fa-paperclip"></i>\n                        </li>\n                    </ul>\n                </div>\n            </div>\n        </div>\n      </div>\n    </div>';
 return __p
 };

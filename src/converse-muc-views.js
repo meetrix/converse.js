@@ -728,7 +728,9 @@ converse.plugins.add('converse-muc-views', {
             generateHeadingHTML () {
                 /* Returns the heading HTML to be rendered.
                  */
+                console.log('room description',this.model.get('description'));
                 return tpl_chatroom_head(
+                    
                     _.extend(this.model.toJSON(), {
                         '_converse': _converse,
                         'Strophe': Strophe,
@@ -736,7 +738,7 @@ converse.plugins.add('converse-muc-views', {
                         'info_configure': __('Configure this groupchat'),
                         'info_details': __('Show more details about this groupchat'),
                         'description': u.addHyperlinks(xss.filterXSS(_.get(this.model.get('subject'), 'text'), {'whiteList': {}})),
-                        'room_description':this.model.description,
+                        'room_description':this.model.get('description'),
                         'occupants':this.model.occupants.length
                 }));
             },
