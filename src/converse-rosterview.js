@@ -167,16 +167,18 @@ converse.plugins.add('converse-rosterview', {
                 xhr.onload = () => {
                     if (xhr.responseText) {
                         const r = xhr.responseText;
-                        this.name_auto_complete.list = JSON.parse(r).map(i => ({'label': i.fullname || i.jid, 'value': i.jid}));
+                        
+                        this.name_auto_complete.list = JSON.parse(r).users.map(i => ({'label': i.fullname || i.username, 'value': i.username}));
                         this.name_auto_complete.auto_completing = true;
                         this.name_auto_complete.evaluate();
+                        console.log('name_auto_complete',this.name_auto_complete)
                     }
                 };
                 const input_el = this.el.querySelector('input[name="name"]');
                 input_el.addEventListener('input', _.debounce(() => {
-                    xhr.open("GET", `${_converse.xhr_user_search_url}q=${input_el.value}`, true);
-                    // xhr.setRequestHeader('Authorization','0z7QDAX4QW0RszYi');
-                    // xhr.setRequestHeader( 'Content-Type',   'application/json' );
+                    xhr.open("GET", `${_converse.xhr_user_search_url}search=${input_el.value}`, true);
+                    xhr.setRequestHeader('Authorization',"Basic " + btoa(_converse.connection.jid.split('/')[0] + ":" + _converse.connection.pass));
+                    xhr.setRequestHeader( 'Content-Type',   'application/json' );
                     xhr.send()
                 } , 300));
                 this.name_auto_complete.on('suggestion-box-selectcomplete', ev => {
