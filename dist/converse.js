@@ -59840,11 +59840,19 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_4__["default"].plugins
           status_icon = 'far fa-circle chat-status';
         } else if (show === 'dnd') {
           status_icon = 'fa fa-minus-circle chat-status chat-status--busy';
+        } //const display_name = item.getDisplayName(); MD
+
+
+        var display_name = item.getDisplayName();
+        var dataUri = "data:" + item.vcard.attributes.image_type + ";base64," + item.vcard.attributes.image;
+
+        if (display_name && _converse.DEFAULT_IMAGE === item.vcard.attributes.image) {
+          dataUri = createAvatar(display_name);
         }
 
-        const display_name = item.getDisplayName();
         this.el.innerHTML = templates_roster_item_html__WEBPACK_IMPORTED_MODULE_11___default()(_.extend(item.toJSON(), {
           'display_name': display_name.split('@')[0],
+          'dataUri': dataUri,
           'desc_status': STATUSES[show],
           'status_icon': status_icon,
           'desc_chat': __('Click to chat with %1$s (JID: %2$s)', display_name, item.get('jid')),
@@ -95652,7 +95660,9 @@ var _ = {escape:__webpack_require__(/*! ./node_modules/lodash/escape.js */ "./no
 module.exports = function(o) {
 var __t, __p = '', __e = _.escape, __j = Array.prototype.join;
 function print() { __p += __j.call(arguments, '') }
-__p += '<!-- src/templates/roster_item.html -->\n\n<a class="list-item-link cbox-list-item open-chat w-100 ';
+__p += '<!-- src/templates/roster_item.html -->\n<img class="roster-avatar avatar direct-message-avatart" src="' +
+__e(o.dataUri) +
+'">\n<a class="list-item-link cbox-list-item open-chat w-100 ';
  if (o.num_unread) { ;
 __p += ' unread-msgs ';
  } ;

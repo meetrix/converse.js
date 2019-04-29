@@ -514,10 +514,18 @@ converse.plugins.add('converse-rosterview', {
                 } else if (show === 'dnd') {
                     status_icon = 'fa fa-minus-circle chat-status chat-status--busy';
                 }
-                const display_name = item.getDisplayName();
+                //const display_name = item.getDisplayName(); MD
+                var display_name = item.getDisplayName();
+                var dataUri = "data:" + item.vcard.attributes.image_type + ";base64," + item.vcard.attributes.image;
+
+                if (display_name && _converse.DEFAULT_IMAGE === item.vcard.attributes.image)
+                {
+                    dataUri = createAvatar(display_name);
+                }
                 this.el.innerHTML = tpl_roster_item(
                     _.extend(item.toJSON(), {
                         'display_name': display_name.split('@')[0],
+                        'dataUri':dataUri,
                         'desc_status': STATUSES[show],
                         'status_icon': status_icon,
                         'desc_chat': __('Click to chat with %1$s (JID: %2$s)', display_name, item.get('jid')),
