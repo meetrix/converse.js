@@ -257,6 +257,7 @@ converse.plugins.add('converse-profile', {
 
             afterRender () {
                 this.renderAvatar();
+                
             },
 
             showProfileModal (ev) {

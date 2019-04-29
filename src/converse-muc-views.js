@@ -1895,12 +1895,26 @@ converse.plugins.add('converse-muc-views', {
             },
 
             toHTML () {
+                var image = "data:" + _converse.DEFAULT_IMAGE_TYPE + ";base64," + _converse.DEFAULT_IMAGE;  // BAO
+
+                if ((this.model.get('nick') || this.model.get('jid')))
+                {
+                    image = createAvatar(this.model.get('nick') || this.model.get('jid'));
+                    const rosterJid = this.model.get('jid');
+
+                    if (rosterJid)
+                    {
+                        const item = _converse.roster.get(rosterJid);
+                        if (item) image = "data:" + item.vcard.attributes.image_type + ";base64," + item.vcard.attributes.image;
+                    }
+                }
                 const show = this.model.get('show');
                 return tpl_occupant(
                     _.extend(
                         { '_': _,
                           'jid': '',
                           'show': show,
+                          'image': image,     
                           'hint_show': _converse.PRETTY_CHAT_STATUS[show],
                           'hint_occupant': __('Click to mention %1$s in your message.', this.model.get('nick')),
                           'desc_moderator': __('This user is a moderator.'),

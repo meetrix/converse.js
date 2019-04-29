@@ -24,7 +24,7 @@ const AvatarMixin = {
             return;
         }
         const image_type = this.model.vcard.get('image_type'),
-                image = this.model.vcard.get('image');  
+                image = this.model.vcard.get('image');         
         canvas_el.outerHTML = tpl_avatar({
             'classes': canvas_el.getAttribute('class'),
             'width': canvas_el.width,

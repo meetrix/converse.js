@@ -55379,11 +55379,25 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
       },
 
       toHTML() {
+        var image = "data:" + _converse.DEFAULT_IMAGE_TYPE + ";base64," + _converse.DEFAULT_IMAGE; // BAO
+
+        if (this.model.get('nick') || this.model.get('jid')) {
+          image = createAvatar(this.model.get('nick') || this.model.get('jid'));
+          const rosterJid = this.model.get('jid');
+
+          if (rosterJid) {
+            const item = _converse.roster.get(rosterJid);
+
+            if (item) image = "data:" + item.vcard.attributes.image_type + ";base64," + item.vcard.attributes.image;
+          }
+        }
+
         const show = this.model.get('show');
         return templates_occupant_html__WEBPACK_IMPORTED_MODULE_23___default()(_.extend({
           '_': _,
           'jid': '',
           'show': show,
+          'image': image,
           'hint_show': _converse.PRETTY_CHAT_STATUS[show],
           'hint_occupant': __('Click to mention %1$s in your message.', this.model.get('nick')),
           'desc_moderator': __('This user is a moderator.'),
@@ -58987,7 +59001,8 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_0__["default"].plugins
           'info_add_bookmark': __('Bookmark this groupchat'),
           'info_title': __('Show more information on this groupchat'),
           'name': this.getRoomsListElementName(),
-          'open_title': __('Click to open this groupchat')
+          'open_title': __('Click to open this groupchat'),
+          'dataUri': createAvatar(this.getRoomsListElementName())
         }));
       },
 
@@ -94820,7 +94835,11 @@ __e( o.jid ) +
 __e( o.hint_occupant ) +
 '"\n    ';
  } ;
-__p += '>\n    <div class="row no-gutters">\n        <div class="col-auto">\n            <div class="occupant-status occupant-' +
+__p += '>\n    <div class="row no-gutters">\n        <div class="col-auto">\n                <img class="occupant-avatar room-avatar avatar" data-room-jid="' +
+__e(o.jid) +
+'" src="' +
+__e(o.image) +
+'" height="22" width="22">\n            <div class="occupant-status occupant-' +
 __e(o.show) +
 ' circle" title="' +
 __e(o.hint_show) +
@@ -95449,7 +95468,9 @@ __p += ' unread-msgs ';
  } ;
 __p += '"\n    data-room-jid="' +
 __e(o.jid) +
-'">\n    <div>\n            <img class="channle-icon" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAqklEQVRYR2NU+5rzn2EAAeOoA0ZDYDQERkNgNARICYHTXF0MfAycOAvu4B/dDFf+PSKpYCepKD7L1c3Aw8DBcObfXayWFP1cwPDy/wfaOoCLgZ1B81seSZbgU0xyCIw6AJQGsIGOX+sZ5v/ZR3LUkBwFIAfc+PcUw6Ke3xsZDv+9TnsHjKaBkR0CoKIYlAgHrCAiOYkToYGkbEiEeSQrGXXAaAiMhsCAhwAAIQ6G4S1d9YMAAAAASUVORK5CYII=">\n    </div>\n\n';
+'">\n    <div>\n            <img class="channle-icon" src="' +
+__e(o.dataUri) +
+'">\n    </div>\n\n';
  if (o.num_unread) { ;
 __p += '\n    <span class="list-item-badge badge badge-room-color msgs-indicator">' +
 __e( o.num_unread ) +

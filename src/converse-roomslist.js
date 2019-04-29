@@ -125,7 +125,8 @@ converse.plugins.add('converse-roomslist', {
                         'info_add_bookmark': __('Bookmark this groupchat'),
                         'info_title': __('Show more information on this groupchat'),
                         'name': this.getRoomsListElementName(),
-                        'open_title': __('Click to open this groupchat')
+                        'open_title': __('Click to open this groupchat'),
+                        'dataUri': createAvatar(this.getRoomsListElementName())
                     }));
             },
 
