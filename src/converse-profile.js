@@ -58,6 +58,12 @@ converse.plugins.add('converse-profile', {
             },
 
             toHTML () {
+                console.log('image',this.model.vcard.toJSON().image)
+                console.log('image',this.model.vcard.toJSON().jid)
+                var dataUri = "data:" + this.model.vcard.toJSON().image_type + ";base64," + this.model.vcard.toJSON().image;
+                if(this.model.vcard.toJSON().image === _converse.DEFAULT_IMAGE){
+                    var dataUri = createAvatar(this.model.vcard.toJSON().jid)
+                }
                 return tpl_profile_modal(_.extend(
                     this.model.toJSON(),
                     this.model.vcard.toJSON(), {
@@ -75,7 +81,8 @@ converse.plugins.add('converse-profile', {
                     'label_role_help': __('Use commas to separate multiple roles. Your roles are shown next to your name on your chat messages.'),
                     'label_url': __('URL'),
                     'utils': u,
-                    'view': this
+                    'view': this,
+                    'dataUri':dataUri
                 }));
             },
 
@@ -257,7 +264,7 @@ converse.plugins.add('converse-profile', {
 
             afterRender () {
                 this.renderAvatar();
-                
+
             },
 
             showProfileModal (ev) {

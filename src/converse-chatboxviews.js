@@ -23,13 +23,37 @@ const AvatarMixin = {
         if (_.isNull(canvas_el)) {
             return;
         }
-        const image_type = this.model.vcard.get('image_type'),
-                image = this.model.vcard.get('image');         
+        const defaultAvatar = "PD94bWwgdmVyc2lvbj0iMS4wIj8+CjxzdmcgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB3aWR0aD0iMTI4IiBoZWlnaHQ9IjEyOCI+CiA8cmVjdCB3aWR0aD0iMTI4IiBoZWlnaHQ9IjEyOCIgZmlsbD0iIzU1NSIvPgogPGNpcmNsZSBjeD0iNjQiIGN5PSI0MSIgcj0iMjQiIGZpbGw9IiNmZmYiLz4KIDxwYXRoIGQ9Im0yOC41IDExMiB2LTEyIGMwLTEyIDEwLTI0IDI0LTI0IGgyMyBjMTQgMCAyNCAxMiAyNCAyNCB2MTIiIGZpbGw9IiNmZmYiLz4KPC9zdmc+Cg==";
+        let image_type = "image/png";
+        let image = defaultAvatar;
+        let display_name = this.model.get('jid');
+ 
+        if (this.model.vcard)
+        {
+            image_type = this.model.vcard.get('image_type');
+            image = this.model.vcard.get('image');
+            display_name = this.model.vcard.attributes.fullname || this.model.vcard.get('jid');
+        }
+
+        var dataUri = "data:" + image_type + ";base64," + image;
+
+        if (!image || (display_name && defaultAvatar == image))
+        {
+            dataUri = createAvatar(display_name);
+        }
+  
+        // else {
+        //     setAvatar(display_name, dataUri);
+        // }
+
+        // const image_type = this.model.vcard.get('image_type'),
+        //         image = this.model.vcard.get('image');         
         canvas_el.outerHTML = tpl_avatar({
             'classes': canvas_el.getAttribute('class'),
             'width': canvas_el.width,
             'height': canvas_el.height,
-            'image': "data:" + image_type + ";base64," + image,
+            //'image': "data:" + image_type + ";base64," + image,
+            'image':dataUri
         });
     },
 };

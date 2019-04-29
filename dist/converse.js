@@ -48712,13 +48712,34 @@ const AvatarMixin = {
       return;
     }
 
-    const image_type = this.model.vcard.get('image_type'),
-          image = this.model.vcard.get('image');
+    const defaultAvatar = "PD94bWwgdmVyc2lvbj0iMS4wIj8+CjxzdmcgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB3aWR0aD0iMTI4IiBoZWlnaHQ9IjEyOCI+CiA8cmVjdCB3aWR0aD0iMTI4IiBoZWlnaHQ9IjEyOCIgZmlsbD0iIzU1NSIvPgogPGNpcmNsZSBjeD0iNjQiIGN5PSI0MSIgcj0iMjQiIGZpbGw9IiNmZmYiLz4KIDxwYXRoIGQ9Im0yOC41IDExMiB2LTEyIGMwLTEyIDEwLTI0IDI0LTI0IGgyMyBjMTQgMCAyNCAxMiAyNCAyNCB2MTIiIGZpbGw9IiNmZmYiLz4KPC9zdmc+Cg==";
+    let image_type = "image/png";
+    let image = defaultAvatar;
+    let display_name = this.model.get('jid');
+
+    if (this.model.vcard) {
+      image_type = this.model.vcard.get('image_type');
+      image = this.model.vcard.get('image');
+      display_name = this.model.vcard.attributes.fullname || this.model.vcard.get('jid');
+    }
+
+    var dataUri = "data:" + image_type + ";base64," + image;
+
+    if (!image || display_name && defaultAvatar == image) {
+      dataUri = createAvatar(display_name);
+    } // else {
+    //     setAvatar(display_name, dataUri);
+    // }
+    // const image_type = this.model.vcard.get('image_type'),
+    //         image = this.model.vcard.get('image');         
+
+
     canvas_el.outerHTML = templates_avatar_svg__WEBPACK_IMPORTED_MODULE_4___default()({
       'classes': canvas_el.getAttribute('class'),
       'width': canvas_el.width,
       'height': canvas_el.height,
-      'image': "data:" + image_type + ";base64," + image
+      //'image': "data:" + image_type + ";base64," + image,
+      'image': dataUri
     });
   }
 
@@ -57661,6 +57682,14 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_4__["default"].plugins
       },
 
       toHTML() {
+        console.log('image', this.model.vcard.toJSON().image);
+        console.log('image', this.model.vcard.toJSON().jid);
+        var dataUri = "data:" + this.model.vcard.toJSON().image_type + ";base64," + this.model.vcard.toJSON().image;
+
+        if (this.model.vcard.toJSON().image === _converse.DEFAULT_IMAGE) {
+          var dataUri = createAvatar(this.model.vcard.toJSON().jid);
+        }
+
         return templates_profile_modal_html__WEBPACK_IMPORTED_MODULE_7___default()(_.extend(this.model.toJSON(), this.model.vcard.toJSON(), {
           '_': _,
           '__': __,
@@ -57676,7 +57705,8 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_4__["default"].plugins
           'label_role_help': __('Use commas to separate multiple roles. Your roles are shown next to your name on your chat messages.'),
           'label_url': __('URL'),
           'utils': u,
-          'view': this
+          'view': this,
+          'dataUri': dataUri
         }));
       },
 
@@ -94935,10 +94965,8 @@ __p += '\n                <div class="tab-content">\n                    <div cl
  if (o.image) { ;
 __p += '\n                                            <img alt="' +
 __e(o.alt_avatar) +
-'" class="img-thumbnail avatar align-self-center" height="100px" width="100px" src="data:' +
-__e(o.image_type) +
-';base64,' +
-__e(o.image) +
+'" class="img-thumbnail avatar align-self-center" height="100px" width="100px" src="' +
+__e(o.dataUri) +
 '"/>\n                                        ';
  } ;
 __p += '\n                                        ';
