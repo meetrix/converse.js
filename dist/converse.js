@@ -48519,6 +48519,33 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_0__["default"].plugins
             'toggle-state': _converse.OPENED
           });
         }
+      },
+
+      filter(q) {
+        var rooms = this.model.models.filter(room => !_.includes(room.get('name').toLowerCase(), q.toLowerCase()));
+        this.filterOutRooms(rooms);
+      },
+
+      filterOutRooms() {
+        let rooms = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : [];
+
+        /* Given a list of contacts, make sure they're filtered out
+         * (aka hidden) and that all other contacts are visible.
+         *
+         * If all contacts are hidden, then also hide the group
+         * title.
+         */
+        const all__views = this.getAll();
+
+        _.each(this.model.models, room => {
+          const room_view = this.get(room.get('jid'));
+
+          if (_.includes(rooms, room)) {
+            u.hideElement(room_view.el);
+          } else {
+            u.showElement(room_view.el);
+          }
+        });
       }
 
     });
@@ -59257,6 +59284,33 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_0__["default"].plugins
             icon_el.classList.add("fa-caret-down");
           });
         }
+      },
+
+      filter(q) {
+        var rooms = this.model.models.filter(room => !_.includes(room.get('name').toLowerCase(), q.toLowerCase()));
+        this.filterOutRooms(rooms);
+      },
+
+      filterOutRooms() {
+        let rooms = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : [];
+
+        /* Given a list of contacts, make sure they're filtered out
+         * (aka hidden) and that all other contacts are visible.
+         *
+         * If all contacts are hidden, then also hide the group
+         * title.
+         */
+        const all__views = this.getAll();
+
+        _.each(this.model.models, room => {
+          const room_view = this.get(room.get('id'));
+
+          if (_.includes(rooms, room)) {
+            u.hideElement(room_view.el);
+          } else {
+            u.showElement(room_view.el);
+          }
+        });
       }
 
     });

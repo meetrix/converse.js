@@ -528,7 +528,34 @@ converse.plugins.add('converse-bookmarks', {
                     u.slideOut(this.el.querySelector('.bookmarks'));
                     this.list_model.save({'toggle-state': _converse.OPENED});
                 }
-            }
+            },
+            filter(q){
+                var rooms = this.model.models.filter(
+                    (room) => !_.includes(room.get('name').toLowerCase(), q.toLowerCase())
+                );
+                this.filterOutRooms(rooms)
+
+            },
+            filterOutRooms (rooms=[]) {
+                /* Given a list of contacts, make sure they're filtered out
+                 * (aka hidden) and that all other contacts are visible.
+                 *
+                 * If all contacts are hidden, then also hide the group
+                 * title.
+                 */
+
+                const all__views = this.getAll();
+                _.each(this.model.models, (room) => {
+                    const room_view = this.get(room.get('jid'));
+                    if (_.includes(rooms, room)) {
+                        u.hideElement(room_view.el);
+                    } else{
+                        u.showElement(room_view.el);
+                    }
+                     
+                    
+                });
+            },
         });
 
         _converse.checkBookmarksSupport = async function () {
