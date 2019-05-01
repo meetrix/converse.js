@@ -58244,8 +58244,9 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_1__["default"].plugins
           this.registerlinkview = new _converse.RegisterLinkView({
             'model': this.model
           });
-          this.registerlinkview.render();
-          this.el.querySelector('.buttons').insertAdjacentElement('afterend', this.registerlinkview.el);
+          this.registerlinkview.render(); // this.el.querySelector('.buttons').insertAdjacentElement('afterend', this.registerlinkview.el);
+
+          this.el.querySelector('#converse-login').insertAdjacentElement('beforeend', this.registerlinkview.el);
         }
 
         this.registerlinkview.render();
@@ -94651,7 +94652,7 @@ var _ = {escape:__webpack_require__(/*! ./node_modules/lodash/escape.js */ "./no
 module.exports = function(o) {
 var __t, __p = '', __e = _.escape, __j = Array.prototype.join;
 function print() { __p += __j.call(arguments, '') }
-__p += '<!-- src/templates/login_panel.html -->\n<div id="converse-login-panel" class="controlbox-pane fade-in row no-gutters">\n    <form id="converse-login" class="converse-form" method="post">\n        <div class="conn-feedback fade-in ';
+__p += '<!-- src/templates/login_panel.html -->\n<div id="converse-login-panel" class="controlbox-pane fade-in row no-gutters">\n    <form id="converse-login" class="converse-form" method="post">\n        <div>\n        <div class="onboard-title">Welcome Back !</div>\n        <div class="onboard-text">We’re happy to have you here again!</div>\n        <div class="conn-feedback fade-in ';
  if (!o.conn_feedback_subject) { ;
 __p += ' hidden ';
  } ;
@@ -94672,18 +94673,18 @@ __p += '\n            <span class="spinner fa fa-spinner centered"/>\n        ';
 __p += '\n            ';
  if (o.authentication == o.LOGIN || o.authentication == o.EXTERNAL) { ;
 __p += '\n                <div class="form-group">\n                    <label for="converse-login-jid">' +
-__e(o.__("Username:")) +
+__e(o.__("USERNAME:")) +
 '</label>\n                    <input id="converse-login-jid" class="form-control" autofocus required="required" type="text" name="jid" placeholder="' +
 __e(o.placeholder_username) +
 '"/>\n                </div>\n                ';
  if (o.authentication !== o.EXTERNAL) { ;
 __p += '\n                <div class="form-group">\n                    <label for="converse-login-password">' +
-__e(o.__("Password:")) +
+__e(o.__("PASSWORD:")) +
 '</label>\n                    <input id="converse-login-password" class="form-control" required="required" type="password" name="password" placeholder="' +
 __e(o.__('password')) +
 '"/>\n                </div>\n                ';
  } ;
-__p += '\n                ';
+__p += '\n                <!-- ';
  if (o.show_trust_checkbox) { ;
 __p += '\n                    <div class="form-group form-check login-trusted">\n                        <input id="converse-login-trusted" type="checkbox" class="form-check-input" name="trusted" ';
  if (o._converse.config.get('trusted')) { ;
@@ -94695,8 +94696,8 @@ __e(o.__('This is a trusted device')) +
 __e(o.__('To improve performance, we cache your data in this browser. Uncheck this box if this is a public computer or if you want your data to be deleted when you log out. It\'s important that you explicitly log out, otherwise not all cached data might be deleted. Please note, when using an untrusted device, OMEMO encryption is NOT available.')) +
 '"></i>\n                    </div>\n                ';
  } ;
-__p += '\n\n                <fieldset class="buttons">\n                    <input class="btn btn-primary" type="submit" value="' +
-__e(o.__('Log in')) +
+__p += ' -->\n            \n                <fieldset class="buttons">\n                    <input class="btn btn-primary" type="submit" value="' +
+__e(o.__('Sign In')) +
 '"/>\n                </fieldset>\n            ';
  } ;
 __p += '\n            ';
@@ -94711,7 +94712,7 @@ __p += '\n                <p>Disconnected.</p>\n            ';
  } ;
 __p += '\n        ';
  } ;
-__p += '\n    </form>\n</div>\n';
+__p += '\n        </div>\n    </form>\n\n</div>\n';
 return __p
 };
 
@@ -95179,11 +95180,15 @@ __p += ' fa fa-circle chat-status chat-status--offline';
  } ;
 __p += '"></span>\n                        <!-- ' +
 __e(o.status_message) +
-'-->\n                        </span>\n                </span>\n                <!-- <a class="controlbox-heading__btn change-status fa fa-pencil-alt" title="' +
+'-->\n                        </span>\n                </span>\n                <!-- <span>' +
+__e(o.status_message) +
+'</span> -->\n                <!-- <a class="controlbox-heading__btn change-status fa fa-pencil-alt" title="' +
 __e(o.title_change_status) +
 '" data-toggle="modal" data-target="#changeStatusModal"></a> -->\n            </div>\n    </a>\n    <div class="media-body dropdown">\n        <a href="#" data-toggle="dropdown" class="profile-menu media-title dropdown-toggle font-weight-semibold" aria-expanded="false">' +
 __e(o.fullname) +
-'</a>\n        <div class="dropdown-menu animate slideIn">\n            <a href="javascript:void(0);" class="dropdown-item show-profile">Profile &amp; Account</a>\n            <!-- <a href="javascript:void(0);" class="dropdown-item">Preferences</a> -->\n            <!-- <a href="javascript:void(0);" class="dropdown-item">Help &amp; feedback</a> -->\n            <a href="javascript:void(0);" class="dropdown-item logout align-self-center">Log out</a>\n        </div>\n        <div class="user-role font-size-xs opacity-75">\n                ' +
+'</a>\n        <div class="dropdown-menu animate slideIn">\n            <a href="javascript:void(0);" class="dropdown-item show-profile">Profile &amp; Account</a>\n            <!-- <a href="javascript:void(0);" class="dropdown-item">Preferences</a> -->\n            <!-- <a href="javascript:void(0);" class="dropdown-item">Help &amp; feedback</a> -->\n            <a class="controlbox-heading__btn change-status" title="' +
+__e(o.title_change_status) +
+'" data-toggle="modal" data-target="#changeStatusModal">Change Status</a>\n            <a href="javascript:void(0);" class="dropdown-item logout align-self-center">Log out</a>\n        </div>\n        <div class="user-role font-size-xs opacity-75">\n                ' +
 __e(o.role) +
 '\n        </div>\n    </div>\n    <div>\n        <i class="fas fa-bell"></i>\n    </div>\n    <!-- <span class="username w-100 align-self-center">' +
 __e(o.fullname) +
@@ -95218,11 +95223,11 @@ var __t, __p = '', __e = _.escape, __j = Array.prototype.join;
 function print() { __p += __j.call(arguments, '') }
 __p += '<!-- src/templates/register_link.html -->\n<fieldset class="switch-form">\n    ';
  if (!o._converse.auto_login && o._converse.CONNECTION_STATUS[o.connection_status] !== 'CONNECTING') { ;
-__p += '\n        <p>' +
+__p += '\n        <span>' +
 __e( o.__("Don't have a chat account?") ) +
-'</p>\n        <p><a class="register-account toggle-register-login" href="#converse/register">' +
+'</span>\n        <span><a class="register-account toggle-register-login" href="#converse/register">' +
 __e(o.__("Create an account")) +
-'</a></p>\n    ';
+'</span></p>\n    ';
  } ;
 __p += '\n</fieldset>\n';
 return __p

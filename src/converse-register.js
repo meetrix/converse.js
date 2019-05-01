@@ -54,7 +54,9 @@ converse.plugins.add('converse-register', {
                 if (_.isUndefined(this.registerlinkview)) {
                     this.registerlinkview = new _converse.RegisterLinkView({'model': this.model});
                     this.registerlinkview.render();
-                    this.el.querySelector('.buttons').insertAdjacentElement('afterend', this.registerlinkview.el);
+                    // this.el.querySelector('.buttons').insertAdjacentElement('afterend', this.registerlinkview.el);
+                    this.el.querySelector('#converse-login').insertAdjacentElement('beforeend', this.registerlinkview.el);
+                    
                 }
                 this.registerlinkview.render();
             },
