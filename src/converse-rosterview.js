@@ -510,7 +510,7 @@ converse.plugins.add('converse-rosterview', {
                 } else if (show === 'away') {
                     status_icon = 'fa fa-circle chat-status chat-status--away';
                 } else if (show === 'xa') {
-                    status_icon = 'far fa-circle chat-status';
+                    status_icon = 'fa fa-circle chat-status';
                 } else if (show === 'dnd') {
                     status_icon = 'fa fa-minus-circle chat-status chat-status--busy';
                 }

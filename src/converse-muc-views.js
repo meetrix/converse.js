@@ -633,7 +633,13 @@ converse.plugins.add('converse-muc-views', {
                     'auto_evaluate': false,
                     'min_chars': 1,
                     'match_current_word': true,
-                    'list': () => _converse.roster.map(o => ({'label': o.getDisplayName(), 'value': `@${o.getDisplayName()}`})),
+                    'list': () => _converse.roster.map(o => {
+                        let label = o.getDisplayName()
+                        if(_.includes(label, '@')) {
+                            label = label.spilt('@')[0];
+                        }
+                        return {'label': label, 'value': `@${o.getDisplayName()}`}
+                    }),
                     'filter': _converse.FILTER_STARTSWITH,
                     'ac_triggers': ["Tab", "@"],
                     'include_triggers': []
@@ -2038,18 +2044,31 @@ converse.plugins.add('converse-muc-views', {
                       jid = el.value;
                 if (!jid || _.compact(jid.split('@')).length < 2) {
                     evt.target.outerHTML = tpl_chatroom_invite({
-                        'error_message': __('Please enter a valid XMPP address'),
+                        'error_message': __('Please enter a valid UserName address'),
                         'label_invitation': __('Invite'),
                     });
                     this.initInviteWidget();
                     return;
                 }
-                this.promptForInvite({
-                    'target': el,
-                    'text': {
-                        'label': jid,
-                        'value': jid
-                    }});
+                console.log('room',this.chatroomview.model)
+                this.inviteRoom(jid)
+                // this.promptForInvite({
+                //     'target': el,
+                //     'text': {
+                //         'label': jid,
+                //         'value': jid
+                //     }});
+            },
+            inviteRoom(jid){
+                console.log('jid',jid)
+                this.chatroomview.model.directInvite(jid, 'invite to the room');
+                const form = this.el.querySelector('.room-invite form'),
+                      input = form.querySelector('.invited-contact'),
+                      error = form.querySelector('.error');
+                if (!_.isNull(error)) {
+                    error.parentNode.removeChild(error);
+                }
+                input.value = '';
             },
 
             shouldInviteWidgetBeShown () {
@@ -2065,7 +2084,13 @@ converse.plugins.add('converse-muc-views', {
                     return;
                 }
                 form.addEventListener('submit', this.inviteFormSubmitted.bind(this), false);
-                const list = _converse.roster.map(i => ({'label': i.get('fullname') || i.get('jid'), 'value': i.get('jid')}));
+                const list = _converse.roster.map(i => {
+                    let label =  i.get('fullname') || i.get('jid');
+                        if(_.includes(label, '@')) {
+                            label = label.split('@')[0];
+                        }
+                    return {'label': label, 'value': i.get('jid')}
+                });
                 const el = this.el.querySelector('.suggestion-box').parentElement;
 
                 if (this.invite_auto_complete) {
@@ -2075,7 +2100,8 @@ converse.plugins.add('converse-muc-views', {
                     'min_chars': 1,
                     'list': list
                 });
-                this.invite_auto_complete.on('suggestion-box-selectcomplete', ev => this.promptForInvite(ev));
+                //this.invite_auto_complete.on('suggestion-box-selectcomplete', ev => this.promptForInvite(ev)); MD
+                this.invite_auto_complete.on('suggestion-box-selectcomplete', ev => this.inviteRoom(ev.text.value));
                 this.invite_auto_complete.ul.setAttribute(
                     'style',
                     `max-height: calc(${this.el.offsetHeight}px - 80px);`

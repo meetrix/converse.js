@@ -54064,10 +54064,18 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
           'auto_evaluate': false,
           'min_chars': 1,
           'match_current_word': true,
-          'list': () => _converse.roster.map(o => ({
-            'label': o.getDisplayName(),
-            'value': `@${o.getDisplayName()}`
-          })),
+          'list': () => _converse.roster.map(o => {
+            let label = o.getDisplayName();
+
+            if (_.includes(label, '@')) {
+              label = label.spilt('@')[0];
+            }
+
+            return {
+              'label': label,
+              'value': `@${o.getDisplayName()}`
+            };
+          }),
           'filter': _converse.FILTER_STARTSWITH,
           'ac_triggers': ["Tab", "@"],
           'include_triggers': []
@@ -55568,20 +55576,34 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
 
         if (!jid || _.compact(jid.split('@')).length < 2) {
           evt.target.outerHTML = templates_chatroom_invite_html__WEBPACK_IMPORTED_MODULE_17___default()({
-            'error_message': __('Please enter a valid XMPP address'),
+            'error_message': __('Please enter a valid UserName address'),
             'label_invitation': __('Invite')
           });
           this.initInviteWidget();
           return;
         }
 
-        this.promptForInvite({
-          'target': el,
-          'text': {
-            'label': jid,
-            'value': jid
-          }
-        });
+        console.log('room', this.chatroomview.model);
+        this.inviteRoom(jid); // this.promptForInvite({
+        //     'target': el,
+        //     'text': {
+        //         'label': jid,
+        //         'value': jid
+        //     }});
+      },
+
+      inviteRoom(jid) {
+        console.log('jid', jid);
+        this.chatroomview.model.directInvite(jid, 'invite to the room');
+        const form = this.el.querySelector('.room-invite form'),
+              input = form.querySelector('.invited-contact'),
+              error = form.querySelector('.error');
+
+        if (!_.isNull(error)) {
+          error.parentNode.removeChild(error);
+        }
+
+        input.value = '';
       },
 
       shouldInviteWidgetBeShown() {
@@ -55597,10 +55619,18 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
 
         form.addEventListener('submit', this.inviteFormSubmitted.bind(this), false);
 
-        const list = _converse.roster.map(i => ({
-          'label': i.get('fullname') || i.get('jid'),
-          'value': i.get('jid')
-        }));
+        const list = _converse.roster.map(i => {
+          let label = i.get('fullname') || i.get('jid');
+
+          if (_.includes(label, '@')) {
+            label = label.split('@')[0];
+          }
+
+          return {
+            'label': label,
+            'value': i.get('jid')
+          };
+        });
 
         const el = this.el.querySelector('.suggestion-box').parentElement;
 
@@ -55611,8 +55641,9 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
         this.invite_auto_complete = new _converse.AutoComplete(el, {
           'min_chars': 1,
           'list': list
-        });
-        this.invite_auto_complete.on('suggestion-box-selectcomplete', ev => this.promptForInvite(ev));
+        }); //this.invite_auto_complete.on('suggestion-box-selectcomplete', ev => this.promptForInvite(ev)); MD
+
+        this.invite_auto_complete.on('suggestion-box-selectcomplete', ev => this.inviteRoom(ev.text.value));
         this.invite_auto_complete.ul.setAttribute('style', `max-height: calc(${this.el.offsetHeight}px - 80px);`);
       }
 
@@ -59936,7 +59967,7 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_4__["default"].plugins
         } else if (show === 'away') {
           status_icon = 'fa fa-circle chat-status chat-status--away';
         } else if (show === 'xa') {
-          status_icon = 'far fa-circle chat-status';
+          status_icon = 'fa fa-circle chat-status';
         } else if (show === 'dnd') {
           status_icon = 'fa fa-minus-circle chat-status chat-status--busy';
         } //const display_name = item.getDisplayName(); MD
@@ -93152,7 +93183,7 @@ __e(o.label_away) +
  if (o.status === 'xa') { ;
 __p += ' checked="checked" ';
  } ;
-__p += '\n                                   type="radio" id="radio-xa" value="xa" name="chat_status" class="custom-control-input"/>\n                            <label class="custom-control-label" for="radio-xa">\n                                <span class="far fa-circle chat-status chat-status--xa"></span>' +
+__p += '\n                                   type="radio" id="radio-xa" value="xa" name="chat_status" class="custom-control-input"/>\n                            <label class="custom-control-label" for="radio-xa">\n                                <span class="fa fa-circle chat-status chat-status--xa"></span>' +
 __e(o.label_xa) +
 '</label>\n                        </div>\n                    </div>\n                    <div class="form-group">\n                        <div class="btn-group w-100">\n                            <input name="status_message" type="text" class="form-control" \n                                value="' +
 __e(o.status_message) +
@@ -95140,7 +95171,7 @@ __p += ' fa fa-circle chat-status chat-status--away';
  } ;
 __p += '\n                        ';
  if (o.chat_status === 'xa') { ;
-__p += ' far fa-circle chat-status chat-status--xa ';
+__p += ' fa fa-circle chat-status chat-status--xa ';
  } ;
 __p += '\n                        ';
  if (o.chat_status === 'offline') { ;
