@@ -429,7 +429,8 @@ converse.plugins.add('converse-controlbox', {
                         'conn_feedback_message': _converse.connfeedback.get('message'),
                         'placeholder_username': (_converse.locked_domain || _converse.default_domain) &&
                                                 __('Username') || __('user@domain'),
-                        'show_trust_checkbox': _converse.trusted !== 'on' && _converse.trusted !== 'off'
+                        'show_trust_checkbox': _converse.trusted !== 'on' && _converse.trusted !== 'off',
+                        'login_bottom_image': _converse.user_settings.images.login_bottom_image
                     })
                 );
             },

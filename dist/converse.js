@@ -50985,7 +50985,8 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
           'conn_feedback_subject': pretty_status,
           'conn_feedback_message': _converse.connfeedback.get('message'),
           'placeholder_username': (_converse.locked_domain || _converse.default_domain) && __('Username') || __('user@domain'),
-          'show_trust_checkbox': _converse.trusted !== 'on' && _converse.trusted !== 'off'
+          'show_trust_checkbox': _converse.trusted !== 'on' && _converse.trusted !== 'off',
+          'login_bottom_image': _converse.user_settings.images.login_bottom_image
         }));
       },
 
@@ -58217,7 +58218,8 @@ const _converse$env = _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_
       Backbone = _converse$env.Backbone,
       sizzle = _converse$env.sizzle,
       $iq = _converse$env.$iq,
-      _ = _converse$env._; // Add Strophe Namespaces
+      _ = _converse$env._;
+const u = _converse_headless_utils_form__WEBPACK_IMPORTED_MODULE_9__["default"]; // Add Strophe Namespaces
 
 Strophe.addNamespace('REGISTER', 'jabber:iq:register'); // Add Strophe Statuses
 
@@ -58713,6 +58715,16 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_1__["default"].plugins
           _.each(stanza.querySelectorAll('field'), field => {
             buttons.insertAdjacentHTML('beforebegin', _converse_headless_utils_form__WEBPACK_IMPORTED_MODULE_9__["default"].xForm2webForm(field, stanza, this.domain));
           });
+
+          buttons.insertAdjacentHTML('beforebegin', templates_form_input_html__WEBPACK_IMPORTED_MODULE_2___default()({
+            'id': u.getUniqueId(),
+            'label': __('Confirm Password'),
+            'name': 'confirmpassword',
+            'placeholder': null,
+            'required': true,
+            'type': 'password',
+            'value': ''
+          }));
         } else {
           this.renderLegacyRegistrationForm(form);
         }
@@ -58803,6 +58815,10 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_1__["default"].plugins
        * @param { HTMLElement } form - The HTML form that was submitted
        */
       submitRegistrationForm(form) {
+        if (!this.validationRegistationForm(form)) {
+          return;
+        }
+
         const has_empty_inputs = _.reduce(this.el.querySelectorAll('input.required'), function (result, input) {
           if (input.value === '') {
             input.classList.add('error');
@@ -58844,6 +58860,37 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_1__["default"].plugins
         _converse.connection.send(iq);
 
         this.setFields(iq.tree());
+      },
+
+      validationRegistationForm(form) {
+        const password = form.querySelector('input[name=password]').value;
+        const confirmpassword = form.querySelector('input[name=confirmpassword]').value;
+        let strongRegex = new RegExp("^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{8,})");
+        let mediumRegex = new RegExp("^(((?=.*[a-z])(?=.*[A-Z]))|((?=.*[a-z])(?=.*[0-9]))|((?=.*[A-Z])(?=.*[0-9])))(?=.{6,})");
+
+        if (!_converse.user_settings.password_regex && !_converse.user_settings.password_regex.strongRegex) {
+          strongRegex = new RegExp(_converse.user_settings.password_regex.strongRegex);
+        }
+
+        if (!_converse.user_settings.password_regex && !_converse.user_settings.password_regex.mediumRegex) {
+          mediumRegex = new RegExp(_converse.user_settings.password_regex.mediumRegex);
+        }
+
+        if (password !== confirmpassword) {
+          this.showValidationError(__('passwords does not match'));
+          return false;
+        }
+
+        if (strongRegex.test(password)) {
+          return true;
+        } else if (mediumRegex.test(password)) {
+          return true;
+        }
+
+        const passwordWeekMsg = __('A minimum 8 characters password contains a combination of uppercase and lowercase letter and number are required');
+
+        this.showValidationError(passwordWeekMsg);
+        return false;
       },
 
       /* Stores the values that will be sent to the XMPP server during attempted registration.
@@ -94714,7 +94761,9 @@ __p += '\n                <p>Disconnected.</p>\n            ';
  } ;
 __p += '\n        ';
  } ;
-__p += '\n        </div>\n    </form>\n\n</div>\n';
+__p += '\n        </div>\n    </form>\n    <img className="image-bottom" src="' +
+__e(o.login_bottom_image) +
+'" alt="" />\n\n</div>\n';
 return __p
 };
 

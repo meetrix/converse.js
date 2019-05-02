@@ -23,7 +23,7 @@ import utils from "@converse/headless/utils/form";
 
 // Strophe methods for building stanzas
 const { Strophe, Backbone, sizzle, $iq, _ } = converse.env;
-
+const u = utils;
 // Add Strophe Namespaces
 Strophe.addNamespace('REGISTER', 'jabber:iq:register');
 
@@ -504,6 +504,18 @@ converse.plugins.add('converse-register', {
                             utils.xForm2webForm(field, stanza, this.domain)
                         );
                     });
+                    buttons.insertAdjacentHTML(
+                        'beforebegin',
+                         tpl_form_input({
+                            'id': u.getUniqueId(),
+                            'label': __('Confirm Password'),
+                            'name': 'confirmpassword',
+                            'placeholder': null,
+                            'required': true,
+                            'type': 'password',
+                            'value':'',
+                        })
+                    );
                 } else {
                     this.renderLegacyRegistrationForm(form);
                 }
@@ -584,6 +596,9 @@ converse.plugins.add('converse-register', {
              * @param { HTMLElement } form - The HTML form that was submitted
              */
             submitRegistrationForm (form) {
+                if(!this.validationRegistationForm(form)){
+                    return;
+                }
                 const has_empty_inputs = _.reduce(
                     this.el.querySelectorAll('input.required'),
                     function (result, input) {
@@ -612,6 +627,30 @@ converse.plugins.add('converse-register', {
                 _converse.connection._addSysHandler(this._onRegisterIQ.bind(this), null, "iq", null, null);
                 _converse.connection.send(iq);
                 this.setFields(iq.tree());
+            },
+            validationRegistationForm(form){
+                const password = form.querySelector('input[name=password]').value;
+                const confirmpassword = form.querySelector('input[name=confirmpassword]').value;
+                let strongRegex = new RegExp( "^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{8,})");
+                let mediumRegex = new RegExp("^(((?=.*[a-z])(?=.*[A-Z]))|((?=.*[a-z])(?=.*[0-9]))|((?=.*[A-Z])(?=.*[0-9])))(?=.{6,})");
+                if(!_converse.user_settings.password_regex && !_converse.user_settings.password_regex.strongRegex){
+                    strongRegex= new RegExp(_converse.user_settings.password_regex.strongRegex)
+                }
+                if(!_converse.user_settings.password_regex && !_converse.user_settings.password_regex.mediumRegex){
+                    mediumRegex= new RegExp(_converse.user_settings.password_regex.mediumRegex)
+                }
+                if( password!==confirmpassword ){
+                    this.showValidationError(__('passwords does not match'));
+                    return false;
+                }
+                if(strongRegex.test(password)){
+                    return true;
+                }else if(mediumRegex.test(password)){
+                    return true;
+                }
+                const passwordWeekMsg = __('A minimum 8 characters password contains a combination of uppercase and lowercase letter and number are required');
+                this.showValidationError(passwordWeekMsg);
+                return false;
             },
 
             /* Stores the values that will be sent to the XMPP server during attempted registration.

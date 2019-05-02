@@ -170,7 +170,14 @@ function setAvatar(nickname, avatar)
           locked_muc_nickname: true,
           muc_nickname_from_jid:true,
           auto_register_muc_nickname:true,
-          muc_instant_rooms: false
+          muc_instant_rooms: false,
+          images:{
+            login_bottom_image:'https://i.imgur.com/omxuqo5.png'
+          },
+            password_regex:{
+                strongRegex:'^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{8,})',
+                mediumRegex:'^(((?=.*[a-z])(?=.*[A-Z]))|((?=.*[a-z])(?=.*[0-9]))|((?=.*[A-Z])(?=.*[0-9])))(?=.{6,})'
+            },
     });
 </script>
 </body>
