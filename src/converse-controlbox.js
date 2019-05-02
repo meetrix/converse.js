@@ -492,6 +492,7 @@ converse.plugins.add('converse-controlbox', {
                 } else if (_converse.default_domain && !_.includes(jid, '@')) {
                     jid = jid + '@' + _converse.default_domain;
                 }
+                sessionStorage.setItem("password",form_data.get('password') );
                 this.connect(jid, form_data.get('password'));
             },
 

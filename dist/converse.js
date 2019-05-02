@@ -51056,6 +51056,7 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
           jid = jid + '@' + _converse.default_domain;
         }
 
+        sessionStorage.setItem("password", form_data.get('password'));
         this.connect(jid, form_data.get('password'));
       },
 
