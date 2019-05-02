@@ -49297,7 +49297,8 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
         'input .chat-textarea': 'inputChanged',
         'keydown .chat-textarea': 'keyPressed',
         'dragover .chat-textarea': 'onDragOver',
-        'drop .chat-textarea': 'onDrop'
+        'drop .chat-textarea': 'onDrop',
+        'click .add-message': 'toggleFileUpload'
       },
 
       initialize() {
