@@ -174,10 +174,12 @@ function setAvatar(nickname, avatar)
           images:{
             login_bottom_image:'https://i.imgur.com/omxuqo5.png'
           },
-            password_regex:{
-                strongRegex:'^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{8,})',
-                mediumRegex:'^(((?=.*[a-z])(?=.*[A-Z]))|((?=.*[a-z])(?=.*[0-9]))|((?=.*[A-Z])(?=.*[0-9])))(?=.{6,})'
-            },
+          password_regex:{
+            strongRegex:'^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{8,})',
+            mediumRegex:'^(((?=.*[a-z])(?=.*[A-Z]))|((?=.*[a-z])(?=.*[0-9]))|((?=.*[A-Z])(?=.*[0-9])))(?=.{6,})'
+          },
+          username_regex:'^[a-zA-Z0-9]+$',
+          fullname_regex: '^[a-zA-Z\s]+$'
     });
 </script>
 </body>

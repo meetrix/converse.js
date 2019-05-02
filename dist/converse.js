@@ -58498,9 +58498,16 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_1__["default"].plugins
 
         if (!this.model.get('registration_form_rendered')) {
           this.renderRegistrationForm(stanza);
+          this.registerFieldTips();
         }
 
         return false;
+      },
+
+      registerFieldTips() {
+        this.el.querySelector('.input-group-prepend').insertAdjacentHTML('afterend', '<p>characters A-Z, a-z and 0-9</p>');
+        this.el.querySelector('input[name=name]').insertAdjacentHTML('afterend', '<p>characters A-Z, a-z and 0-9</p>');
+        this.el.querySelector('input[name=password]').insertAdjacentHTML('afterend', '<p>characters A-Z, a-z, 0-9,[!@#$%^&*], more than 8</p>');
       },
 
       reset(settings) {
@@ -58864,16 +58871,22 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_1__["default"].plugins
 
       validationRegistationForm(form) {
         const password = form.querySelector('input[name=password]').value;
+        const username = form.querySelector('input[name=username]').value;
+        const fullname = form.querySelector('input[name=name]').value;
+        const usernameReg = new RegExp(_converse.user_settings.username_regex);
+        const fullnameReg = new RegExp(_converse.user_settings.fullname_regex);
         const confirmpassword = form.querySelector('input[name=confirmpassword]').value;
-        let strongRegex = new RegExp("^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{8,})");
-        let mediumRegex = new RegExp("^(((?=.*[a-z])(?=.*[A-Z]))|((?=.*[a-z])(?=.*[0-9]))|((?=.*[A-Z])(?=.*[0-9])))(?=.{6,})");
+        const strongRegex = new RegExp(_converse.user_settings.password_regex.strongRegex);
+        const mediumRegex = new RegExp(_converse.user_settings.password_regex.mediumRegex);
 
-        if (!_converse.user_settings.password_regex && !_converse.user_settings.password_regex.strongRegex) {
-          strongRegex = new RegExp(_converse.user_settings.password_regex.strongRegex);
+        if (!usernameReg.test(username)) {
+          this.showValidationError(__('Username should only contains characters A-Z, a-z and 0-9'));
+          return false;
         }
 
-        if (!_converse.user_settings.password_regex && !_converse.user_settings.password_regex.mediumRegex) {
-          mediumRegex = new RegExp(_converse.user_settings.password_regex.mediumRegex);
+        if (!fullnameReg.test(fullname)) {
+          this.showValidationError(__('fullname should only contains characters A-Z, a-z and space'));
+          return false;
         }
 
         if (password !== confirmpassword) {
@@ -58885,12 +58898,12 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_1__["default"].plugins
           return true;
         } else if (mediumRegex.test(password)) {
           return true;
+        } else {
+          const passwordWeekMsg = __('A minimum 8 characters password contains a combination of uppercase and lowercase letter and number are required');
+
+          this.showValidationError(passwordWeekMsg);
+          return false;
         }
-
-        const passwordWeekMsg = __('A minimum 8 characters password contains a combination of uppercase and lowercase letter and number are required');
-
-        this.showValidationError(passwordWeekMsg);
-        return false;
       },
 
       /* Stores the values that will be sent to the XMPP server during attempted registration.
@@ -58929,7 +58942,8 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_1__["default"].plugins
       },
 
       _setFieldsFromXForm(xform) {
-        this.title = _.get(xform.querySelector('title'), 'textContent');
+        //this.title = _.get(xform.querySe'lector('title'), 'textContent');
+        this.title = 'User Registation';
         this.instructions = _.get(xform.querySelector('instructions'), 'textContent');
 
         _.each(xform.querySelectorAll('field'), field => {
