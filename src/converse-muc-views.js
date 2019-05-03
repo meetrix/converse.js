@@ -452,6 +452,7 @@ converse.plugins.add('converse-muc-views', {
             openChatRoom (ev) {
                 ev.preventDefault();
                 const data = this.parseRoomDataFromEvent(ev.target);
+                console.log('data',data)
                 if (data.nick === "") {
                     // Make sure defaults apply if no nick is provided.
                     data.nick = undefined;
@@ -463,7 +464,6 @@ converse.plugins.add('converse-muc-views', {
                     jid = data.jid
                     this.model.setDomain(jid);
                 }
-                console.log('data',data)
                 data.roomconfig = {
                     'changesubject': false,
                     'membersonly': true,

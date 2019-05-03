@@ -53872,6 +53872,7 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
       openChatRoom(ev) {
         ev.preventDefault();
         const data = this.parseRoomDataFromEvent(ev.target);
+        console.log('data', data);
 
         if (data.nick === "") {
           // Make sure defaults apply if no nick is provided.
@@ -53887,7 +53888,6 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
           this.model.setDomain(jid);
         }
 
-        console.log('data', data);
         data.roomconfig = {
           'changesubject': false,
           'membersonly': true,
@@ -92978,29 +92978,29 @@ __p += '<!-- src/templates/add_chatroom_modal.html -->\n<div class="modal fade" 
 __e(o.__('Create New Channel')) +
 '</h5>\n                <h6 class="modal-title"\n                    id="add-chatroom-modal-sublabel">' +
 __e(o.__('channel are where your memebers communicate. They are best when organized around a topic -#lead, for example')) +
-'</h5>    \n                <button type="button" class="close" data-dismiss="modal" aria-label="Close">\n                        <i class="fas fa-times"></i>\n                </button>\n            </div>\n            <div class="modal-body">\n                <h1></h1>\n                <form class="converse-form add-chatroom">\n                    <div class="form-group">\n                        <input id="private-channel" type="checkbox" name="privatechannel" >\n                        <label for="private-channel" class="form-check-label" >' +
+'</h5>    \n                <button type="button" class="close" data-dismiss="modal" aria-label="Close">\n                        <i class="fas fa-times"></i>\n                </button>\n            </div>\n            <div class="modal-body">\n                <h1></h1>\n                <form class="converse-form add-chatroom">\n                    <div class="form-group">\n                        <label class="switch">\n                            <input id="private-channel" type="checkbox" name="privatechannel" checked>\n                            <span class="slider round"></span>\n                            <label for="private-channel" class="form-check-label" >' +
 __e(o.__('Option one is enabled')) +
-'</label>\n                        <span>' +
+'</label>\n                            <span>' +
 __e(o.__('just invited people can access this channel')) +
-'</span>\n                    </div>\n                    <div class="form-group">\n                        <input id="read-only-channel" type="checkbox" name="readonlychannel">\n                        <label for="read-only-channel" class="form-check-label">' +
+'</span>\n                        </label>\n                    </div>\n                    <div class="form-group">\n                        <label class="switch">\n                            <input id="read-only-channel" type="checkbox" name="readonlychannel">\n                            <span class="slider round"></span>\n                            <label for="read-only-channel" class="form-check-label">' +
 __e(o.__('Read Only Channel')) +
-'</label>\n                        <span>' +
+'</label>\n                            <span>' +
 __e(o.__('All users in the channel can write messages')) +
-'</span>\n                    </div>\n                    <div class="form-group">\n                            <label for="chatroom">' +
+'</span>\n                        </label>\n                    </div>\n                    <div class="form-group">\n                            <label for="chatroom">' +
 __e(o.label_room_address) +
 '</label>\n                            <input type="text" required="required" name="chatroom" class="form-control" placeholder="' +
 __e(o.chatroom_placeholder) +
 '"/>\n                            <span>' +
 __e(o.__('Names must be lowercase without spaces or period, and shorter than 22 characters')) +
-'</span>\n                    </div>\n                    <div class="form-group">\n                            <label for="chatroom">' +
+'</span>\n                    </div>\n                    <div class="form-group">\n                            <label for="purpose">' +
 __e(o.__('Purpose')) +
 '(' +
 __e(o.__('optionl')) +
-')</label>\n                            <input type="text" required="required" name="chatroom" class="form-control" />\n                            <span>' +
+')</label>\n                            <input type="text" required="required" name="purpose" class="form-control" />\n                            <span>' +
 __e(o.__("What's the channel about?")) +
-'</span>\n                    </div>\n                    <div class="form-group">\n                            <label for="chatroom">' +
+'</span>\n                    </div>\n                    <div class="form-group">\n                            <label for="users">' +
 __e(o.__('Invite Users')) +
-'</label>\n                            <input type="text" required="required" name="chatroom" class="form-control" />\n                            <span>' +
+'</label>\n                            <input type="text" required="required" name="users" class="form-control" />\n                            <span>' +
 __e(o.__('name must be a lowercase,without space, period, and shorter than 22 characters')) +
 '</span>\n                    </div>\n                    \n                        \n                    ';
  if (!o._converse.locked_muc_nickname) { ;
