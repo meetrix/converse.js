@@ -53843,6 +53843,22 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
         this.el.addEventListener('shown.bs.modal', () => {
           this.el.querySelector('input[name="chatroom"]').focus();
         }, false);
+
+        _converse.roster.each(o => {
+          let label = o.getDisplayName();
+          console.log('label', label);
+
+          if (_.includes(label, '@')) {
+            label = label.split('@')[0];
+          }
+
+          const user = document.createElement('option');
+          user.setAttribute('value', o.getDisplayName());
+          user.innerHTML = label;
+          this.el.querySelector('.channel-users-invite-list').insertAdjacentElement('beforeend', user);
+        }); // <option value="participant">Participant</option>
+        // <option value="visitor">Visitor</option>
+
       },
 
       parseRoomDataFromEvent(form) {
@@ -53860,9 +53876,17 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
           nick = data.get('nickname').trim();
         }
 
+        var roomconfig = {
+          'roomname': data.get('chatroom'),
+          'roomdesc': data.get('purpose'),
+          'publicroom': data.get('privatechannel'),
+          'allowpm': data.get('readonlychannel') ? 'moderators' : 'anyone',
+          'roomowners': [_converse.connection.jid.split('/')[0]]
+        };
         return {
           'jid': jid,
-          'nick': nick
+          'nick': nick,
+          'roomconfig': _.extend(_converse.user_settings.roomDefaultConfiguration, roomconfig)
         };
       },
 
@@ -53884,8 +53908,6 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
           this.model.setDomain(jid);
         }
 
-        data.roomconfig = this.defaultRoomConfiguration(jid);
-
         _converse.api.rooms.open(jid, _.extend(data, {
           jid
         }, {
@@ -53894,13 +53916,6 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
 
         this.modal.hide();
         ev.target.reset();
-      },
-
-      defaultRoomConfiguration(jid) {
-        const roomDefaultConfiguration = _converse.user_settings.roomDefaultConfiguration;
-        roomDefaultConfiguration.roomowners = [_converse.connection.jid.split('/')[0]];
-        roomDefaultConfiguration.roomname = jid.split('@')[0];
-        return roomDefaultConfiguration;
       }
 
     });
@@ -54076,7 +54091,7 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
             let label = o.getDisplayName();
 
             if (_.includes(label, '@')) {
-              label = label.spilt('@')[0];
+              label = label.splite('@')[0];
             }
 
             return {
@@ -92990,11 +93005,11 @@ __e(o.__('Purpose')) +
 __e(o.__('Optional')) +
 ')</label>\n                            <input type="text" required="required" name="purpose" class="form-control" />\n                            <span>' +
 __e(o.__("What's the channel about?")) +
-'</span>\n                    </div>\n                    <div class="form-group channel-invite">\n                            <label for="users">' +
+'</span>\n                    </div>\n                    <div class="form-group channel-invite">\n                        <label for="users">' +
 __e(o.__('Invite Users')) +
-'</label>\n                            <input type="text" required="required" name="users" class="form-control" />\n                            <span>' +
+'</label>\n                        <select class="form-control channel-users-invite-list" name="users" multiple="multiple"></select>\n                        <span>' +
 __e(o.__('Name must be a lowercase,without space, period, and shorter than 22 characters')) +
-'</span>\n                    </div>\n                    \n                        \n                    ';
+'</span>\n                    </div>\n                    ';
  if (!o._converse.locked_muc_nickname) { ;
 __p += '\n                    <div class="form-group" >\n                        <label for="nickname">' +
 __e(o.__('Nickname')) +

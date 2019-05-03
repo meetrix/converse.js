@@ -429,6 +429,22 @@ converse.plugins.add('converse-muc-views', {
                 this.el.addEventListener('shown.bs.modal', () => {
                     this.el.querySelector('input[name="chatroom"]').focus();
                 }, false);
+
+                _converse.roster.each(o => {
+                    let label = o.getDisplayName()
+                    console.log('label',label)
+                    if(_.includes(label, '@')) {
+                        label = label.split('@')[0];
+                    }
+                    const user = document.createElement('option')
+                    user.setAttribute('value',o.getDisplayName())
+                    user.innerHTML = label
+                    this.el.querySelector('.channel-users-invite-list').insertAdjacentElement('beforeend',user)
+                })
+                
+                
+                        // <option value="participant">Participant</option>
+                        // <option value="visitor">Visitor</option>
             },
 
             parseRoomDataFromEvent (form) {
@@ -443,9 +459,17 @@ converse.plugins.add('converse-muc-views', {
                 } else {
                     nick = data.get('nickname').trim();
                 }
+                var roomconfig = {
+                    'roomname': data.get('chatroom'),
+                    'roomdesc':  data.get('purpose'),
+                    'publicroom': data.get('privatechannel'),
+                    'allowpm':data.get('readonlychannel')?'moderators':'anyone',
+                    'roomowners':[_converse.connection.jid.split('/')[0]]
+                }
                 return {
                     'jid': jid,
-                    'nick': nick
+                    'nick': nick,
+                    'roomconfig': _.extend(_converse.user_settings.roomDefaultConfiguration,roomconfig) 
                 }
             },
 
@@ -463,17 +487,10 @@ converse.plugins.add('converse-muc-views', {
                     jid = data.jid
                     this.model.setDomain(jid);
                 }
-                data.roomconfig = this.defaultRoomConfiguration(jid)
                 _converse.api.rooms.open(jid, _.extend(data, {jid},{'auto_configure': _converse.user_settings.room_auto_configure}));
                 this.modal.hide();
                 ev.target.reset();
             },
-            defaultRoomConfiguration(jid){
-                const roomDefaultConfiguration =  _converse.user_settings.roomDefaultConfiguration;
-                roomDefaultConfiguration.roomowners = [_converse.connection.jid.split('/')[0]];
-                roomDefaultConfiguration.roomname = jid.split('@')[0]
-                return roomDefaultConfiguration;
-            }
         });
 
 
@@ -641,7 +658,7 @@ converse.plugins.add('converse-muc-views', {
                     'list': () => _converse.roster.map(o => {
                         let label = o.getDisplayName()
                         if(_.includes(label, '@')) {
-                            label = label.spilt('@')[0];
+                            label = label.splite('@')[0];
                         }
                         return {'label': label, 'value': `@${o.getDisplayName()}`}
                     }),
