@@ -412,7 +412,7 @@ converse.plugins.add('converse-muc-views', {
             },
 
             toHTML () {
-                let placeholder = '';
+                let placeholder = `# e.g link solutions`;
                 if (!_converse.locked_muc_domain) {
                     const muc_domain = this.model.get('muc_domain') || _converse.muc_domain;
                     placeholder = muc_domain ? `name@${muc_domain}` : __('name@conference.example.org');
@@ -462,6 +462,15 @@ converse.plugins.add('converse-muc-views', {
                 } else {
                     jid = data.jid
                     this.model.setDomain(jid);
+                }
+                console.log('data',data)
+                data.roomconfig = {
+                    'changesubject': false,
+                    'membersonly': true,
+                    'persistentroom': true,
+                    'publicroom': true,
+                    'roomdesc': 'Comfy room for hanging out',
+                    'whois': 'anyone'
                 }
                 _converse.api.rooms.open(jid, _.extend(data, {jid}));
                 this.modal.hide();

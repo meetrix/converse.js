@@ -4,23 +4,50 @@
             <div class="modal-header">
                 <h5 class="modal-title"
                     id="add-chatroom-modal-label">{{{o.__('Create New Channel')}}}</h5>
+                <h6 class="modal-title"
+                    id="add-chatroom-modal-sublabel">{{{o.__('channel are where your memebers communicate. They are best when organized around a topic -#lead, for example')}}}</h5>    
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <i class="fas fa-times"></i>
                 </button>
             </div>
             <div class="modal-body">
+                <h1></h1>
                 <form class="converse-form add-chatroom">
                     <div class="form-group">
-                        <label for="chatroom">{{{o.label_room_address}}}:</label>
-                        <input type="text" required="required" name="chatroom" class="form-control" placeholder="{{{o.chatroom_placeholder}}}"/>
+                        <input id="private-channel" type="checkbox" name="privatechannel" >
+                        <label for="private-channel" class="form-check-label" >{{{o.__('Option one is enabled')}}}</label>
+                        <span>{{{o.__('just invited people can access this channel')}}}</span>
                     </div>
+                    <div class="form-group">
+                        <input id="read-only-channel" type="checkbox" name="readonlychannel">
+                        <label for="read-only-channel" class="form-check-label">{{{o.__('Read Only Channel')}}}</label>
+                        <span>{{{o.__('All users in the channel can write messages')}}}</span>
+                    </div>
+                    <div class="form-group">
+                            <label for="chatroom">{{{o.label_room_address}}}</label>
+                            <input type="text" required="required" name="chatroom" class="form-control" placeholder="{{{o.chatroom_placeholder}}}"/>
+                            <span>{{{o.__('Names must be lowercase without spaces or period, and shorter than 22 characters')}}}</span>
+                    </div>
+                    <div class="form-group">
+                            <label for="chatroom">{{{o.__('Purpose')}}}({{{o.__('optionl')}}})</label>
+                            <input type="text" required="required" name="chatroom" class="form-control" />
+                            <span>{{{o.__("What's the channel about?")}}}</span>
+                    </div>
+                    <div class="form-group">
+                            <label for="chatroom">{{{o.__('Invite Users')}}}</label>
+                            <input type="text" required="required" name="chatroom" class="form-control" />
+                            <span>{{{o.__('name must be a lowercase,without space, period, and shorter than 22 characters')}}}</span>
+                    </div>
+                    
+                        
                     {[ if (!o._converse.locked_muc_nickname) { ]}
                     <div class="form-group" >
                         <label for="nickname">{{{o.__('Nickname')}}}:</label>
                         <input type="text" pattern=".*\S+.*" title="{{{o.__('This field is required')}}}" required="required" name="nickname" value="{{{o.nick}}}" class="form-control"/>
                     </div>
                     {[ } ]}
-                    <input type="submit" class="btn btn-primary" name="join" value="{{{o.__('Join')}}}"/>
+                    <input type="button" class="btn btn-primary" name="cancel" value="{{{o.__('cancel')}}}"/>
+                    <input type="submit" class="btn btn-primary" name="join" value="{{{o.__('create')}}}"/>
                 </form>
             </div>
         </div>

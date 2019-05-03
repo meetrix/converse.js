@@ -84,5 +84,8 @@
     "webpack": "^4.0.1",
     "webpack-cli": "^2.1.4",
     "xss": "^0.3.3"
+  },
+  "dependencies": {
+    "bootstrap4-toggle": "^3.4.0"
   }
 }
