@@ -420,7 +420,7 @@ converse.plugins.add('converse-muc-views', {
                 return tpl_add_chatroom_modal(_.extend(this.model.toJSON(), {
                     '__': _converse.__,
                     '_converse': _converse,
-                    'label_room_address': _converse.muc_domain ? __('Channel name') :  __('Channel address'),
+                    'label_room_address': _converse.muc_domain ? __('Channel Name') :  __('Channel Address'),
                     'chatroom_placeholder': placeholder
                 }));
             },
