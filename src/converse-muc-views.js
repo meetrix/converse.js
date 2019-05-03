@@ -452,7 +452,6 @@ converse.plugins.add('converse-muc-views', {
             openChatRoom (ev) {
                 ev.preventDefault();
                 const data = this.parseRoomDataFromEvent(ev.target);
-                console.log('data',data)
                 if (data.nick === "") {
                     // Make sure defaults apply if no nick is provided.
                     data.nick = undefined;
@@ -464,17 +463,16 @@ converse.plugins.add('converse-muc-views', {
                     jid = data.jid
                     this.model.setDomain(jid);
                 }
-                data.roomconfig = {
-                    'changesubject': false,
-                    'membersonly': true,
-                    'persistentroom': true,
-                    'publicroom': true,
-                    'roomdesc': 'Comfy room for hanging out',
-                    'whois': 'anyone'
-                }
-                _converse.api.rooms.open(jid, _.extend(data, {jid}));
+                data.roomconfig = this.defaultRoomConfiguration(jid)
+                console.log('roomDefaultConfiguration',data);
+                _converse.api.rooms.open(jid, _.extend(data, {jid}),true);
                 this.modal.hide();
                 ev.target.reset();
+            },
+            defaultRoomConfiguration(jid){
+                const roomDefaultConfiguration =  _converse.user_settings.roomDefaultConfiguration;
+                roomDefaultConfiguration.roomowners = [jid];
+                return roomDefaultConfiguration;
             }
         });
 

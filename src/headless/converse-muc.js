@@ -630,6 +630,7 @@ converse.plugins.add('converse-muc', {
                 return new Promise((resolve, reject) => {
                     const inputs = form ? sizzle(':input:not([type=button]):not([type=submit])', form) : [],
                           configArray = _.map(inputs, u.webForm2xForm);
+                          console.log('configArray',configArray)
                     this.sendConfiguration(configArray, resolve, reject);
                 });
             },
@@ -1520,6 +1521,7 @@ converse.plugins.add('converse-muc', {
                     } else if (_.isString(jids)) {
                         return createChatRoom(jids, attrs);
                     }
+                    console.log
                     return _.map(jids, _.partial(createChatRoom, _, attrs));
                 },
 
@@ -1578,12 +1580,14 @@ converse.plugins.add('converse-muc', {
                  * );
                  */
                 'open': async function (jids, attrs) {
+                    console.log('opening room',jids,'configuratiom',attrs)
                     await _converse.api.waitUntil('chatBoxesFetched');
                     if (_.isUndefined(jids)) {
                         const err_msg = 'rooms.open: You need to provide at least one JID';
                         _converse.log(err_msg, Strophe.LogLevel.ERROR);
                         throw(new TypeError(err_msg));
                     } else if (_.isString(jids)) {
+                        console.log('opening room')
                         return _converse.api.rooms.create(jids, attrs).trigger('show');
                     } else {
                         return _.map(jids, (jid) => _converse.api.rooms.create(jid, attrs).trigger('show'));

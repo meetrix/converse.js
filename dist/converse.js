@@ -53872,7 +53872,6 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
       openChatRoom(ev) {
         ev.preventDefault();
         const data = this.parseRoomDataFromEvent(ev.target);
-        console.log('data', data);
 
         if (data.nick === "") {
           // Make sure defaults apply if no nick is provided.
@@ -53888,21 +53887,21 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
           this.model.setDomain(jid);
         }
 
-        data.roomconfig = {
-          'changesubject': false,
-          'membersonly': true,
-          'persistentroom': true,
-          'publicroom': true,
-          'roomdesc': 'Comfy room for hanging out',
-          'whois': 'anyone'
-        };
+        data.roomconfig = this.defaultRoomConfiguration(jid);
+        console.log('roomDefaultConfiguration', data);
 
         _converse.api.rooms.open(jid, _.extend(data, {
           jid
-        }));
+        }), true);
 
         this.modal.hide();
         ev.target.reset();
+      },
+
+      defaultRoomConfiguration(jid) {
+        const roomDefaultConfiguration = _converse.user_settings.roomDefaultConfiguration;
+        roomDefaultConfiguration.roomowners = [jid];
+        return roomDefaultConfiguration;
       }
 
     });
@@ -67487,6 +67486,7 @@ _converse_core__WEBPACK_IMPORTED_MODULE_3__["default"].plugins.add('converse-muc
           const inputs = form ? sizzle(':input:not([type=button]):not([type=submit])', form) : [],
                 configArray = _.map(inputs, _utils_form__WEBPACK_IMPORTED_MODULE_4__["default"].webForm2xForm);
 
+          console.log('configArray', configArray);
           this.sendConfiguration(configArray, resolve, reject);
         });
       },
@@ -68495,6 +68495,7 @@ _converse_core__WEBPACK_IMPORTED_MODULE_3__["default"].plugins.add('converse-muc
             return createChatRoom(jids, attrs);
           }
 
+          console.log;
           return _.map(jids, _.partial(createChatRoom, _, attrs));
         },
 
@@ -68553,6 +68554,7 @@ _converse_core__WEBPACK_IMPORTED_MODULE_3__["default"].plugins.add('converse-muc
          * );
          */
         'open': async function open(jids, attrs) {
+          console.log('opening room', jids, 'configuratiom', attrs);
           await _converse.api.waitUntil('chatBoxesFetched');
 
           if (_.isUndefined(jids)) {
@@ -68562,6 +68564,7 @@ _converse_core__WEBPACK_IMPORTED_MODULE_3__["default"].plugins.add('converse-muc
 
             throw new TypeError(err_msg);
           } else if (_.isString(jids)) {
+            console.log('opening room');
             return _converse.api.rooms.create(jids, attrs).trigger('show');
           } else {
             return _.map(jids, jid => _converse.api.rooms.create(jid, attrs).trigger('show'));
