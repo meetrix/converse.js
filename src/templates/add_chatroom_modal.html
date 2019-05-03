@@ -1,48 +1,53 @@
 <div class="modal fade" id="add-chatroom-modal" tabindex="-1" role="dialog" aria-labelledby="add-chatroom-modal-label" aria-hidden="true">
-    <div class="modal-dialog" role="document">
+    <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title"
-                    id="add-chatroom-modal-label">{{{o.__('Create New Channel')}}}</h5>
-                <h6 class="modal-title"
-                    id="add-chatroom-modal-sublabel">{{{o.__('channel are where your memebers communicate. They are best when organized around a topic -#lead, for example')}}}</h5>    
+            <div class="modal-header">    
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <i class="fas fa-times"></i>
                 </button>
             </div>
             <div class="modal-body">
-                <h1></h1>
+                <div class="modal-title" id="add-chatroom-modal-label">
+                    {{{o.__('Create New Channel')}}}
+                </div>
+                <div class="modal-title" id="add-chatroom-modal-sublabel">
+                    {{{o.__('Channels are where your members communicate. They are best when organized around a topic - #lead, for example')}}}
+                </div>
                 <form class="converse-form add-chatroom">
-                    <div class="form-group">
-                        <label class="switch">
-                            <input id="private-channel" type="checkbox" name="privatechannel" checked>
-                            <span class="slider round"></span>
-                            <label for="private-channel" class="form-check-label" >{{{o.__('Option one is enabled')}}}</label>
-                            <span>{{{o.__('just invited people can access this channel')}}}</span>
-                        </label>
+                    <div class="form-group private-public">
+                        <div>
+                            <label class="switch">
+                                <input id="private-channel" type="checkbox" name="privatechannel" checked>
+                                <span class="slider round"></span>
+                            </label>
+                            <label for="private-channel" class="form-check-label" >{{{o.__('Private Channel')}}}</label>
+                        </div>
+                        <span>{{{o.__('Just invited people can access this channel')}}}</span>
                     </div>
-                    <div class="form-group">
-                        <label class="switch">
-                            <input id="read-only-channel" type="checkbox" name="readonlychannel">
-                            <span class="slider round"></span>
-                            <label for="read-only-channel" class="form-check-label">{{{o.__('Read Only Channel')}}}</label>
-                            <span>{{{o.__('All users in the channel can write messages')}}}</span>
-                        </label>
+                    <div class="form-group read-only">
+                        <div>
+                            <label class="switch">
+                                <input id="read-only-channel" type="checkbox" name="readonlychannel">
+                                <span class="slider round"></span>
+                            </label>
+                            <label for="read-only-channel" class="form-check-label">{{{o.__('Read-Only Channel')}}}</label>
+                        </div>
+                        <span>{{{o.__('All users in the channel can write messages')}}}</span>
                     </div>
-                    <div class="form-group">
+                    <div class="form-group channel-name">
                             <label for="chatroom">{{{o.label_room_address}}}</label>
                             <input type="text" required="required" name="chatroom" class="form-control" placeholder="{{{o.chatroom_placeholder}}}"/>
                             <span>{{{o.__('Names must be lowercase without spaces or period, and shorter than 22 characters')}}}</span>
                     </div>
-                    <div class="form-group">
-                            <label for="purpose">{{{o.__('Purpose')}}}({{{o.__('optionl')}}})</label>
+                    <div class="form-group channel-about">
+                            <label for="purpose">{{{o.__('Purpose')}}}&nbsp;({{{o.__('Optional')}}})</label>
                             <input type="text" required="required" name="purpose" class="form-control" />
                             <span>{{{o.__("What's the channel about?")}}}</span>
                     </div>
-                    <div class="form-group">
+                    <div class="form-group channel-invite">
                             <label for="users">{{{o.__('Invite Users')}}}</label>
                             <input type="text" required="required" name="users" class="form-control" />
-                            <span>{{{o.__('name must be a lowercase,without space, period, and shorter than 22 characters')}}}</span>
+                            <span>{{{o.__('Name must be a lowercase,without space, period, and shorter than 22 characters')}}}</span>
                     </div>
                     
                         
@@ -52,8 +57,8 @@
                         <input type="text" pattern=".*\S+.*" title="{{{o.__('This field is required')}}}" required="required" name="nickname" value="{{{o.nick}}}" class="form-control"/>
                     </div>
                     {[ } ]}
-                    <input type="button" class="btn btn-primary" name="cancel" value="{{{o.__('cancel')}}}"/>
-                    <input type="submit" class="btn btn-primary" name="join" value="{{{o.__('create')}}}"/>
+                    <input type="button" class="btn cancel-btn" name="cancel" value="{{{o.__('Cancel')}}}"/>
+                    <input type="submit" class="btn create-btn" name="join" value="{{{o.__('Create')}}}"/>
                 </form>
             </div>
         </div>
