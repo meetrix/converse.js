@@ -464,14 +464,14 @@ converse.plugins.add('converse-muc-views', {
                     this.model.setDomain(jid);
                 }
                 data.roomconfig = this.defaultRoomConfiguration(jid)
-                console.log('roomDefaultConfiguration',data);
-                _converse.api.rooms.open(jid, _.extend(data, {jid}),true);
+                _converse.api.rooms.open(jid, _.extend(data, {jid},{'auto_configure': _converse.user_settings.room_auto_configure}));
                 this.modal.hide();
                 ev.target.reset();
             },
             defaultRoomConfiguration(jid){
                 const roomDefaultConfiguration =  _converse.user_settings.roomDefaultConfiguration;
-                roomDefaultConfiguration.roomowners = [jid];
+                roomDefaultConfiguration.roomowners = [_converse.connection.jid.split('/')[0]];
+                roomDefaultConfiguration.roomname = jid.split('@')[0]
                 return roomDefaultConfiguration;
             }
         });
@@ -592,7 +592,6 @@ converse.plugins.add('converse-muc-views', {
                 _converse.api.trigger('chatRoomOpened', this);
             },
             videoCall(){
-                console.log('video call click')
             },
 
             render () {
@@ -621,7 +620,6 @@ converse.plugins.add('converse-muc-views', {
                  */
                 if (_.isNull(this.el.querySelector('.chat-area'))) {
                     const container_el = this.el.querySelector('.chatroom-body');
-                    // console.log('description',u.addHyperlinks(xss.filterXSS(_.get(this.model.get('subject'), 'text'), {'whiteList': {}})));
                     container_el.insertAdjacentHTML('beforeend', tpl_chatarea( {
                         '_converse': _converse,
                         'Strophe': Strophe,
@@ -735,7 +733,6 @@ converse.plugins.add('converse-muc-views', {
             generateHeadingHTML () {
                 /* Returns the heading HTML to be rendered.
                  */
-                console.log('room description',this.model.get('description'));
                 return tpl_chatroom_head(
                     
                     _.extend(this.model.toJSON(), {
@@ -2057,7 +2054,6 @@ converse.plugins.add('converse-muc-views', {
                     this.initInviteWidget();
                     return;
                 }
-                console.log('room',this.chatroomview.model)
                 this.inviteRoom(jid)
                 // this.promptForInvite({
                 //     'target': el,
@@ -2067,7 +2063,6 @@ converse.plugins.add('converse-muc-views', {
                 //     }});
             },
             inviteRoom(jid){
-                console.log('jid',jid)
                 this.chatroomview.model.directInvite(jid, 'invite to the room');
                 const form = this.el.querySelector('.room-invite form'),
                       input = form.querySelector('.invited-contact'),

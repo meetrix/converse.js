@@ -49333,9 +49333,7 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
         });
       },
 
-      videoCall() {
-        console.log('video call click');
-      },
+      videoCall() {},
 
       render() {
         // XXX: Is this still needed?
@@ -50970,7 +50968,6 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
           feedback_class = CONNECTION_STATUS_CSS_CLASS[pretty_status];
         }
 
-        console.log('username12', __("XMPP Address:"));
         return templates_login_panel_html__WEBPACK_IMPORTED_MODULE_10___default()(_.extend(this.model.toJSON(), {
           '__': __,
           '_converse': _converse,
@@ -53888,11 +53885,12 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
         }
 
         data.roomconfig = this.defaultRoomConfiguration(jid);
-        console.log('roomDefaultConfiguration', data);
 
         _converse.api.rooms.open(jid, _.extend(data, {
           jid
-        }), true);
+        }, {
+          'auto_configure': _converse.user_settings.room_auto_configure
+        }));
 
         this.modal.hide();
         ev.target.reset();
@@ -53900,7 +53898,8 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
 
       defaultRoomConfiguration(jid) {
         const roomDefaultConfiguration = _converse.user_settings.roomDefaultConfiguration;
-        roomDefaultConfiguration.roomowners = [jid];
+        roomDefaultConfiguration.roomowners = [_converse.connection.jid.split('/')[0]];
+        roomDefaultConfiguration.roomname = jid.split('@')[0];
         return roomDefaultConfiguration;
       }
 
@@ -54024,9 +54023,7 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
         _converse.api.trigger('chatRoomOpened', this);
       },
 
-      videoCall() {
-        console.log('video call click');
-      },
+      videoCall() {},
 
       render() {
         this.el.setAttribute('id', this.model.get('box_id'));
@@ -54055,8 +54052,7 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
         /* Render the UI container in which groupchat messages will appear.
          */
         if (_.isNull(this.el.querySelector('.chat-area'))) {
-          const container_el = this.el.querySelector('.chatroom-body'); // console.log('description',u.addHyperlinks(xss.filterXSS(_.get(this.model.get('subject'), 'text'), {'whiteList': {}})));
-
+          const container_el = this.el.querySelector('.chatroom-body');
           container_el.insertAdjacentHTML('beforeend', templates_chatarea_html__WEBPACK_IMPORTED_MODULE_8___default()({
             '_converse': _converse,
             'Strophe': Strophe,
@@ -54190,7 +54186,6 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
       generateHeadingHTML() {
         /* Returns the heading HTML to be rendered.
          */
-        console.log('room description', this.model.get('description'));
         return templates_chatroom_head_html__WEBPACK_IMPORTED_MODULE_16___default()(_.extend(this.model.toJSON(), {
           '_converse': _converse,
           'Strophe': Strophe,
@@ -55595,7 +55590,6 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
           return;
         }
 
-        console.log('room', this.chatroomview.model);
         this.inviteRoom(jid); // this.promptForInvite({
         //     'target': el,
         //     'text': {
@@ -55605,7 +55599,6 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
       },
 
       inviteRoom(jid) {
-        console.log('jid', jid);
         this.chatroomview.model.directInvite(jid, 'invite to the room');
         const form = this.el.querySelector('.room-invite form'),
               input = form.querySelector('.invited-contact'),
@@ -57752,8 +57745,6 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_4__["default"].plugins
       },
 
       toHTML() {
-        console.log('image', this.model.vcard.toJSON().image);
-        console.log('image', this.model.vcard.toJSON().jid);
         var dataUri = "data:" + this.model.vcard.toJSON().image_type + ";base64," + this.model.vcard.toJSON().image;
 
         if (this.model.vcard.toJSON().image === _converse.DEFAULT_IMAGE) {
@@ -59206,8 +59197,6 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_0__["default"].plugins
       },
 
       createAvatar(nickname, width, height, font) {
-        console.log('create canvas');
-
         if (!nickname) {
           nickname = 'no-name';
         }
@@ -59675,7 +59664,6 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_4__["default"].plugins
             }));
             this.name_auto_complete.auto_completing = true;
             this.name_auto_complete.evaluate();
-            console.log('name_auto_complete', this.name_auto_complete);
           }
         };
 
@@ -62637,7 +62625,6 @@ _converse_core__WEBPACK_IMPORTED_MODULE_2__["default"].plugins.add('converse-cha
         const is_spoiler = this.get('composing_spoiler'),
               origin_id = _converse.connection.getUniqueId();
 
-        console.log('string1', text);
         return {
           'jid': this.get('jid'),
           'nickname': this.get('nickname'),
@@ -67486,7 +67473,6 @@ _converse_core__WEBPACK_IMPORTED_MODULE_3__["default"].plugins.add('converse-muc
           const inputs = form ? sizzle(':input:not([type=button]):not([type=submit])', form) : [],
                 configArray = _.map(inputs, _utils_form__WEBPACK_IMPORTED_MODULE_4__["default"].webForm2xForm);
 
-          console.log('configArray', configArray);
           this.sendConfiguration(configArray, resolve, reject);
         });
       },
@@ -67506,8 +67492,13 @@ _converse_core__WEBPACK_IMPORTED_MODULE_3__["default"].plugins.add('converse-muc
             let count = fields.length;
 
             _.each(fields, field => {
-              const fieldname = field.getAttribute('var').replace('muc#roomconfig_', ''),
-                    type = field.getAttribute('type');
+              let fieldname;
+              const type = field.getAttribute('type');
+
+              if (type !== 'fixed') {
+                fieldname = field.getAttribute('var').replace('muc#roomconfig_', '');
+              }
+
               let value;
 
               if (fieldname in config) {
@@ -67518,7 +67509,8 @@ _converse_core__WEBPACK_IMPORTED_MODULE_3__["default"].plugins.add('converse-muc
 
                   case 'list-multi':
                     // TODO: we don't yet handle "list-multi" types
-                    value = field.innerHTML;
+                    //value = field.innerHTML;
+                    value = config[fieldname];
                     break;
 
                   default:
@@ -68495,7 +68487,6 @@ _converse_core__WEBPACK_IMPORTED_MODULE_3__["default"].plugins.add('converse-muc
             return createChatRoom(jids, attrs);
           }
 
-          console.log;
           return _.map(jids, _.partial(createChatRoom, _, attrs));
         },
 
@@ -68554,7 +68545,6 @@ _converse_core__WEBPACK_IMPORTED_MODULE_3__["default"].plugins.add('converse-muc
          * );
          */
         'open': async function open(jids, attrs) {
-          console.log('opening room', jids, 'configuratiom', attrs);
           await _converse.api.waitUntil('chatBoxesFetched');
 
           if (_.isUndefined(jids)) {
@@ -68564,7 +68554,6 @@ _converse_core__WEBPACK_IMPORTED_MODULE_3__["default"].plugins.add('converse-muc
 
             throw new TypeError(err_msg);
           } else if (_.isString(jids)) {
-            console.log('opening room');
             return _converse.api.rooms.create(jids, attrs).trigger('show');
           } else {
             return _.map(jids, jid => _converse.api.rooms.create(jid, attrs).trigger('show'));
@@ -93920,7 +93909,7 @@ __e( o.Strophe.getDomainFromJid(o.jid) ) +
  } ;
 __p += '\n    </div> -->\n    <!-- Sanitized in converse-muc-views. We want to render links. -->\n    <p class="chatroom-description">' +
 ((__t = (o.description)) == null ? '' : __t) +
-'</p>\n<!-- </div>\n<div class="chatbox-buttons row no-gutters">\n    <a class="chatbox-btn close-chatbox-button fa fa-sign-out-alt" title="' +
+'</p>\n<!-- </div>-->\n<!-- <div class="chatbox-buttons row no-gutters">\n    <a class="chatbox-btn close-chatbox-button fa fa-sign-out-alt" title="' +
 __e(o.info_close) +
 '"></a>\n    ';
  if (o.affiliation == 'owner') { ;
@@ -93930,7 +93919,7 @@ __e(o.info_configure) +
  } ;
 __p += '\n    <a class="chatbox-btn show-room-details-modal fa fa-info-circle" title="' +
 __e(o.info_details) +
-'"></a>\n</div> -->\n<div class="chatbox-title">\n<div class="top-toolbar">\n        <div class="container-fluid">\n            <div class="row">\n                <div class="col-sm-6 room-description">\n                    <div class="container-fluid">\n                        <div class="row channel-name">\n                            #' +
+'"></a>\n</div>  -->\n<div class="chatbox-title">\n<div class="top-toolbar">\n        <div class="container-fluid">\n            <div class="row">\n                <div class="col-sm-6 room-description">\n                    <div class="container-fluid">\n                        <div class="row channel-name">\n                            #' +
 __e( o.Strophe.getNodeFromJid(o.jid) ) +
 '\n                        </div>\n                        <div class="row channel-summary">\n                                <ul class="m-0 pl-0 d-block list-unstyled channel-info">\n                                <li class="favorite-star">\n                                    <span class="favorite"><i class="fas fa-star"></i></span>\n                                </li>\n                                <li class="favorite-user">\n                                    <span class="mr-1 ">' +
 ((__t = (o.occupants)) == null ? '' : __t) +

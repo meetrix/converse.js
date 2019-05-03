@@ -157,7 +157,6 @@ converse.plugins.add('converse-roomslist', {
             },
             createAvatar(nickname, width, height, font)
             {
-                console.log('create canvas');
                 if(!nickname){
                     nickname= 'no-name' 
                 }

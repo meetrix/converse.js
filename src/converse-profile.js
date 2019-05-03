@@ -58,8 +58,6 @@ converse.plugins.add('converse-profile', {
             },
 
             toHTML () {
-                console.log('image',this.model.vcard.toJSON().image)
-                console.log('image',this.model.vcard.toJSON().jid)
                 var dataUri = "data:" + this.model.vcard.toJSON().image_type + ";base64," + this.model.vcard.toJSON().image;
                 if(this.model.vcard.toJSON().image === _converse.DEFAULT_IMAGE){
                     var dataUri = createAvatar(this.model.vcard.toJSON().jid)

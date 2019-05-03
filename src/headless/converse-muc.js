@@ -630,7 +630,6 @@ converse.plugins.add('converse-muc', {
                 return new Promise((resolve, reject) => {
                     const inputs = form ? sizzle(':input:not([type=button]):not([type=submit])', form) : [],
                           configArray = _.map(inputs, u.webForm2xForm);
-                          console.log('configArray',configArray)
                     this.sendConfiguration(configArray, resolve, reject);
                 });
             },
@@ -650,8 +649,11 @@ converse.plugins.add('converse-muc', {
                         let count = fields.length;
 
                         _.each(fields, (field) => {
-                            const fieldname = field.getAttribute('var').replace('muc#roomconfig_', ''),
-                                type = field.getAttribute('type');
+                            let fieldname;
+                            const type = field.getAttribute('type');
+                            if (type !== 'fixed') {
+                                fieldname = field.getAttribute('var').replace('muc#roomconfig_', '');
+                            }
                             let value;
                             if (fieldname in config) {
                                 switch (type) {
@@ -660,7 +662,8 @@ converse.plugins.add('converse-muc', {
                                         break;
                                     case 'list-multi':
                                         // TODO: we don't yet handle "list-multi" types
-                                        value = field.innerHTML;
+                                        //value = field.innerHTML;
+                                        value = config[fieldname];
                                         break;
                                     default:
                                         value = config[fieldname];
@@ -708,6 +711,7 @@ converse.plugins.add('converse-muc', {
                 _.each(config || [], function (node) { iq.cnode(node).up(); });
                 callback = _.isUndefined(callback) ? _.noop : _.partial(callback, iq.nodeTree);
                 errback = _.isUndefined(errback) ? _.noop : _.partial(errback, iq.nodeTree);
+                
                 return _converse.api.sendIQ(iq).then(callback).catch(errback);
             },
 
@@ -1118,7 +1122,6 @@ converse.plugins.add('converse-muc', {
              */
             onOwnPresence (pres) {
                 this.saveAffiliationAndRole(pres);
-
                 const locked_room = pres.querySelector("status[code='201']");
                 if (locked_room) {
                     if (this.get('auto_configure')) {
@@ -1521,7 +1524,6 @@ converse.plugins.add('converse-muc', {
                     } else if (_.isString(jids)) {
                         return createChatRoom(jids, attrs);
                     }
-                    console.log
                     return _.map(jids, _.partial(createChatRoom, _, attrs));
                 },
 
@@ -1580,14 +1582,12 @@ converse.plugins.add('converse-muc', {
                  * );
                  */
                 'open': async function (jids, attrs) {
-                    console.log('opening room',jids,'configuratiom',attrs)
                     await _converse.api.waitUntil('chatBoxesFetched');
                     if (_.isUndefined(jids)) {
                         const err_msg = 'rooms.open: You need to provide at least one JID';
                         _converse.log(err_msg, Strophe.LogLevel.ERROR);
                         throw(new TypeError(err_msg));
                     } else if (_.isString(jids)) {
-                        console.log('opening room')
                         return _converse.api.rooms.create(jids, attrs).trigger('show');
                     } else {
                         return _.map(jids, (jid) => _converse.api.rooms.create(jid, attrs).trigger('show'));
