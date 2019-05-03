@@ -43,6 +43,10 @@ converse.plugins.add('converse-vcard', {
                 } else {
                     return Backbone.Model.prototype.set.apply(this, arguments);
                 }
+            },
+
+            getDisplayName () {
+                return this.get('nickname') || this.get('fullname') || this.get('jid');
             }
         });
 
@@ -114,21 +118,29 @@ converse.plugins.add('converse-vcard', {
             return onVCardData(jid, iq);
         }
 
-        /* Event handlers */
+        /************************ BEGIN Event Handlers ************************/
         _converse.initVCardCollection = function () {
             _converse.vcards = new _converse.VCards();
             const id = `${_converse.bare_jid}-converse.vcards`;
             _converse.vcards.browserStorage = new Backbone.BrowserStorage[_converse.config.get('storage')](id);
             _converse.vcards.fetch();
         }
-        _converse.api.listen.on('sessionInitialized', _converse.initVCardCollection);
+        _converse.api.listen.on('setUserJID', _converse.initVCardCollection);
+
+
+        _converse.api.listen.on('statusInitialized', () => {
+            const vcards = _converse.vcards;
+            const jid = _converse.xmppstatus.get('jid');
+            _converse.xmppstatus.vcard = vcards.findWhere({'jid': jid}) || vcards.create({'jid': jid});
+        });
 
 
         _converse.api.listen.on('addClientFeatures', () => {
             _converse.api.disco.own.features.add(Strophe.NS.VCARD);
         });
 
-        _.extend(_converse.api, {
+        /************************ BEGIN API ************************/
+        Object.assign(_converse.api, {
             /**
              * The XEP-0054 VCard API
              *

@@ -303,7 +303,24 @@
                         background-color: var(--chatroom-head-button-color);
                     }
                 }
+
+                .chatroom-form {
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: center;
+                    padding: 2em;
+                }
             }
+        }
+
+        .muc-bottom-panel {
+            border-top: var(--message-input-border-top);
+            height: 3em;
+            padding: 0.5em;
+            text-align: center;
+            font-size: var(--font-size-small);
+            background-color: var(--chatroom-head-color);
+            color: white;
         }
 
         .sendXMPPMessage {
@@ -497,20 +514,6 @@
             span {
                 .invited-contact {
                     margin: 0 0 0.5em -1px;
-                }
-            }
-        }
-    }
-}
-
-@include media-breakpoint-up(md) {
-    .chatroom {
-        .box-flyout {
-            .occupants {
-                .occupants-header {
-                    .hide-occupants {
-                        display: none;
-                    }
                 }
             }
         }

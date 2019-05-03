@@ -5,6 +5,14 @@
     }
 
     form {
+        .hidden-username {
+            opacity: 0 !important;
+            height: 0 !important;
+            padding: 0 !important;
+        }
+        .error-feedback {
+            margin-bottom: 0.5em;
+        }
         .form-check-label {
             margin-top: $form-check-input-margin-y;
         }
@@ -110,7 +118,12 @@
         }
 
         &.converse-centered-form {
+            min-height: 66%;
             text-align: center;
+            input {
+                max-width: 30em;
+                margin: auto;
+            }
         }
     }
 }

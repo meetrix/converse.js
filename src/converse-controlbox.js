@@ -92,12 +92,7 @@ converse.plugins.add('converse-controlbox', {
                 } else {
                     return this.__super__.model.apply(this, arguments);
                 }
-            },
-
-            chatBoxMayBeShown (chatbox) {
-                return this.__super__.chatBoxMayBeShown.apply(this, arguments) &&
-                       chatbox.get('id') !== 'controlbox';
-            },
+            }
         },
 
         ChatBoxViews: {
@@ -143,6 +138,14 @@ converse.plugins.add('converse-controlbox', {
                 return this.__super__.validate.apply(this, arguments);
             },
 
+            maybeShow (force) {
+                if (!force && this.get('id') === 'controlbox') {
+                   // Must return the chatbox
+                   return this;
+                }
+                return this.__super__.maybeShow.apply(this, arguments);
+            },
+
             initialize () {
                 if (this.get('id') === 'controlbox') {
                     this.set({'time_opened': moment(0).valueOf()});
@@ -185,18 +188,18 @@ converse.plugins.add('converse-controlbox', {
         const addControlBox = () => _converse.chatboxes.add({'id': 'controlbox'});
 
         _converse.ControlBox = _converse.ChatBox.extend({
-            defaults: {
-                'bookmarked': false,
-                'box_id': 'controlbox',
-                'chat_state': undefined,
-                'closed': !_converse.show_controlbox_by_default,
-                'num_unread': 0,
-                'type': _converse.CONTROLBOX_TYPE,
-                'url': ''
-            },
 
-            initialize () {
-                u.safeSave(this, {'time_opened': this.get('time_opened') || moment().valueOf()});
+            defaults () {
+                return {
+                    'bookmarked': false,
+                    'box_id': 'controlbox',
+                    'chat_state': undefined,
+                    'closed': !_converse.show_controlbox_by_default,
+                    'num_unread': 0,
+                    'time_opened': this.get('time_opened') || moment().valueOf(),
+                    'type': _converse.CONTROLBOX_TYPE,
+                    'url': ''
+                }
             }
         });
 
@@ -241,7 +244,7 @@ converse.plugins.add('converse-controlbox', {
                         this.model.set('closed', !_converse.show_controlbox_by_default);
                     }
                 }
-                this.el.innerHTML = tpl_controlbox(_.extend(this.model.toJSON()));
+                this.el.innerHTML = tpl_controlbox(Object.assign(this.model.toJSON()));
 
                 if (!this.model.get('closed')) {
                     this.show();
@@ -413,7 +416,7 @@ converse.plugins.add('converse-controlbox', {
                     feedback_class = CONNECTION_STATUS_CSS_CLASS[pretty_status];
                 }
                 return tpl_login_panel(
-                    _.extend(this.model.toJSON(), {
+                    Object.assign(this.model.toJSON(), {
                         '__': __,
                         '_converse': _converse,
                         'ANONYMOUS': _converse.ANONYMOUS,
@@ -573,7 +576,7 @@ converse.plugins.add('converse-controlbox', {
                     controlbox = addControlBox();
                 }
                 if (_converse.connection.connected) {
-                    controlbox.save({closed: false});
+                    controlbox.save({'closed': false});
                 } else {
                     controlbox.trigger('show');
                 }
@@ -655,7 +658,7 @@ converse.plugins.add('converse-controlbox', {
 
 
         /************************ BEGIN API ************************/
-        _.extend(_converse.api, {
+        Object.assign(_converse.api, {
             /**
              * The "controlbox" namespace groups methods pertaining to the
              * controlbox view

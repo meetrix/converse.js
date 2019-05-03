@@ -41,6 +41,7 @@ Strophe.addNamespace('ROSTERX', 'http://jabber.org/protocol/rosterx');
 Strophe.addNamespace('RSM', 'http://jabber.org/protocol/rsm');
 Strophe.addNamespace('SID', 'urn:xmpp:sid:0');
 Strophe.addNamespace('SPOILER', 'urn:xmpp:spoiler:0');
+Strophe.addNamespace('STANZAS', 'urn:ietf:params:xml:ns:xmpp-stanzas');
 Strophe.addNamespace('VCARD', 'vcard-temp');
 Strophe.addNamespace('VCARDUPDATE', 'vcard-temp:x:update');
 Strophe.addNamespace('XFORM', 'jabber:x:data');
@@ -74,7 +75,7 @@ const _converse = {
 
 _converse.VERSION_NAME = "v4.2.0";
 
-_.extend(_converse, Backbone.Events);
+Object.assign(_converse, Backbone.Events);
 
 // Make converse pluggable
 pluggable.enable(_converse, '_converse', 'pluggable');
@@ -83,6 +84,7 @@ pluggable.enable(_converse, '_converse', 'pluggable');
 // These are just the @converse/headless plugins, for the full converse,
 // the other plugins are whitelisted in src/converse.js
 _converse.core_plugins = [
+    'converse-caps',
     'converse-chatboxes',
     'converse-disco',
     'converse-mam',
@@ -148,7 +150,7 @@ _converse.CONNECTION_STATUS = {
     7: 'DISCONNECTING',
     8: 'ATTACHED',
     9: 'REDIRECT',
-   10: 'RECONNECTING',
+    10: 'RECONNECTING',
 };
 
 _converse.SUCCESS = 'success';
@@ -305,15 +307,10 @@ function addPromise (promise) {
     _converse.promises[promise] = u.getResolveablePromise();
 }
 
-_converse.emit = function (name) {
-   _converse.log(
-      "(DEPRECATION) "+
-      "_converse.emit has been has been deprecated. "+
-      "Please use `_converse.api.trigger` instead.",
-      Strophe.LogLevel.WARN
-   )
-   _converse.api.emit.apply(_converse, arguments);
-};
+function isTestEnv () {
+    return _.get(_converse.connection, 'service') === 'jasmine tests';
+}
+
 
 _converse.isUniView = function () {
     /* We distinguish between UniView and MultiView instances.
@@ -349,18 +346,10 @@ function initPlugins() {
         });
     }
 
-    _converse.pluggable.initializePlugins({
-        'updateSettings' () {
-            _converse.log(
-                "(DEPRECATION) "+
-                "The `updateSettings` method has been deprecated. "+
-                "Please use `_converse.api.settings.update` instead.",
-                Strophe.LogLevel.WARN
-            )
-            _converse.api.settings.update.apply(_converse, arguments);
-        },
-        '_converse': _converse
-    }, whitelist, _converse.blacklisted_plugins);
+    _converse.pluggable.initializePlugins(
+        {'_converse': _converse},
+        whitelist, _converse.blacklisted_plugins
+    );
     
     /**
      * Triggered once all plugins have been initialized. This is a useful event if you want to
@@ -435,25 +424,53 @@ _converse.initConnection = function () {
 }
 
 
+async function initSession () {
+   const id = 'converse.bosh-session';
+   _converse.session = new Backbone.Model({id});
+   _converse.session.browserStorage = new Backbone.BrowserStorage.session(id);
+   try {
+      await new Promise((success, error) => _converse.session.fetch({success, error}));
+      if (_converse.jid && _converse.session.get('jid') !== _converse.jid) {
+         _converse.session.clear({'silent': true});
+         _converse.session.save({'jid': _converse.jid, id});
+      }
+   } catch (e) {
+      if (_converse.jid) {
+         _converse.session.save({'jid': _converse.jid});
+      }
+   }
+   /**
+    * Triggered once the session has been initialized. The session is a
+    * persistent object which stores session information in the browser storage.
+    * @event _converse#sessionInitialized
+    * @memberOf _converse
+    */
+   _converse.api.trigger('sessionInitialized');
+}
+
+
 function setUpXMLLogging () {
     Strophe.log = function (level, msg) {
         _converse.log(msg, level);
     };
-    if (_converse.debug) {
-        _converse.connection.xmlInput = function (body) {
+    _converse.connection.xmlInput = function (body) {
+        if (_converse.debug) {
             _converse.log(body.outerHTML, Strophe.LogLevel.DEBUG, 'color: darkgoldenrod');
-        };
-        _converse.connection.xmlOutput = function (body) {
+        }
+    };
+    _converse.connection.xmlOutput = function (body) {
+        if (_converse.debug) {
             _converse.log(body.outerHTML, Strophe.LogLevel.DEBUG, 'color: darkcyan');
-        };
-    }
+        }
+    };
 }
 
 
-function finishInitialization () {
+async function finishInitialization () {
     initClientConfig();
     initPlugins();
     _converse.initConnection();
+    await initSession();
     _converse.logIn();
     _converse.registerGlobalEventHandlers();
     if (!Backbone.history.started) {
@@ -464,6 +481,44 @@ function finishInitialization () {
             _converse.api.disco.own.features.add(Strophe.NS.IDLE);
         });
     }
+}
+
+function fetchLoginCredentials (wait=0) {
+   return new Promise(_.debounce((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.open('GET', _converse.credentials_url, true);
+      xhr.setRequestHeader('Accept', "application/json, text/javascript");
+      xhr.onload = () => {
+         if (xhr.status >= 200 && xhr.status < 400) {
+            const data = JSON.parse(xhr.responseText);
+            resolve({
+               'jid': data.jid,
+               'password': data.password
+            });
+         } else {
+            reject(new Error(`${xhr.status}: ${xhr.responseText}`));
+         }
+      };
+      xhr.onerror = reject;
+      xhr.send();
+   }, wait));
+}
+
+async function getLoginCredentials () {
+   let credentials;
+   let wait = 0;
+   while (!credentials) {
+      try {
+         credentials = await fetchLoginCredentials(wait); // eslint-disable-line no-await-in-loop
+      } catch (e) {
+         _converse.log("Could not fetch login credentials", Strophe.LogLevel.ERROR);
+         _converse.log(e, Strophe.LogLevel.ERROR);
+      }
+      // If unsuccessful, we wait 2 seconds between subsequent attempts to
+      // fetch the credentials.
+      wait = 2000;
+   }
+   return credentials;
 }
 
 
@@ -477,26 +532,13 @@ function cleanup () {
    // out or disconnecting in the previous session.
    // This happens in tests. We therefore first clean up.
    Backbone.history.stop();
-   if (_converse.chatboxviews) {
-      _converse.chatboxviews.closeAllChatBoxes();
-   }
    unregisterGlobalEventHandlers();
-   window.localStorage.clear();
-   window.sessionStorage.clear();
-   if (_converse.bookmarks) {
-      _converse.bookmarks.reset();
-   }
    delete _converse.controlboxtoggle;
    if (_converse.chatboxviews) {
       delete _converse.chatboxviews;
    }
-   _converse.connection.reset();
-   _converse.tearDown();
    _converse.stopListening();
    _converse.off();
-
-   delete _converse.config;
-   initClientConfig();
 }
 
 
@@ -522,7 +564,7 @@ _converse.initialize = async function (settings, callback) {
 
     _.assignIn(this, this.default_settings);
     // Allow only whitelisted configuration attributes to be overwritten
-    _.assignIn(this, _.pick(settings, _.keys(this.default_settings)));
+    _.assignIn(this, _.pick(settings, Object.keys(this.default_settings)));
 
     if (this.authentication === _converse.ANONYMOUS) {
         if (this.auto_login && !this.jid) {
@@ -689,9 +731,9 @@ _converse.initialize = async function (settings, callback) {
         _converse.connection.reconnecting = true;
         _converse.tearDown();
         _converse.logIn(null, true);
-    }, 3000, {'leading': true});
+    }, 2000, {'leading': true});
 
-    this.disconnect = function () {
+    this.finishDisconnection = function () {
         _converse.log('DISCONNECTED');
         delete _converse.connection.reconnecting;
         _converse.connection.reset();
@@ -721,14 +763,14 @@ _converse.initialize = async function (settings, callback) {
                 _converse.api.trigger('will-reconnect');
                 return _converse.reconnect();
             } else {
-                return _converse.disconnect();
+                return _converse.finishDisconnection();
             }
         } else if (_converse.disconnection_cause === _converse.LOGOUT ||
                 (!_.isUndefined(reason) && reason === _.get(Strophe, 'ErrorCondition.NO_AUTH_MECH')) ||
                 reason === "host-unknown" ||
                 reason === "remote-connection-failed" ||
                 !_converse.auto_reconnect) {
-            return _converse.disconnect();
+            return _converse.finishDisconnection();
         }
         /**
          * Triggered when the connection has dropped, but Converse will attempt
@@ -852,27 +894,12 @@ _converse.initialize = async function (settings, callback) {
         }
     }
 
-
-    this.initSession = function () {
-        const id = 'converse.bosh-session';
-        _converse.session = new Backbone.Model({id});
-        _converse.session.browserStorage = new Backbone.BrowserStorage.session(id);
-        _converse.session.fetch();
-        /**
-         * Triggered once the session has been initialized. The session is a
-         * persistent object which stores session information in the browser storage.
-         * @event _converse#sessionInitialized
-         * @memberOf _converse
-         */
-        _converse.api.trigger('sessionInitialized');
-    };
-
     this.clearSession = function () {
-        if (!_converse.config.get('trusted')) {
+        if (!_converse.config.get('trusted') || isTestEnv()) {
             window.localStorage.clear();
             window.sessionStorage.clear();
-        } else if (!_.isUndefined(this.session) && this.session.browserStorage) {
-            this.session.browserStorage._clear();
+        } else {
+            _.get(_converse, 'session.browserStorage', {'_clear': _.noop})._clear();
         }
         /**
          * Triggered once the session information has been cleared,
@@ -892,7 +919,7 @@ _converse.initialize = async function (settings, callback) {
             _converse.tearDown();
         }
         // Recreate all the promises
-        _.each(_.keys(_converse.promises), addPromise);
+        _.each(Object.keys(_converse.promises), addPromise);
         /**
          * Triggered once the user has logged out.
          * @event _converse#logout
@@ -1020,6 +1047,17 @@ _converse.initialize = async function (settings, callback) {
         _converse.bare_jid = Strophe.getBareJidFromJid(_converse.connection.jid);
         _converse.resource = Strophe.getResourceFromJid(_converse.connection.jid);
         _converse.domain = Strophe.getDomainFromJid(_converse.connection.jid);
+        _converse.session.save({
+            'jid': _converse.connection.jid,
+            'bare_jid': Strophe.getBareJidFromJid(_converse.connection.jid),
+            'resource': Strophe.getResourceFromJid(_converse.connection.jid),
+            'domain': Strophe.getDomainFromJid(_converse.connection.jid)
+        });
+        /**
+         * Triggered once we have the user's full JID and it's been save in the
+         * session.
+         * @event _converse#setUserJID
+         */
         _converse.api.trigger('setUserJID');
     };
 
@@ -1029,7 +1067,6 @@ _converse.initialize = async function (settings, callback) {
          */
         _converse.connection.flush(); // Solves problem of returned PubSub BOSH response not received by browser
         _converse.setUserJID();
-        _converse.initSession();
         _converse.enableCarbons();
         _converse.initStatus(reconnecting)
     };
@@ -1058,11 +1095,6 @@ _converse.initialize = async function (settings, callback) {
         },
 
         initialize () {
-            this.vcard = _converse.vcards.findWhere({'jid': this.get('jid')});
-            if (_.isNil(this.vcard)) {
-                this.vcard = _converse.vcards.create({'jid': this.get('jid')});
-            }
-
             this.on('change:status', (item) => {
                 const status = this.get('status');
                 this.sendPresence(status);
@@ -1129,30 +1161,6 @@ _converse.initialize = async function (settings, callback) {
     });
 
 
-    this.fetchLoginCredentials = () =>
-        new Promise((resolve, reject) => {
-            const xhr = new XMLHttpRequest();
-            xhr.open('GET', _converse.credentials_url, true);
-            xhr.setRequestHeader('Accept', "application/json, text/javascript");
-            xhr.onload = function() {
-                if (xhr.status >= 200 && xhr.status < 400) {
-                    const data = JSON.parse(xhr.responseText);
-                    resolve({
-                        'jid': data.jid,
-                        'password': data.password
-                    });
-                } else {
-                    xhr.onerror();
-                }
-            };
-            xhr.onerror = function () {
-                delete _converse.connection;
-                _converse.api.trigger('noResumeableSession', this);
-                reject(xhr.responseText);
-            };
-            xhr.send();
-        });
-
     this.startNewBOSHSession = function () {
         const xhr = new XMLHttpRequest();
         xhr.open('GET', _converse.prebind_url, true);
@@ -1182,24 +1190,28 @@ _converse.initialize = async function (settings, callback) {
 
     this.restoreBOSHSession = function (jid_is_required) {
         /* Tries to restore a cached BOSH session. */
-        if (!this.jid) {
+        const jid = _converse.session.get('jid');
+        if (!jid) {
             const msg = "restoreBOSHSession: tried to restore a \"keepalive\" session "+
                 "but we don't have the JID for the user!";
             if (jid_is_required) {
                 throw new Error(msg);
             } else {
                 _converse.log(msg);
+                return false;
             }
         }
-        try {
-            this.connection.restore(this.jid, this.onConnectStatusChanged);
-            return true;
-        } catch (e) {
-            _converse.log(
-                "Could not restore session for jid: "+
-                this.jid+" Error message: "+e.message, Strophe.LogLevel.WARN);
-            this.clearSession(); // We want to clear presences (see #555)
-            return false;
+        else {
+            try {
+                this.connection.restore(jid, this.onConnectStatusChanged);
+                return true;
+            } catch (e) {
+                _converse.log(
+                    "Could not restore session for jid: "+
+                    jid+" Error message: "+e.message, Strophe.LogLevel.WARN);
+                this.clearSession(); // We want to clear presences (see #555)
+                return false;
+            }
         }
     };
 
@@ -1228,7 +1240,7 @@ _converse.initialize = async function (settings, callback) {
         }
     };
 
-    this.attemptNonPreboundSession = function (credentials, reconnecting) {
+    this.attemptNonPreboundSession = async function (credentials, reconnecting) {
         /* Handle session resumption or initialization when prebind is not being used.
          *
          * Two potential options exist and are handled in this method:
@@ -1245,10 +1257,8 @@ _converse.initialize = async function (settings, callback) {
             this.autoLogin(credentials);
         } else if (this.auto_login) {
             if (this.credentials_url) {
-                this.fetchLoginCredentials().then(
-                    this.autoLogin.bind(this),
-                    this.autoLogin.bind(this)
-                );
+                const data = await getLoginCredentials();
+                this.autoLogin(data);
             } else if (!this.jid) {
                 throw new Error(
                     "attemptNonPreboundSession: If you use auto_login, "+
@@ -1286,11 +1296,11 @@ _converse.initialize = async function (settings, callback) {
             const password = _.isNil(credentials) ? (_converse.connection.pass || this.password) : credentials.password;
             if (!password) {
                 if (this.auto_login) {
-                    throw new Error("initConnection: If you use auto_login and "+
+                    throw new Error("autoLogin: If you use auto_login and "+
                         "authentication='login' then you also need to provide a password.");
                 }
                 _converse.setDisconnectionCause(Strophe.Status.AUTHFAIL, undefined, true);
-                _converse.disconnect();
+                _converse.api.connection.disconnect();
                 return;
             }
             const resource = Strophe.getResourceFromJid(this.jid);
@@ -1339,8 +1349,8 @@ _converse.initialize = async function (settings, callback) {
         this.connection = settings.connection;
     }
 
-    if (_.get(_converse.connection, 'service') === 'jasmine tests') {
-        finishInitialization();
+    if (isTestEnv()) {
+        await finishInitialization();
         return _converse;
     } else if (!_.isUndefined(i18n)) {
         const url = u.interpolate(_converse.locales_url, {'locale': _converse.locale});
@@ -1350,7 +1360,7 @@ _converse.initialize = async function (settings, callback) {
             _converse.log(e.message, Strophe.LogLevel.FATAL);
         }
     }
-    finishInitialization();
+    await finishInitialization();
     return init_promise;
 };
 
@@ -1390,17 +1400,13 @@ _converse.api = {
          * @memberOf _converse.api.connection
          */
         'disconnect' () {
-            _converse.connection.disconnect();
+            if (_converse.connection) {
+               _converse.connection.disconnect();
+            } else {
+               _converse.tearDown();
+               _converse.clearSession();
+            }
         },
-    },
-
-    /**
-     * Lets you emit (i.e. trigger) events.
-     * @deprecated since version 4.2.0. Use _converse.api.trigger instead.
-     * @method _converse.api.emit
-     */
-    'emit' () {
-         _converse.api.trigger.apply(this, arguments);
     },
 
     /**
@@ -1494,7 +1500,7 @@ _converse.api = {
              */
             'set' (value, message) {
                 const data = {'status': value};
-                if (!_.includes(_.keys(_converse.STATUS_WEIGHTS), value)) {
+                if (!_.includes(Object.keys(_converse.STATUS_WEIGHTS), value)) {
                     throw new Error('Invalid availability value. See https://xmpp.org/rfcs/rfc3921.html#rfc.section.2.2.2.1');
                 }
                 if (_.isString(message)) {
@@ -1568,7 +1574,7 @@ _converse.api = {
          * @example _converse.api.settings.get("play_sounds");
          */
         'get' (key) {
-            if (_.includes(_.keys(_converse.default_settings), key)) {
+            if (_.includes(Object.keys(_converse.default_settings), key)) {
                 return _converse[key];
             }
         },
@@ -1593,10 +1599,10 @@ _converse.api = {
         'set' (key, val) {
             const o = {};
             if (_.isObject(key)) {
-                _.assignIn(_converse, _.pick(key, _.keys(_converse.default_settings)));
+                _.assignIn(_converse, _.pick(key, Object.keys(_converse.default_settings)));
             } else if (_.isString("string")) {
                 o[key] = val;
-                _.assignIn(_converse, _.pick(o, _.keys(_converse.default_settings)));
+                _.assignIn(_converse, _.pick(o, Object.keys(_converse.default_settings)));
             }
         }
     },

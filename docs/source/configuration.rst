@@ -563,9 +563,12 @@ It allows you to specify a URL which Converse will call when it needs to get
 the username and password (or authentication token) which Converse will use
 to automatically log the user in.
 
-If ``auto_reconnect`` is also set to true, then Converse will automatically
+If ``auto_reconnect`` is also set to ``true``, then Converse will automatically
 fetch new credentials from the ``credentials_url`` whenever the connection or
 session drops, and then attempt to reconnect and establish a new session.
+
+If the request to the ``credentials_url`` URL fails for whatever reason,
+Converse will continuously retry to fetch the credentials every 2 seconds.
 
 The server behind ``credentials_url`` should return a JSON encoded object::
 
@@ -590,6 +593,8 @@ Afterwards, ss soon as there is any activity (for example, the mouse moves),
 a chat state indication of ``active`` will be sent out.
 
 A value of ``0`` means that this feature is disabled.
+
+.. _`debug`:
 
 debug
 -----
@@ -964,8 +969,8 @@ Message carbons is the XEP (Jabber protocol extension) specifically drafted to
 solve this problem, while `forward_messages`_ uses
 `stanza forwarding <http://www.xmpp.org/extensions/xep-0297.html>`_
 
-muc_disable_moderator_commands
-------------------------------
+muc_disable_slash_commands
+--------------------------
 
 * Default: ``false``
 
@@ -979,7 +984,7 @@ The following example will disable 'mute' and 'voice' command:
 
 .. code-block:: javascript
 
-    muc_disable_moderator_commands: ['mute', 'voice'],
+    muc_disable_slash_commands: ['mute', 'voice'],
 
 muc_domain
 ----------
@@ -1059,6 +1064,8 @@ muc_show_join_leave
 
 Determines whether Converse will show info messages inside a chatroom
 whenever a user joins or leaves it.
+
+.. _`nickname`:
 
 nickname
 --------

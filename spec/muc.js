@@ -167,7 +167,7 @@
                 chatroomview = _converse.chatboxviews.get('room@conference.example.org');
 
                 // We pretend this is a new room, so no disco info is returned.
-                var features_stanza = $iq({
+                const features_stanza = $iq({
                         from: 'room@conference.example.org',
                         'id': IQ_id,
                         'to': 'dummy@localhost/desktop',
@@ -184,7 +184,7 @@
                  *  </x>
                  * </presence>
                  */
-                var presence = $pres({
+                const presence = $pres({
                         from:'room@conference.example.org/some1',
                         to:'dummy@localhost/pda'
                     })
@@ -299,7 +299,6 @@
 
                 const view = _converse.chatboxviews.get('lounge@localhost');
                 spyOn(view, 'join').and.callThrough();
-                spyOn(view, 'submitNickname').and.callThrough();
 
                 /* <iq to="myroom@conference.chat.example.org"
                  *     from="jordie.langen@chat.example.org/converse.js-11659299"
@@ -336,7 +335,6 @@
                 const input = await test_utils.waitUntil(() => view.el.querySelector('input[name="nick"]'));
                 input.value = 'nicky';
                 view.el.querySelector('input[type=submit]').click();
-                expect(view.submitNickname).toHaveBeenCalled();
                 expect(view.join).toHaveBeenCalled();
 
                 // The user has just entered the room (because join was called)
@@ -1231,7 +1229,7 @@
                 /* Server responds with the configuration form.
                  * See: // https://xmpp.org/extensions/xep-0045.html#example-165
                  */
-                var config_stanza = $iq({from: 'coven@chat.shakespeare.lit',
+                const config_stanza = $iq({from: 'coven@chat.shakespeare.lit',
                     'id': IQ_id,
                     'to': 'dummy@localhost/desktop',
                     'type': 'result'})
@@ -1712,7 +1710,7 @@
 
             it("allows the user to invite their roster contacts to enter the groupchat",
                 mock.initConverse(
-                    null, ['rosterGroupsFetched', 'chatBoxesFetched'], {},
+                    null, ['rosterGroupsFetched', 'chatBoxesFetched'], {'view_mode': 'fullscreen'},
                     async function (done, _converse) {
 
                 test_utils.createContacts(_converse, 'current'); // We need roster contacts, so that we have someone to invite
@@ -1783,9 +1781,7 @@
                     async function (done, _converse) {
 
                 test_utils.createContacts(_converse, 'current'); // We need roster contacts, who can invite us
-                spyOn(window, 'confirm').and.callFake(function () {
-                    return true;
-                });
+                spyOn(window, 'confirm').and.callFake(() => true);
                 await test_utils.openAndEnterChatRoom(_converse, 'lounge', 'localhost', 'dummy');
                 const view = _converse.chatboxviews.get('lounge@localhost');
                 view.close(); // Hack, otherwise we have to mock stanzas.
@@ -2552,23 +2548,24 @@
                     null, ['rosterGroupsFetched'], {},
                     async function (done, _converse) {
 
+                spyOn(window, 'confirm').and.callFake(() => true);
                 await test_utils.openAndEnterChatRoom(_converse, 'lounge', 'localhost', 'dummy');
                 const view = _converse.chatboxviews.get('lounge@localhost');
-                var textarea = view.el.querySelector('.chat-textarea');
-                textarea.value = '/help This is the groupchat subject';
-                view.keyPressed({
-                    target: textarea,
-                    preventDefault: _.noop,
-                    keyCode: 13
-                });
+                const textarea = view.el.querySelector('.chat-textarea');
+                textarea.value = '/clear';
 
-                const info_messages = Array.prototype.slice.call(view.el.querySelectorAll('.chat-info'), 0);
+                const enter = { 'target': textarea, 'preventDefault': _.noop, 'keyCode': 13 };
+                view.keyPressed(enter);
+                textarea.value = '/help';
+                view.keyPressed(enter);
+
+                let info_messages = Array.prototype.slice.call(view.el.querySelectorAll('.chat-info'), 0);
                 expect(info_messages.length).toBe(19);
                 expect(info_messages.pop().textContent).toBe('/voice: Allow muted user to post messages');
                 expect(info_messages.pop().textContent).toBe('/topic: Set groupchat subject (alias for /subject)');
                 expect(info_messages.pop().textContent).toBe('/subject: Set groupchat subject');
                 expect(info_messages.pop().textContent).toBe('/revoke: Revoke user\'s membership');
-                expect(info_messages.pop().textContent).toBe('/register: Register a nickname for this groupchat');
+                expect(info_messages.pop().textContent).toBe('/register: Register your nickname');
                 expect(info_messages.pop().textContent).toBe('/owner: Grant ownership of this groupchat');
                 expect(info_messages.pop().textContent).toBe('/op: Grant moderator role to user');
                 expect(info_messages.pop().textContent).toBe('/nick: Change your nickname');
@@ -2579,33 +2576,68 @@
                 expect(info_messages.pop().textContent).toBe('/help: Show this menu');
                 expect(info_messages.pop().textContent).toBe('/destroy: Remove this groupchat');
                 expect(info_messages.pop().textContent).toBe('/deop: Change user role to participant');
-                expect(info_messages.pop().textContent).toBe('/clear: Remove messages');
+                expect(info_messages.pop().textContent).toBe('/clear: Clear the chat area');
                 expect(info_messages.pop().textContent).toBe('/ban: Ban user from groupchat');
                 expect(info_messages.pop().textContent).toBe('/admin: Change user\'s affiliation to admin');
+                expect(info_messages.pop().textContent).toBe('You can run the following commands');
+
+                const occupant = view.model.occupants.findWhere({'jid': _converse.bare_jid});
+                occupant.set('affiliation', 'admin');
+                textarea.value = '/clear';
+                view.keyPressed(enter);
+                textarea.value = '/help';
+                view.keyPressed(enter);
+                info_messages = sizzle('.chat-info', view.el).slice(1);
+                expect(info_messages.length).toBe(17);
+                let commands = info_messages.map(m => m.textContent.replace(/:.*$/, ''));
+                expect(commands).toEqual([
+                    "/admin", "/ban", "/clear", "/deop", "/destroy",
+                    "/help", "/kick", "/me", "/member", "/mute", "/nick",
+                    "/op", "/register", "/revoke", "/subject", "/topic", "/voice"
+                ]);
+                occupant.set('affiliation', 'member');
+                textarea.value = '/clear';
+                view.keyPressed(enter);
+                textarea.value = '/help';
+                view.keyPressed(enter);
+                info_messages = sizzle('.chat-info', view.el).slice(1);
+                expect(info_messages.length).toBe(10);
+                commands = info_messages.map(m => m.textContent.replace(/:.*$/, ''));
+                expect(commands).toEqual(["/clear", "/help", "/kick", "/me", "/mute", "/nick", "/register", "/subject", "/topic", "/voice"]);
+
+                occupant.set('role', 'participant');
+                textarea.value = '/clear';
+                view.keyPressed(enter);
+                textarea.value = '/help';
+                view.keyPressed(enter);
+                info_messages = sizzle('.chat-info', view.el).slice(1);
+                expect(info_messages.length).toBe(7);
+                commands = info_messages.map(m => m.textContent.replace(/:.*$/, ''));
+                expect(commands).toEqual(["/clear", "/help", "/me", "/nick", "/register", "/subject", "/topic"]);
                 done();
             }));
 
             it("takes /help to show the available commands and commands can be disabled by config",
                 mock.initConverse(
-                    null, ['rosterGroupsFetched'], {muc_disable_moderator_commands: ['mute', 'voice']},
+                    null, ['rosterGroupsFetched'], {muc_disable_slash_commands: ['mute', 'voice']},
                     async function (done, _converse) {
 
                 await test_utils.openAndEnterChatRoom(_converse, 'lounge', 'localhost', 'dummy');
                 const view = _converse.chatboxviews.get('lounge@localhost');
                 var textarea = view.el.querySelector('.chat-textarea');
-                textarea.value = '/help This is the groupchat subject';
-                view.keyPressed({
-                    target: textarea,
-                    preventDefault: _.noop,
-                    keyCode: 13
-                });
+                const enter = { 'target': textarea, 'preventDefault': _.noop, 'keyCode': 13 };
+                spyOn(window, 'confirm').and.callFake(() => true);
+                textarea.value = '/clear';
+                view.keyPressed(enter);
+                textarea.value = '/help';
+                view.keyPressed(enter);
 
                 const info_messages = Array.prototype.slice.call(view.el.querySelectorAll('.chat-info'), 0);
                 expect(info_messages.length).toBe(17);
                 expect(info_messages.pop().textContent).toBe('/topic: Set groupchat subject (alias for /subject)');
                 expect(info_messages.pop().textContent).toBe('/subject: Set groupchat subject');
                 expect(info_messages.pop().textContent).toBe('/revoke: Revoke user\'s membership');
-                expect(info_messages.pop().textContent).toBe('/register: Register a nickname for this groupchat');
+                expect(info_messages.pop().textContent).toBe('/register: Register your nickname');
                 expect(info_messages.pop().textContent).toBe('/owner: Grant ownership of this groupchat');
                 expect(info_messages.pop().textContent).toBe('/op: Grant moderator role to user');
                 expect(info_messages.pop().textContent).toBe('/nick: Change your nickname');
@@ -2615,9 +2647,10 @@
                 expect(info_messages.pop().textContent).toBe('/help: Show this menu');
                 expect(info_messages.pop().textContent).toBe('/destroy: Remove this groupchat');
                 expect(info_messages.pop().textContent).toBe('/deop: Change user role to participant');
-                expect(info_messages.pop().textContent).toBe('/clear: Remove messages');
+                expect(info_messages.pop().textContent).toBe('/clear: Clear the chat area');
                 expect(info_messages.pop().textContent).toBe('/ban: Ban user from groupchat');
                 expect(info_messages.pop().textContent).toBe('/admin: Change user\'s affiliation to admin');
+                expect(info_messages.pop().textContent).toBe('You can run the following commands');
                 done();
             }));
 
@@ -3455,7 +3488,7 @@
                 const view = _converse.chatboxviews.get(groupchat_jid);
                 spyOn(view, 'renderPasswordForm').and.callThrough();
 
-                var presence = $pres().attrs({
+                const presence = $pres().attrs({
                         'from': `${groupchat_jid}/dummy`,
                         'id': u.getUniqueId(),
                         'to': 'dummy@localhost/pda',
@@ -3469,7 +3502,7 @@
                 const chat_body = view.el.querySelector('.chatroom-body');
                 expect(view.renderPasswordForm).toHaveBeenCalled();
                 expect(chat_body.querySelectorAll('form.chatroom-form').length).toBe(1);
-                expect(chat_body.querySelector('legend').textContent)
+                expect(chat_body.querySelector('label').textContent)
                     .toBe('This groupchat requires a password');
 
                 // Let's submit the form
@@ -4635,6 +4668,108 @@
                     done();
                 }));
             });
+        });
+
+        describe("A muted user", function () {
+
+            it("will receive a user-friendly error message when trying to send a message",
+                mock.initConverse(
+                    null, ['rosterGroupsFetched', 'chatBoxesFetched'], {},
+                    async function (done, _converse) {
+
+                await test_utils.openAndEnterChatRoom(_converse, 'trollbox', 'localhost', 'troll');
+                const view = _converse.chatboxviews.get('trollbox@localhost');
+                const textarea = view.el.querySelector('.chat-textarea');
+                textarea.value = 'Hello world';
+                view.onFormSubmitted(new Event('submit'));
+
+                const stanza = u.toStanza(`
+                    <message xmlns="jabber:client" type="error" to="troll@localhost/resource" from="trollbox@localhost">
+                        <error type="auth"><forbidden xmlns="urn:ietf:params:xml:ns:xmpp-stanzas"/></error>
+                    </message>`);
+                _converse.connection._dataRecv(test_utils.createRequest(stanza));
+
+                await new Promise((resolve, reject) => view.once('messageInserted', resolve));
+                expect(view.el.querySelector('.chat-error').textContent).toBe(
+                    "Your message was not delivered because you're not allowed to send messages in this groupchat.");
+                done();
+            }));
+
+            it("will see an explanatory message instead of a textarea",
+                mock.initConverse(
+                    null, ['rosterGroupsFetched', 'chatBoxesFetched'], {},
+                    async function (done, _converse) {
+
+                const features = [
+                    'http://jabber.org/protocol/muc',
+                    'jabber:iq:register',
+                    Strophe.NS.SID,
+                    'muc_moderated',
+                ]
+                await test_utils.openAndEnterChatRoom(_converse, 'trollbox', 'localhost', 'troll', features);
+                const view = _converse.chatboxviews.get('trollbox@localhost');
+                expect(_.isNull(view.el.querySelector('.chat-textarea'))).toBe(false);
+
+                let stanza = u.toStanza(`
+                    <presence
+                        from='trollbox@localhost/troll'
+                        to='dummy@localhost/resource'>
+                    <x xmlns='http://jabber.org/protocol/muc#user'>
+                        <item affiliation='moderator'
+                            nick='troll'
+                            role='visitor'/>
+                        <status code='110'/>
+                    </x>
+                    </presence>`);
+                _converse.connection._dataRecv(test_utils.createRequest(stanza));
+
+                expect(view.el.querySelector('.chat-textarea')).toBe(null);
+                let bottom_panel = view.el.querySelector('.muc-bottom-panel');
+                expect(bottom_panel.textContent.trim()).toBe("You're not allowed to send messages in this room");
+
+                // This only applies to moderated rooms, so let's check that
+                // the textarea becomes visible when the room's
+                // configuration changes to be non-moderated
+                view.model.features.set('moderated', false);
+                expect(view.el.querySelector('.muc-bottom-panel')).toBe(null);
+                let textarea = view.el.querySelector('.chat-textarea');
+                expect(_.isNull(textarea)).toBe(false);
+
+                view.model.features.set('moderated', true);
+                expect(view.el.querySelector('.chat-textarea')).toBe(null);
+                bottom_panel = view.el.querySelector('.muc-bottom-panel');
+                expect(bottom_panel.textContent.trim()).toBe("You're not allowed to send messages in this room");
+
+                // Check now that things get restored when the user is given a voice
+                let info_msgs = sizzle('.chat-info', view.el);
+                expect(info_msgs.length).toBe(4);
+                expect(info_msgs[2].textContent).toBe("troll is no longer a moderator");
+                expect(info_msgs[3].textContent).toBe("troll has been muted");
+
+                stanza = u.toStanza(`
+                    <presence
+                        from='trollbox@localhost/troll'
+                        to='dummy@localhost/resource'>
+                    <x xmlns='http://jabber.org/protocol/muc#user'>
+                        <item affiliation='moderator'
+                            nick='troll'
+                            role='participant'/>
+                        <status code='110'/>
+                    </x>
+                    </presence>`);
+                _converse.connection._dataRecv(test_utils.createRequest(stanza));
+                info_msgs = sizzle('.chat-info', view.el);
+
+                bottom_panel = view.el.querySelector('.muc-bottom-panel');
+                expect(bottom_panel).toBe(null);
+
+                textarea = view.el.querySelector('.chat-textarea');
+                expect(_.isNull(textarea)).toBe(false);
+
+                expect(info_msgs.length).toBe(5);
+                expect(info_msgs[4].textContent).toBe("troll has been given a voice again");
+                done();
+            }));
         });
     });
 }));
