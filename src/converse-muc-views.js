@@ -429,10 +429,9 @@ converse.plugins.add('converse-muc-views', {
                 this.el.addEventListener('shown.bs.modal', () => {
                     this.el.querySelector('input[name="chatroom"]').focus();
                 }, false);
-
+                 //<-----  Mdev
                 _converse.roster.each(o => {
                     let label = o.getDisplayName()
-                    console.log('label',label)
                     if(_.includes(label, '@')) {
                         label = label.split('@')[0];
                     }
@@ -441,10 +440,7 @@ converse.plugins.add('converse-muc-views', {
                     user.innerHTML = label
                     this.el.querySelector('.channel-users-invite-list').insertAdjacentElement('beforeend',user)
                 })
-                
-                
-                        // <option value="participant">Participant</option>
-                        // <option value="visitor">Visitor</option>
+                 //-------->
             },
 
             parseRoomDataFromEvent (form) {
@@ -459,6 +455,7 @@ converse.plugins.add('converse-muc-views', {
                 } else {
                     nick = data.get('nickname').trim();
                 }
+                //<-----  Mdev
                 var roomconfig = {
                     'roomname': data.get('chatroom'),
                     'roomdesc':  data.get('purpose'),
@@ -469,8 +466,10 @@ converse.plugins.add('converse-muc-views', {
                 return {
                     'jid': jid,
                     'nick': nick,
-                    'roomconfig': _.extend(_converse.user_settings.roomDefaultConfiguration,roomconfig) 
+                    'roomconfig': _.extend(_converse.user_settings.roomDefaultConfiguration,roomconfig) ,
+                    'users':data.getAll('users')
                 }
+                 //-------->
             },
 
             openChatRoom (ev) {
@@ -488,6 +487,19 @@ converse.plugins.add('converse-muc-views', {
                     this.model.setDomain(jid);
                 }
                 _converse.api.rooms.open(jid, _.extend(data, {jid},{'auto_configure': _converse.user_settings.room_auto_configure}));
+                //<-----  MDEV
+                if (data.users.length > 0 ) {
+                    data.users.forEach(o => {
+                        let user = o;
+                        if (!_.includes(o, '@')) {
+                            user = `${o}@${_converse.api.settings.get("default_domain")}`
+                        }
+                        setTimeout(function(){
+                            _converse.api.roomviews.get(jid).model.directInvite(user, 'invite to the room');
+                        },5000);
+                    })
+                }
+                //-------->
                 this.modal.hide();
                 ev.target.reset();
             },

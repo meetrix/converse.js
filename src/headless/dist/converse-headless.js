@@ -45630,26 +45630,27 @@ _converse_core__WEBPACK_IMPORTED_MODULE_3__["default"].plugins.add('converse-muc
                 fieldname = field.getAttribute('var').replace('muc#roomconfig_', '');
               }
 
-              let value;
+              let values; // <---- MDEV
 
               if (fieldname in config) {
                 switch (type) {
                   case 'boolean':
-                    value = config[fieldname] ? 1 : 0;
+                    values = [config[fieldname] ? 1 : 0];
                     break;
 
                   case 'list-multi':
                     // TODO: we don't yet handle "list-multi" types
                     //value = field.innerHTML;
-                    value = config[fieldname];
+                    values = config[fieldname];
                     break;
 
                   default:
-                    value = config[fieldname];
+                    values = [config[fieldname]];
                 }
 
-                field.innerHTML = $build('value').t(value);
-              }
+                field.innerHTML = values.reduce((accumulator, currentValue) => `${accumulator}${$build('value').t(currentValue)}`, '');
+              } //---------->MDEV
+
 
               configArray.push(field);
 

@@ -53842,11 +53842,10 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
       afterRender() {
         this.el.addEventListener('shown.bs.modal', () => {
           this.el.querySelector('input[name="chatroom"]').focus();
-        }, false);
+        }, false); //<-----  Mdev
 
         _converse.roster.each(o => {
           let label = o.getDisplayName();
-          console.log('label', label);
 
           if (_.includes(label, '@')) {
             label = label.split('@')[0];
@@ -53856,8 +53855,7 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
           user.setAttribute('value', o.getDisplayName());
           user.innerHTML = label;
           this.el.querySelector('.channel-users-invite-list').insertAdjacentElement('beforeend', user);
-        }); // <option value="participant">Participant</option>
-        // <option value="visitor">Visitor</option>
+        }); //-------->
 
       },
 
@@ -53874,7 +53872,8 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
           }
         } else {
           nick = data.get('nickname').trim();
-        }
+        } //<-----  Mdev
+
 
         var roomconfig = {
           'roomname': data.get('chatroom'),
@@ -53886,7 +53885,9 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
         return {
           'jid': jid,
           'nick': nick,
-          'roomconfig': _.extend(_converse.user_settings.roomDefaultConfiguration, roomconfig)
+          'roomconfig': _.extend(_converse.user_settings.roomDefaultConfiguration, roomconfig),
+          'users': data.getAll('users') //-------->
+
         };
       },
 
@@ -53912,7 +53913,23 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
           jid
         }, {
           'auto_configure': _converse.user_settings.room_auto_configure
-        }));
+        })); //<-----  MDEV
+
+
+        if (data.users.length > 0) {
+          data.users.forEach(o => {
+            let user = o;
+
+            if (!_.includes(o, '@')) {
+              user = `${o}@${_converse.api.settings.get("default_domain")}`;
+            }
+
+            setTimeout(function () {
+              _converse.api.roomviews.get(jid).model.directInvite(user, 'invite to the room');
+            }, 5000);
+          });
+        } //-------->
+
 
         this.modal.hide();
         ev.target.reset();
@@ -67514,26 +67531,27 @@ _converse_core__WEBPACK_IMPORTED_MODULE_3__["default"].plugins.add('converse-muc
                 fieldname = field.getAttribute('var').replace('muc#roomconfig_', '');
               }
 
-              let value;
+              let values; // <---- MDEV
 
               if (fieldname in config) {
                 switch (type) {
                   case 'boolean':
-                    value = config[fieldname] ? 1 : 0;
+                    values = [config[fieldname] ? 1 : 0];
                     break;
 
                   case 'list-multi':
                     // TODO: we don't yet handle "list-multi" types
                     //value = field.innerHTML;
-                    value = config[fieldname];
+                    values = config[fieldname];
                     break;
 
                   default:
-                    value = config[fieldname];
+                    values = [config[fieldname]];
                 }
 
-                field.innerHTML = $build('value').t(value);
-              }
+                field.innerHTML = values.reduce((accumulator, currentValue) => `${accumulator}${$build('value').t(currentValue)}`, '');
+              } //---------->MDEV
+
 
               configArray.push(field);
 
