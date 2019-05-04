@@ -54004,7 +54004,8 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
         'input .chat-textarea': 'inputChanged',
         'dragover .chat-textarea': 'onDragOver',
         'drop .chat-textarea': 'onDrop',
-        'click .top-toolbar-video-cal': 'videoCall'
+        'click .top-toolbar-video-cal': 'videoCall',
+        'click .add-message': 'toggleFileUpload'
       },
 
       initialize() {
@@ -56029,7 +56030,8 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_0__["default"].plugins
 
     _converse.areDesktopNotificationsEnabled = function () {
       return _converse.supports_html5_notification && _converse.show_desktop_notifications && Notification.permission === "granted";
-    };
+    }; //<-------MDEV
+
 
     _converse.showMessageNotification = function (message) {
       /* Shows an HTML5 Notification to indicate that a new chat
@@ -56045,15 +56047,15 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_0__["default"].plugins
 
       if (message.getAttribute('type') === 'headline') {
         if (!_.includes(from_jid, '@') || _converse.allow_non_roster_messaging) {
-          title = __("Notification from %1$s", from_jid);
+          title = __("Notification from %1$s", _converse.notitifationDisplayName(from_jid));
         } else {
           return;
         }
       } else if (!_.includes(from_jid, '@')) {
         // workaround for Prosody which doesn't give type "headline"
-        title = __("Notification from %1$s", from_jid);
+        title = __("Notification from %1$s", _converse.notitifationDisplayName(from_jid));
       } else if (message.getAttribute('type') === 'groupchat') {
-        title = __("%1$s says", Strophe.getResourceFromJid(full_from_jid));
+        title = __("%1$s says", _converse.notitifationDisplayName(Strophe.getResourceFromJid(full_from_jid)));
       } else {
         if (_.isUndefined(_converse.roster)) {
           _converse.log("Could not send notification, because roster is undefined", Strophe.LogLevel.ERROR);
@@ -56064,10 +56066,10 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_0__["default"].plugins
         roster_item = _converse.roster.get(from_jid);
 
         if (!_.isUndefined(roster_item)) {
-          title = __("%1$s says", roster_item.getDisplayName());
+          title = __("%1$s says", _converse.notitifationDisplayName(roster_item.getDisplayName()));
         } else {
           if (_converse.allow_non_roster_messaging) {
-            title = __("%1$s says", from_jid);
+            title = __("%1$s says", _converse.notitifationDisplayName(from_jid));
           } else {
             return;
           }
@@ -56092,7 +56094,8 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_0__["default"].plugins
       if (_converse.notification_delay) {
         setTimeout(n.close.bind(n), _converse.notification_delay);
       }
-    };
+    }; //-------->
+
 
     _converse.showChatStateNotification = function (contact) {
       /* Creates an HTML5 Notification to inform of a change in a
@@ -56118,24 +56121,34 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_0__["default"].plugins
 
       if (message === null) {
         return;
-      }
+      } //<------MDEV
 
-      const n = new Notification(contact.getDisplayName(), {
+
+      const n = new Notification(_converse.notitifationDisplayName(contact.getDisplayName()), {
         body: message,
         lang: _converse.locale,
         icon: _converse.notification_icon
       });
-      setTimeout(n.close.bind(n), 5000);
+      setTimeout(n.close.bind(n), 5000); //-------->
     };
 
     _converse.showContactRequestNotification = function (contact) {
-      const n = new Notification(contact.getDisplayName(), {
+      //<----------MDEV
+      const n = new Notification(_converse.notitifationDisplayName(contact.getDisplayName()), {
         body: __('wants to be your contact'),
         lang: _converse.locale,
         icon: _converse.notification_icon
       });
-      setTimeout(n.close.bind(n), 5000);
-    };
+      setTimeout(n.close.bind(n), 5000); //-------->
+    }; //<----MDEV
+
+
+    _converse.notitifationDisplayName = function (name) {
+      let notitifationDisplayName = name;
+      notitifationDisplayName = _.includes(notitifationDisplayName, '@') ? notitifationDisplayName.split('@')[0] : notitifationDisplayName;
+      return notitifationDisplayName;
+    }; //---------->
+
 
     _converse.showFeedbackNotification = function (data) {
       if (data.klass === 'error' || data.klass === 'warn') {
@@ -58544,12 +58557,14 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_1__["default"].plugins
         return false;
       },
 
+      //<----MDEV
       registerFieldTips() {
         this.el.querySelector('.input-group-prepend').insertAdjacentHTML('afterend', '<p>characters A-Z, a-z and 0-9</p>');
-        this.el.querySelector('input[name=name]').insertAdjacentHTML('afterend', '<p>characters A-Z, a-z and 0-9</p>');
+        this.el.querySelector('input[name=name]').insertAdjacentHTML('afterend', '<p>characters A-Z, a-z and space</p>');
         this.el.querySelector('input[name=password]').insertAdjacentHTML('afterend', '<p>characters A-Z, a-z, 0-9,[!@#$%^&*], more than 8</p>');
       },
 
+      //------>
       reset(settings) {
         const defaults = {
           fields: {},
@@ -58862,9 +58877,11 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_1__["default"].plugins
        * @param { HTMLElement } form - The HTML form that was submitted
        */
       submitRegistrationForm(form) {
+        //<-----MDEV
         if (!this.validationRegistationForm(form)) {
           return;
-        }
+        } //-------->
+
 
         const has_empty_inputs = _.reduce(this.el.querySelectorAll('input.required'), function (result, input) {
           if (input.value === '') {
@@ -58909,6 +58926,7 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_1__["default"].plugins
         this.setFields(iq.tree());
       },
 
+      //<---MDEV
       validationRegistationForm(form) {
         const password = form.querySelector('input[name=password]').value;
         const username = form.querySelector('input[name=username]').value;
@@ -58945,6 +58963,8 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_1__["default"].plugins
           return false;
         }
       },
+
+      //------>
 
       /* Stores the values that will be sent to the XMPP server during attempted registration.
        * @private
@@ -68330,6 +68350,8 @@ _converse_core__WEBPACK_IMPORTED_MODULE_3__["default"].plugins.add('converse-muc
 
       let contact = _converse.roster.get(from),
           result;
+
+      console.log('contact', contact);
 
       if (_converse.auto_join_on_invite) {
         result = true;
@@ -93427,7 +93449,7 @@ var __t, __p = '', __e = _.escape, __j = Array.prototype.join;
 function print() { __p += __j.call(arguments, '') }
 __p += '<!-- src/templates/chatbox_message_form.html -->\n<div class="message-form-container">\n<div class="new-msgs-indicator hidden">▼ ' +
 __e( o.unread_msgs ) +
-' ▼</div>\n<form class="sendXMPPMessage">\n    <div class="row">\n        <div class="col-sm-auto" >\n            <a href="javascript:void(0);" class="add-message m-auto">\n                <i class="fa fa-plus fa-2x"></i>\n            </a>\n        </div>\n        <div class="col-sm-8 message-input-area">\n            <input type="text" placeholder="' +
+' ▼</div>\n<form class="sendXMPPMessage">\n    <div class="row">\n        <div class="col-sm-auto" >\n            <a class="add-message m-auto">\n                <i class="fa fa-plus fa-2x"></i>\n            </a>\n        </div>\n        <div class="col-sm-8 message-input-area">\n            <input type="text" placeholder="' +
 ((__t = (o.label_spoiler_hint)) == null ? '' : __t) +
 '" value="' +
 ((__t = ( o.hint_value )) == null ? '' : __t) +
@@ -93964,7 +93986,7 @@ __e(o.info_configure) +
 __p += '\n    <a class="chatbox-btn show-room-details-modal fa fa-info-circle" title="' +
 __e(o.info_details) +
 '"></a>\n</div>  -->\n<div class="chatbox-title">\n<div class="top-toolbar">\n        <div class="container-fluid">\n            <div class="row">\n                <div class="col-sm-6 room-description">\n                    <div class="container-fluid">\n                        <div class="row channel-name">\n                            #' +
-__e( o.Strophe.getNodeFromJid(o.jid) ) +
+((__t = ( o.name )) == null ? '' : __t) +
 '\n                        </div>\n                        <div class="row channel-summary">\n                                <ul class="m-0 pl-0 d-block list-unstyled channel-info">\n                                <li class="favorite-star">\n                                    <span class="favorite"><i class="fas fa-star"></i></span>\n                                </li>\n                                <li class="favorite-user">\n                                    <span class="mr-1 ">' +
 ((__t = (o.occupants)) == null ? '' : __t) +
 '</span>\n                                    <i class="far fa-user"></i>\n                                </li>\n                                <li class="favorite-channel">\n                                    <span class="channel-desc ">' +

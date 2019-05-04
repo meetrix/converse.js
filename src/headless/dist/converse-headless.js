@@ -46422,6 +46422,8 @@ _converse_core__WEBPACK_IMPORTED_MODULE_3__["default"].plugins.add('converse-muc
       let contact = _converse.roster.get(from),
           result;
 
+      console.log('contact', contact);
+
       if (_converse.auto_join_on_invite) {
         result = true;
       } else {

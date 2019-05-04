@@ -181,7 +181,7 @@ function setAvatar(nickname, avatar)
             mediumRegex:'^(((?=.*[a-z])(?=.*[A-Z]))|((?=.*[a-z])(?=.*[0-9]))|((?=.*[A-Z])(?=.*[0-9])))(?=.{6,})'
           },
           username_regex:'^[a-zA-Z0-9]+$',
-          fullname_regex: '^[a-zA-Z\s]+$',
+          fullname_regex: '^[a-zA-Z\\s]+$',
           roomDefaultConfiguration:{
                 'roomname':'',
                 'roomdesc': 'Comfy room for hanging out',

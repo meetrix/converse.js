@@ -573,6 +573,7 @@ converse.plugins.add('converse-muc-views', {
                 'dragover .chat-textarea': 'onDragOver',
                 'drop .chat-textarea': 'onDrop',
                 'click .top-toolbar-video-cal': 'videoCall',
+                'click .add-message': 'toggleFileUpload',
             },
 
             initialize () {
@@ -769,7 +770,7 @@ converse.plugins.add('converse-muc-views', {
                 /* Returns the heading HTML to be rendered.
                  */
                 return tpl_chatroom_head(
-                    
+                  
                     _.extend(this.model.toJSON(), {
                         '_converse': _converse,
                         'Strophe': Strophe,
