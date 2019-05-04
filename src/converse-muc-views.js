@@ -502,7 +502,7 @@ converse.plugins.add('converse-muc-views', {
                         }
                         setTimeout(function(){
                             _converse.api.roomviews.get(jid).model.directInvite(user, 'invite to the room');
-                        },5000);
+                        },10000);
                     })
                 }
                 //-------->
