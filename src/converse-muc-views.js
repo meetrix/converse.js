@@ -403,7 +403,9 @@ converse.plugins.add('converse-muc-views', {
         _converse.AddChatRoomModal = _converse.BootstrapModal.extend({
 
             events: {
-                'submit form.add-chatroom': 'openChatRoom'
+                'submit form.add-chatroom': 'openChatRoom',
+                'click .cancel-btn':'clearForm',
+                'click .close':'clearForm'
             },
 
             initialize () {
@@ -442,7 +444,11 @@ converse.plugins.add('converse-muc-views', {
                 })
                  //-------->
             },
-
+             //<-----  Mdev
+            clearForm(){
+                this.el.querySelector('form.add-chatroom').reset()
+            },
+            //---------->MDEV
             parseRoomDataFromEvent (form) {
                 const data = new FormData(form);
                 const jid = data.get('chatroom');

@@ -655,7 +655,7 @@ converse.plugins.add('converse-muc', {
                                 fieldname = field.getAttribute('var').replace('muc#roomconfig_', '');
                             }
                             let values;
-                            // <---- MDEV
+                            // <---- MDEV 
                             if (fieldname in config) {
                                 switch (type) {
                                     case 'boolean':

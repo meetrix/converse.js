@@ -53813,7 +53813,9 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
     });
     _converse.AddChatRoomModal = _converse.BootstrapModal.extend({
       events: {
-        'submit form.add-chatroom': 'openChatRoom'
+        'submit form.add-chatroom': 'openChatRoom',
+        'click .cancel-btn': 'clearForm',
+        'click .close': 'clearForm'
       },
 
       initialize() {
@@ -53859,6 +53861,12 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
 
       },
 
+      //<-----  Mdev
+      clearForm() {
+        this.el.querySelector('form.add-chatroom').reset();
+      },
+
+      //---------->MDEV
       parseRoomDataFromEvent(form) {
         const data = new FormData(form);
         const jid = data.get('chatroom');
@@ -67531,7 +67539,7 @@ _converse_core__WEBPACK_IMPORTED_MODULE_3__["default"].plugins.add('converse-muc
                 fieldname = field.getAttribute('var').replace('muc#roomconfig_', '');
               }
 
-              let values; // <---- MDEV
+              let values; // <---- MDEV 
 
               if (fieldname in config) {
                 switch (type) {
@@ -93037,7 +93045,7 @@ __e(o.__('This field is required')) +
 __e(o.nick) +
 '" class="form-control"/>\n                    </div>\n                    ';
  } ;
-__p += '\n                    <input type="button" class="btn cancel-btn" name="cancel" value="' +
+__p += '\n                    <input type="button" class="btn cancel-btn close" data-dismiss="modal" aria-label="Close" name="cancel" value="' +
 __e(o.__('Cancel')) +
 '"/>\n                    <input type="submit" class="btn create-btn" name="join" value="' +
 __e(o.__('Create')) +

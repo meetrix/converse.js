@@ -45630,7 +45630,7 @@ _converse_core__WEBPACK_IMPORTED_MODULE_3__["default"].plugins.add('converse-muc
                 fieldname = field.getAttribute('var').replace('muc#roomconfig_', '');
               }
 
-              let values; // <---- MDEV
+              let values; // <---- MDEV 
 
               if (fieldname in config) {
                 switch (type) {
