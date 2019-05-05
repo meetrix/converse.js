@@ -58,8 +58,6 @@ converse.plugins.add('converse-profile', {
             },
 
             toHTML () {
-                console.log('image',this.model.vcard.toJSON().image)
-                console.log('image',this.model.vcard.toJSON().jid)
                 var dataUri = "data:" + this.model.vcard.toJSON().image_type + ";base64," + this.model.vcard.toJSON().image;
                 if(this.model.vcard.toJSON().image === _converse.DEFAULT_IMAGE){
                     var dataUri = createAvatar(this.model.vcard.toJSON().jid)
@@ -269,6 +267,7 @@ converse.plugins.add('converse-profile', {
 
             showProfileModal (ev) {
                 if (_.isUndefined(this.profile_modal)) {
+                    console.log('profile',this.model.toJSON())
                     this.profile_modal = new _converse.ProfileModal({model: this.model});
                 }
                 this.profile_modal.show(ev);

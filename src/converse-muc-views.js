@@ -403,7 +403,9 @@ converse.plugins.add('converse-muc-views', {
         _converse.AddChatRoomModal = _converse.BootstrapModal.extend({
 
             events: {
-                'submit form.add-chatroom': 'openChatRoom'
+                'submit form.add-chatroom': 'openChatRoom',
+                'click .cancel-btn':'clearForm',
+                'click .close':'clearForm'
             },
 
             initialize () {
@@ -429,8 +431,24 @@ converse.plugins.add('converse-muc-views', {
                 this.el.addEventListener('shown.bs.modal', () => {
                     this.el.querySelector('input[name="chatroom"]').focus();
                 }, false);
+                 //<-----  Mdev
+                _converse.roster.each(o => {
+                    let label = o.getDisplayName()
+                    if(_.includes(label, '@')) {
+                        label = label.split('@')[0];
+                    }
+                    const user = document.createElement('option')
+                    user.setAttribute('value',o.getDisplayName())
+                    user.innerHTML = label
+                    this.el.querySelector('.channel-users-invite-list').insertAdjacentElement('beforeend',user)
+                })
+                 //-------->
             },
-
+             //<-----  Mdev
+            clearForm(){
+                this.el.querySelector('form.add-chatroom').reset()
+            },
+            //---------->MDEV
             parseRoomDataFromEvent (form) {
                 const data = new FormData(form);
                 const jid = data.get('chatroom');
@@ -443,16 +461,26 @@ converse.plugins.add('converse-muc-views', {
                 } else {
                     nick = data.get('nickname').trim();
                 }
+                //<-----  Mdev
+                var roomconfig = {
+                    'roomname': data.get('chatroom'),
+                    'roomdesc':  data.get('purpose'),
+                    'publicroom': data.get('privatechannel'),
+                    'allowpm':data.get('readonlychannel')?'moderators':'anyone',
+                    'roomowners':[_converse.connection.jid.split('/')[0]]
+                }
                 return {
                     'jid': jid,
-                    'nick': nick
+                    'nick': nick,
+                    'roomconfig': _.extend(_converse.user_settings.roomDefaultConfiguration,roomconfig) ,
+                    'users':data.getAll('users')
                 }
+                 //-------->
             },
 
             openChatRoom (ev) {
                 ev.preventDefault();
                 const data = this.parseRoomDataFromEvent(ev.target);
-                console.log('data',data)
                 if (data.nick === "") {
                     // Make sure defaults apply if no nick is provided.
                     data.nick = undefined;
@@ -464,18 +492,23 @@ converse.plugins.add('converse-muc-views', {
                     jid = data.jid
                     this.model.setDomain(jid);
                 }
-                data.roomconfig = {
-                    'changesubject': false,
-                    'membersonly': true,
-                    'persistentroom': true,
-                    'publicroom': true,
-                    'roomdesc': 'Comfy room for hanging out',
-                    'whois': 'anyone'
+                _converse.api.rooms.open(jid, _.extend(data, {jid},{'auto_configure': _converse.user_settings.room_auto_configure}));
+                //<-----  MDEV
+                if (data.users.length > 0 ) {
+                    data.users.forEach(o => {
+                        let user = o;
+                        if (!_.includes(o, '@')) {
+                            user = `${o}@${_converse.api.settings.get("default_domain")}`
+                        }
+                        setTimeout(function(){
+                            _converse.api.roomviews.get(jid).model.directInvite(user, 'invite to the room');
+                        },10000);
+                    })
                 }
-                _converse.api.rooms.open(jid, _.extend(data, {jid}));
+                //-------->
                 this.modal.hide();
                 ev.target.reset();
-            }
+            },
         });
 
 
@@ -540,6 +573,7 @@ converse.plugins.add('converse-muc-views', {
                 'dragover .chat-textarea': 'onDragOver',
                 'drop .chat-textarea': 'onDrop',
                 'click .top-toolbar-video-cal': 'videoCall',
+                
             },
 
             initialize () {
@@ -594,7 +628,6 @@ converse.plugins.add('converse-muc-views', {
                 _converse.api.trigger('chatRoomOpened', this);
             },
             videoCall(){
-                console.log('video call click')
             },
 
             render () {
@@ -623,7 +656,6 @@ converse.plugins.add('converse-muc-views', {
                  */
                 if (_.isNull(this.el.querySelector('.chat-area'))) {
                     const container_el = this.el.querySelector('.chatroom-body');
-                    // console.log('description',u.addHyperlinks(xss.filterXSS(_.get(this.model.get('subject'), 'text'), {'whiteList': {}})));
                     container_el.insertAdjacentHTML('beforeend', tpl_chatarea( {
                         '_converse': _converse,
                         'Strophe': Strophe,
@@ -645,7 +677,7 @@ converse.plugins.add('converse-muc-views', {
                     'list': () => _converse.roster.map(o => {
                         let label = o.getDisplayName()
                         if(_.includes(label, '@')) {
-                            label = label.spilt('@')[0];
+                            label = label.splite('@')[0];
                         }
                         return {'label': label, 'value': `@${o.getDisplayName()}`}
                     }),
@@ -737,9 +769,8 @@ converse.plugins.add('converse-muc-views', {
             generateHeadingHTML () {
                 /* Returns the heading HTML to be rendered.
                  */
-                console.log('room description',this.model.get('description'));
                 return tpl_chatroom_head(
-                    
+                  
                     _.extend(this.model.toJSON(), {
                         '_converse': _converse,
                         'Strophe': Strophe,
@@ -2059,7 +2090,6 @@ converse.plugins.add('converse-muc-views', {
                     this.initInviteWidget();
                     return;
                 }
-                console.log('room',this.chatroomview.model)
                 this.inviteRoom(jid)
                 // this.promptForInvite({
                 //     'target': el,
@@ -2069,7 +2099,6 @@ converse.plugins.add('converse-muc-views', {
                 //     }});
             },
             inviteRoom(jid){
-                console.log('jid',jid)
                 this.chatroomview.model.directInvite(jid, 'invite to the room');
                 const form = this.el.querySelector('.room-invite form'),
                       input = form.querySelector('.invited-contact'),

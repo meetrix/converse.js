@@ -649,23 +649,32 @@ converse.plugins.add('converse-muc', {
                         let count = fields.length;
 
                         _.each(fields, (field) => {
-                            const fieldname = field.getAttribute('var').replace('muc#roomconfig_', ''),
-                                type = field.getAttribute('type');
-                            let value;
+                            let fieldname;
+                            const type = field.getAttribute('type');
+                            if (type !== 'fixed') {
+                                fieldname = field.getAttribute('var').replace('muc#roomconfig_', '');
+                            }
+                            let values;
+                            // <---- MDEV 
                             if (fieldname in config) {
                                 switch (type) {
                                     case 'boolean':
-                                        value = config[fieldname] ? 1 : 0;
+                                        values = [config[fieldname] ? 1 : 0];
                                         break;
                                     case 'list-multi':
                                         // TODO: we don't yet handle "list-multi" types
-                                        value = field.innerHTML;
+                                        //value = field.innerHTML;
+                                        values = config[fieldname];
                                         break;
                                     default:
-                                        value = config[fieldname];
+                                        values= [config[fieldname]];
                                 }
-                                field.innerHTML = $build('value').t(value);
+                               
+                                field.innerHTML = values.reduce((accumulator, currentValue) => (
+                                    `${accumulator}${$build('value').t(currentValue)}`
+                                ),'')
                             }
+                            //---------->MDEV
                             configArray.push(field);
                             if (!--count) {
                                 this.sendConfiguration(configArray, resolve, reject);
@@ -707,6 +716,7 @@ converse.plugins.add('converse-muc', {
                 _.each(config || [], function (node) { iq.cnode(node).up(); });
                 callback = _.isUndefined(callback) ? _.noop : _.partial(callback, iq.nodeTree);
                 errback = _.isUndefined(errback) ? _.noop : _.partial(errback, iq.nodeTree);
+                
                 return _converse.api.sendIQ(iq).then(callback).catch(errback);
             },
 
@@ -898,7 +908,10 @@ converse.plugins.add('converse-muc', {
                 if (data.type === 'error' || (!data.jid && !data.nick)) {
                     return true;
                 }
+                console.log('data:pres',pres)
+                console.log('data:data',data)
                 const occupant = this.occupants.findOccupant(data);
+                console.log('data:occupant',occupant)
                 if (data.type === 'unavailable' && occupant) {
                     if (!_.includes(data.states, converse.MUC_NICK_CHANGED_CODE) && !occupant.isMember()) {
                         // We only destroy the occupant if this is not a nickname change operation.
@@ -1117,7 +1130,6 @@ converse.plugins.add('converse-muc', {
              */
             onOwnPresence (pres) {
                 this.saveAffiliationAndRole(pres);
-
                 const locked_room = pres.querySelector("status[code='201']");
                 if (locked_room) {
                     if (this.get('auto_configure')) {
@@ -1336,7 +1348,7 @@ converse.plugins.add('converse-muc', {
 
             let contact = _converse.roster.get(from),
                 result;
-
+            console.log('contact',contact)
             if (_converse.auto_join_on_invite) {
                 result = true;
             } else {

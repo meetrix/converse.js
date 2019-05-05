@@ -285,6 +285,7 @@ converse.plugins.add('converse-register', {
                 }
                 return false;
             },
+            //<----MDEV
             registerFieldTips(){
                 this.el.querySelector('.input-group-prepend').insertAdjacentHTML(
                     'afterend',
@@ -293,7 +294,7 @@ converse.plugins.add('converse-register', {
                 );
                 this.el.querySelector('input[name=name]').insertAdjacentHTML(
                     'afterend',
-                    '<p>characters A-Z, a-z and 0-9</p>'
+                    '<p>characters A-Z, a-z and space</p>'
                     
                 );
                 this.el.querySelector('input[name=password]').insertAdjacentHTML(
@@ -303,7 +304,7 @@ converse.plugins.add('converse-register', {
                 );
 
             },
-
+            //------>
             reset (settings) {
                 const defaults = {
                     fields: {},
@@ -615,9 +616,12 @@ converse.plugins.add('converse-register', {
              * @param { HTMLElement } form - The HTML form that was submitted
              */
             submitRegistrationForm (form) {
+                console.log('submit registation')
+                //<-----MDEV
                 if(!this.validationRegistationForm(form)){
                     return;
                 }
+                //-------->
                 const has_empty_inputs = _.reduce(
                     this.el.querySelectorAll('input.required'),
                     function (result, input) {
@@ -647,6 +651,7 @@ converse.plugins.add('converse-register', {
                 _converse.connection.send(iq);
                 this.setFields(iq.tree());
             },
+            //<---MDEV
             validationRegistationForm(form){
                 const password = form.querySelector('input[name=password]').value;
                 const username = form.querySelector('input[name=username]').value;
@@ -679,6 +684,7 @@ converse.plugins.add('converse-register', {
                 }
                 
             },
+            //------>
 
             /* Stores the values that will be sent to the XMPP server during attempted registration.
              * @private

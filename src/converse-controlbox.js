@@ -412,7 +412,6 @@ converse.plugins.add('converse-controlbox', {
                     pretty_status = PRETTY_CONNECTION_STATUS[connection_status];
                     feedback_class = CONNECTION_STATUS_CSS_CLASS[pretty_status];
                 }
-                console.log('username12',__("XMPP Address:"));
                 return tpl_login_panel(
                     _.extend(this.model.toJSON(), {
                         '__': __,

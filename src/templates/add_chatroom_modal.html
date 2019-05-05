@@ -46,22 +46,16 @@
                     </div>
                     <div class="form-group channel-invite">
                             <label for="users">{{{o.__('Invite Users')}}}</label>
-                            <select class="selectpicker" multiple data-live-search="true">
-                                <option>Mustard</option>
-                                <option>Ketchup</option>
-                                <option>Relish</option>
-                            </select>
+                            <input type="text" required="required" name="invitees" class="form-control" />
                             <span>{{{o.__('Name must be a lowercase,without space, period, and shorter than 22 characters')}}}</span>
                     </div>
-                    
-                        
                     {[ if (!o._converse.locked_muc_nickname) { ]}
                     <div class="form-group" >
                         <label for="nickname">{{{o.__('Nickname')}}}:</label>
                         <input type="text" pattern=".*\S+.*" title="{{{o.__('This field is required')}}}" required="required" name="nickname" value="{{{o.nick}}}" class="form-control"/>
                     </div>
                     {[ } ]}
-                    <input type="button" class="btn cancel-btn" name="cancel" value="{{{o.__('Cancel')}}}"/>
+                    <input type="button" class="btn cancel-btn close" data-dismiss="modal" aria-label="Close" name="cancel" value="{{{o.__('Cancel')}}}"/>
                     <input type="submit" class="btn create-btn" name="join" value="{{{o.__('Create')}}}"/>
                 </form>
             </div>

@@ -14,12 +14,7 @@
     <script src="3rdparty/libsignal-protocol.js"></script>
     <script src="dist/converse.js"></script>
     <script src="https://meet.jit.si/libs/lib-jitsi-meet.min.js"></script>
-
-    <!-- <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css"> -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.1/css/bootstrap-select.css" />
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.bundle.min.js"></script>
-    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.1/js/bootstrap-select.min.js"></script> -->
+   
 </head>
 
 <body class="reset">
@@ -162,7 +157,7 @@ function setAvatar(nickname, avatar)
           show_chatstate_notifications: true,
           //show_only_online_users: getSetting("converseShowOnlyOnlineUsers", false),
           //show_send_button: getSetting("showSendButton", false),
-          sounds_path: 'sounds/',
+          sounds_path: 'chatapp/sounds/',
           view_mode: 'fullscreen',
           visible_toolbar_buttons: {'emoji': true, 'call': false, 'clear': true, spoiler:true },
           //websocket_url: connUrl,
@@ -177,7 +172,7 @@ function setAvatar(nickname, avatar)
           locked_muc_nickname: true,
           muc_nickname_from_jid:true,
           auto_register_muc_nickname:true,
-        //   muc_instant_rooms: false,
+        // muc_instant_rooms: false,
           images:{
             login_bottom_image:'https://i.imgur.com/omxuqo5.png'
           },
@@ -186,7 +181,31 @@ function setAvatar(nickname, avatar)
             mediumRegex:'^(((?=.*[a-z])(?=.*[A-Z]))|((?=.*[a-z])(?=.*[0-9]))|((?=.*[A-Z])(?=.*[0-9])))(?=.{6,})'
           },
           username_regex:'^[a-zA-Z0-9]+$',
-          fullname_regex: '^[a-zA-Z\s]+$'
+          fullname_regex: '^[a-zA-Z\\s]+$',
+          roomDefaultConfiguration:{
+                'roomname':'',
+                'roomdesc': 'Comfy room for hanging out',
+                'changesubject': false,
+                'maxusers':'40',
+                'presencebroadcast':['moderator','participant'],
+                'publicroom': false,
+                'persistentroom': true,
+                'moderatedroom':false,
+                'membersonly': true,
+                'allowinvites':false,
+                'passwordprotectedroom':false,
+                'roomsecret':'scret',
+                'whois': 'moderators',
+                'allowpm':'moderators',
+                'enablelogging':true,
+                'reservednick':false,
+                'canchangenick':true,
+                'registration':false,
+                'roomadmins':[],
+                'roomowners':[],
+            },
+            'room_auto_configure': true,
+          
     });
 </script>
 </body>

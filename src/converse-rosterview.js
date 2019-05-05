@@ -171,7 +171,6 @@ converse.plugins.add('converse-rosterview', {
                         this.name_auto_complete.list = JSON.parse(r).users.map(i => ({'label': i.fullname || i.username, 'value': i.username}));
                         this.name_auto_complete.auto_completing = true;
                         this.name_auto_complete.evaluate();
-                        console.log('name_auto_complete',this.name_auto_complete)
                     }
                 };
                 const input_el = this.el.querySelector('input[name="name"]');

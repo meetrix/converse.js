@@ -40756,7 +40756,6 @@ _converse_core__WEBPACK_IMPORTED_MODULE_2__["default"].plugins.add('converse-cha
         const is_spoiler = this.get('composing_spoiler'),
               origin_id = _converse.connection.getUniqueId();
 
-        console.log('string1', text);
         return {
           'jid': this.get('jid'),
           'nickname': this.get('nickname'),
@@ -42359,7 +42358,7 @@ _converse.initialize = async function (settings, callback) {
       _converse.setConnectionStatus(status);
     } else if (status === strophe_js__WEBPACK_IMPORTED_MODULE_0__["Strophe"].Status.AUTHFAIL) {
       if (!message) {
-        message = __('Your Jabber ID and/or password is incorrect. Please try again.');
+        message = __('Username and/or password is incorrect. Please try again.');
       }
 
       _converse.setConnectionStatus(status, message);
@@ -45624,27 +45623,34 @@ _converse_core__WEBPACK_IMPORTED_MODULE_3__["default"].plugins.add('converse-muc
             let count = fields.length;
 
             _.each(fields, field => {
-              const fieldname = field.getAttribute('var').replace('muc#roomconfig_', ''),
-                    type = field.getAttribute('type');
-              let value;
+              let fieldname;
+              const type = field.getAttribute('type');
+
+              if (type !== 'fixed') {
+                fieldname = field.getAttribute('var').replace('muc#roomconfig_', '');
+              }
+
+              let values; // <---- MDEV 
 
               if (fieldname in config) {
                 switch (type) {
                   case 'boolean':
-                    value = config[fieldname] ? 1 : 0;
+                    values = [config[fieldname] ? 1 : 0];
                     break;
 
                   case 'list-multi':
                     // TODO: we don't yet handle "list-multi" types
-                    value = field.innerHTML;
+                    //value = field.innerHTML;
+                    values = config[fieldname];
                     break;
 
                   default:
-                    value = config[fieldname];
+                    values = [config[fieldname]];
                 }
 
-                field.innerHTML = $build('value').t(value);
-              }
+                field.innerHTML = values.reduce((accumulator, currentValue) => `${accumulator}${$build('value').t(currentValue)}`, '');
+              } //---------->MDEV
+
 
               configArray.push(field);
 
@@ -45914,7 +45920,10 @@ _converse_core__WEBPACK_IMPORTED_MODULE_3__["default"].plugins.add('converse-muc
           return true;
         }
 
+        console.log('data:pres', pres);
+        console.log('data:data', data);
         const occupant = this.occupants.findOccupant(data);
+        console.log('data:occupant', occupant);
 
         if (data.type === 'unavailable' && occupant) {
           if (!_.includes(data.states, _converse_core__WEBPACK_IMPORTED_MODULE_3__["default"].MUC_NICK_CHANGED_CODE) && !occupant.isMember()) {
@@ -46412,6 +46421,8 @@ _converse_core__WEBPACK_IMPORTED_MODULE_3__["default"].plugins.add('converse-muc
 
       let contact = _converse.roster.get(from),
           result;
+
+      console.log('contact', contact);
 
       if (_converse.auto_join_on_invite) {
         result = true;

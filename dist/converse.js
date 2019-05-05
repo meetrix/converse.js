@@ -49297,8 +49297,7 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
         'input .chat-textarea': 'inputChanged',
         'keydown .chat-textarea': 'keyPressed',
         'dragover .chat-textarea': 'onDragOver',
-        'drop .chat-textarea': 'onDrop',
-        'click .add-message': 'toggleFileUpload'
+        'drop .chat-textarea': 'onDrop'
       },
 
       initialize() {
@@ -49333,9 +49332,7 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
         });
       },
 
-      videoCall() {
-        console.log('video call click');
-      },
+      videoCall() {},
 
       render() {
         // XXX: Is this still needed?
@@ -50970,7 +50967,6 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
           feedback_class = CONNECTION_STATUS_CSS_CLASS[pretty_status];
         }
 
-        console.log('username12', __("XMPP Address:"));
         return templates_login_panel_html__WEBPACK_IMPORTED_MODULE_10___default()(_.extend(this.model.toJSON(), {
           '__': __,
           '_converse': _converse,
@@ -53816,7 +53812,9 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
     });
     _converse.AddChatRoomModal = _converse.BootstrapModal.extend({
       events: {
-        'submit form.add-chatroom': 'openChatRoom'
+        'submit form.add-chatroom': 'openChatRoom',
+        'click .cancel-btn': 'clearForm',
+        'click .close': 'clearForm'
       },
 
       initialize() {
@@ -53845,9 +53843,29 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
       afterRender() {
         this.el.addEventListener('shown.bs.modal', () => {
           this.el.querySelector('input[name="chatroom"]').focus();
-        }, false);
+        }, false); //<-----  Mdev
+
+        _converse.roster.each(o => {
+          let label = o.getDisplayName();
+
+          if (_.includes(label, '@')) {
+            label = label.split('@')[0];
+          }
+
+          const user = document.createElement('option');
+          user.setAttribute('value', o.getDisplayName());
+          user.innerHTML = label;
+          this.el.querySelector('.channel-users-invite-list').insertAdjacentElement('beforeend', user);
+        }); //-------->
+
       },
 
+      //<-----  Mdev
+      clearForm() {
+        this.el.querySelector('form.add-chatroom').reset();
+      },
+
+      //---------->MDEV
       parseRoomDataFromEvent(form) {
         const data = new FormData(form);
         const jid = data.get('chatroom');
@@ -53861,18 +53879,28 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
           }
         } else {
           nick = data.get('nickname').trim();
-        }
+        } //<-----  Mdev
 
+
+        var roomconfig = {
+          'roomname': data.get('chatroom'),
+          'roomdesc': data.get('purpose'),
+          'publicroom': data.get('privatechannel'),
+          'allowpm': data.get('readonlychannel') ? 'moderators' : 'anyone',
+          'roomowners': [_converse.connection.jid.split('/')[0]]
+        };
         return {
           'jid': jid,
-          'nick': nick
+          'nick': nick,
+          'roomconfig': _.extend(_converse.user_settings.roomDefaultConfiguration, roomconfig),
+          'users': data.getAll('users') //-------->
+
         };
       },
 
       openChatRoom(ev) {
         ev.preventDefault();
         const data = this.parseRoomDataFromEvent(ev.target);
-        console.log('data', data);
 
         if (data.nick === "") {
           // Make sure defaults apply if no nick is provided.
@@ -53888,18 +53916,27 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
           this.model.setDomain(jid);
         }
 
-        data.roomconfig = {
-          'changesubject': false,
-          'membersonly': true,
-          'persistentroom': true,
-          'publicroom': true,
-          'roomdesc': 'Comfy room for hanging out',
-          'whois': 'anyone'
-        };
-
         _converse.api.rooms.open(jid, _.extend(data, {
           jid
-        }));
+        }, {
+          'auto_configure': _converse.user_settings.room_auto_configure
+        })); //<-----  MDEV
+
+
+        if (data.users.length > 0) {
+          data.users.forEach(o => {
+            let user = o;
+
+            if (!_.includes(o, '@')) {
+              user = `${o}@${_converse.api.settings.get("default_domain")}`;
+            }
+
+            setTimeout(function () {
+              _converse.api.roomviews.get(jid).model.directInvite(user, 'invite to the room');
+            }, 10000);
+          });
+        } //-------->
+
 
         this.modal.hide();
         ev.target.reset();
@@ -54025,9 +54062,7 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
         _converse.api.trigger('chatRoomOpened', this);
       },
 
-      videoCall() {
-        console.log('video call click');
-      },
+      videoCall() {},
 
       render() {
         this.el.setAttribute('id', this.model.get('box_id'));
@@ -54056,8 +54091,7 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
         /* Render the UI container in which groupchat messages will appear.
          */
         if (_.isNull(this.el.querySelector('.chat-area'))) {
-          const container_el = this.el.querySelector('.chatroom-body'); // console.log('description',u.addHyperlinks(xss.filterXSS(_.get(this.model.get('subject'), 'text'), {'whiteList': {}})));
-
+          const container_el = this.el.querySelector('.chatroom-body');
           container_el.insertAdjacentHTML('beforeend', templates_chatarea_html__WEBPACK_IMPORTED_MODULE_8___default()({
             '_converse': _converse,
             'Strophe': Strophe,
@@ -54081,7 +54115,7 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
             let label = o.getDisplayName();
 
             if (_.includes(label, '@')) {
-              label = label.spilt('@')[0];
+              label = label.splite('@')[0];
             }
 
             return {
@@ -54191,7 +54225,6 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
       generateHeadingHTML() {
         /* Returns the heading HTML to be rendered.
          */
-        console.log('room description', this.model.get('description'));
         return templates_chatroom_head_html__WEBPACK_IMPORTED_MODULE_16___default()(_.extend(this.model.toJSON(), {
           '_converse': _converse,
           'Strophe': Strophe,
@@ -55596,7 +55629,6 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
           return;
         }
 
-        console.log('room', this.chatroomview.model);
         this.inviteRoom(jid); // this.promptForInvite({
         //     'target': el,
         //     'text': {
@@ -55606,7 +55638,6 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
       },
 
       inviteRoom(jid) {
-        console.log('jid', jid);
         this.chatroomview.model.directInvite(jid, 'invite to the room');
         const form = this.el.querySelector('.room-invite form'),
               input = form.querySelector('.invited-contact'),
@@ -55997,7 +56028,8 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_0__["default"].plugins
 
     _converse.areDesktopNotificationsEnabled = function () {
       return _converse.supports_html5_notification && _converse.show_desktop_notifications && Notification.permission === "granted";
-    };
+    }; //<-------MDEV
+
 
     _converse.showMessageNotification = function (message) {
       /* Shows an HTML5 Notification to indicate that a new chat
@@ -56013,15 +56045,15 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_0__["default"].plugins
 
       if (message.getAttribute('type') === 'headline') {
         if (!_.includes(from_jid, '@') || _converse.allow_non_roster_messaging) {
-          title = __("Notification from %1$s", from_jid);
+          title = __("Notification from %1$s", _converse.notitifationDisplayName(from_jid));
         } else {
           return;
         }
       } else if (!_.includes(from_jid, '@')) {
         // workaround for Prosody which doesn't give type "headline"
-        title = __("Notification from %1$s", from_jid);
+        title = __("Notification from %1$s", _converse.notitifationDisplayName(from_jid));
       } else if (message.getAttribute('type') === 'groupchat') {
-        title = __("%1$s says", Strophe.getResourceFromJid(full_from_jid));
+        title = __("%1$s says", _converse.notitifationDisplayName(Strophe.getResourceFromJid(full_from_jid)));
       } else {
         if (_.isUndefined(_converse.roster)) {
           _converse.log("Could not send notification, because roster is undefined", Strophe.LogLevel.ERROR);
@@ -56032,10 +56064,10 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_0__["default"].plugins
         roster_item = _converse.roster.get(from_jid);
 
         if (!_.isUndefined(roster_item)) {
-          title = __("%1$s says", roster_item.getDisplayName());
+          title = __("%1$s says", _converse.notitifationDisplayName(roster_item.getDisplayName()));
         } else {
           if (_converse.allow_non_roster_messaging) {
-            title = __("%1$s says", from_jid);
+            title = __("%1$s says", _converse.notitifationDisplayName(from_jid));
           } else {
             return;
           }
@@ -56060,7 +56092,8 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_0__["default"].plugins
       if (_converse.notification_delay) {
         setTimeout(n.close.bind(n), _converse.notification_delay);
       }
-    };
+    }; //-------->
+
 
     _converse.showChatStateNotification = function (contact) {
       /* Creates an HTML5 Notification to inform of a change in a
@@ -56086,24 +56119,34 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_0__["default"].plugins
 
       if (message === null) {
         return;
-      }
+      } //<------MDEV
 
-      const n = new Notification(contact.getDisplayName(), {
+
+      const n = new Notification(_converse.notitifationDisplayName(contact.getDisplayName()), {
         body: message,
         lang: _converse.locale,
         icon: _converse.notification_icon
       });
-      setTimeout(n.close.bind(n), 5000);
+      setTimeout(n.close.bind(n), 5000); //-------->
     };
 
     _converse.showContactRequestNotification = function (contact) {
-      const n = new Notification(contact.getDisplayName(), {
+      //<----------MDEV
+      const n = new Notification(_converse.notitifationDisplayName(contact.getDisplayName()), {
         body: __('wants to be your contact'),
         lang: _converse.locale,
         icon: _converse.notification_icon
       });
-      setTimeout(n.close.bind(n), 5000);
-    };
+      setTimeout(n.close.bind(n), 5000); //-------->
+    }; //<----MDEV
+
+
+    _converse.notitifationDisplayName = function (name) {
+      let notitifationDisplayName = name;
+      notitifationDisplayName = _.includes(notitifationDisplayName, '@') ? notitifationDisplayName.split('@')[0] : notitifationDisplayName;
+      return notitifationDisplayName;
+    }; //---------->
+
 
     _converse.showFeedbackNotification = function (data) {
       if (data.klass === 'error' || data.klass === 'warn') {
@@ -57753,8 +57796,6 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_4__["default"].plugins
       },
 
       toHTML() {
-        console.log('image', this.model.vcard.toJSON().image);
-        console.log('image', this.model.vcard.toJSON().jid);
         var dataUri = "data:" + this.model.vcard.toJSON().image_type + ";base64," + this.model.vcard.toJSON().image;
 
         if (this.model.vcard.toJSON().image === _converse.DEFAULT_IMAGE) {
@@ -57944,6 +57985,7 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_4__["default"].plugins
 
       showProfileModal(ev) {
         if (_.isUndefined(this.profile_modal)) {
+          console.log('profile', this.model.toJSON());
           this.profile_modal = new _converse.ProfileModal({
             model: this.model
           });
@@ -58514,12 +58556,14 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_1__["default"].plugins
         return false;
       },
 
+      //<----MDEV
       registerFieldTips() {
         this.el.querySelector('.input-group-prepend').insertAdjacentHTML('afterend', '<p>characters A-Z, a-z and 0-9</p>');
-        this.el.querySelector('input[name=name]').insertAdjacentHTML('afterend', '<p>characters A-Z, a-z and 0-9</p>');
+        this.el.querySelector('input[name=name]').insertAdjacentHTML('afterend', '<p>characters A-Z, a-z and space</p>');
         this.el.querySelector('input[name=password]').insertAdjacentHTML('afterend', '<p>characters A-Z, a-z, 0-9,[!@#$%^&*], more than 8</p>');
       },
 
+      //------>
       reset(settings) {
         const defaults = {
           fields: {},
@@ -58832,9 +58876,12 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_1__["default"].plugins
        * @param { HTMLElement } form - The HTML form that was submitted
        */
       submitRegistrationForm(form) {
+        console.log('submit registation'); //<-----MDEV
+
         if (!this.validationRegistationForm(form)) {
           return;
-        }
+        } //-------->
+
 
         const has_empty_inputs = _.reduce(this.el.querySelectorAll('input.required'), function (result, input) {
           if (input.value === '') {
@@ -58879,6 +58926,7 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_1__["default"].plugins
         this.setFields(iq.tree());
       },
 
+      //<---MDEV
       validationRegistationForm(form) {
         const password = form.querySelector('input[name=password]').value;
         const username = form.querySelector('input[name=username]').value;
@@ -58915,6 +58963,8 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_1__["default"].plugins
           return false;
         }
       },
+
+      //------>
 
       /* Stores the values that will be sent to the XMPP server during attempted registration.
        * @private
@@ -59207,8 +59257,6 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_0__["default"].plugins
       },
 
       createAvatar(nickname, width, height, font) {
-        console.log('create canvas');
-
         if (!nickname) {
           nickname = 'no-name';
         }
@@ -59676,7 +59724,6 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_4__["default"].plugins
             }));
             this.name_auto_complete.auto_completing = true;
             this.name_auto_complete.evaluate();
-            console.log('name_auto_complete', this.name_auto_complete);
           }
         };
 
@@ -62638,7 +62685,6 @@ _converse_core__WEBPACK_IMPORTED_MODULE_2__["default"].plugins.add('converse-cha
         const is_spoiler = this.get('composing_spoiler'),
               origin_id = _converse.connection.getUniqueId();
 
-        console.log('string1', text);
         return {
           'jid': this.get('jid'),
           'nickname': this.get('nickname'),
@@ -64241,7 +64287,7 @@ _converse.initialize = async function (settings, callback) {
       _converse.setConnectionStatus(status);
     } else if (status === strophe_js__WEBPACK_IMPORTED_MODULE_0__["Strophe"].Status.AUTHFAIL) {
       if (!message) {
-        message = __('Your Jabber ID and/or password is incorrect. Please try again.');
+        message = __('Username and/or password is incorrect. Please try again.');
       }
 
       _converse.setConnectionStatus(status, message);
@@ -67506,27 +67552,34 @@ _converse_core__WEBPACK_IMPORTED_MODULE_3__["default"].plugins.add('converse-muc
             let count = fields.length;
 
             _.each(fields, field => {
-              const fieldname = field.getAttribute('var').replace('muc#roomconfig_', ''),
-                    type = field.getAttribute('type');
-              let value;
+              let fieldname;
+              const type = field.getAttribute('type');
+
+              if (type !== 'fixed') {
+                fieldname = field.getAttribute('var').replace('muc#roomconfig_', '');
+              }
+
+              let values; // <---- MDEV 
 
               if (fieldname in config) {
                 switch (type) {
                   case 'boolean':
-                    value = config[fieldname] ? 1 : 0;
+                    values = [config[fieldname] ? 1 : 0];
                     break;
 
                   case 'list-multi':
                     // TODO: we don't yet handle "list-multi" types
-                    value = field.innerHTML;
+                    //value = field.innerHTML;
+                    values = config[fieldname];
                     break;
 
                   default:
-                    value = config[fieldname];
+                    values = [config[fieldname]];
                 }
 
-                field.innerHTML = $build('value').t(value);
-              }
+                field.innerHTML = values.reduce((accumulator, currentValue) => `${accumulator}${$build('value').t(currentValue)}`, '');
+              } //---------->MDEV
+
 
               configArray.push(field);
 
@@ -67796,7 +67849,10 @@ _converse_core__WEBPACK_IMPORTED_MODULE_3__["default"].plugins.add('converse-muc
           return true;
         }
 
+        console.log('data:pres', pres);
+        console.log('data:data', data);
         const occupant = this.occupants.findOccupant(data);
+        console.log('data:occupant', occupant);
 
         if (data.type === 'unavailable' && occupant) {
           if (!_.includes(data.states, _converse_core__WEBPACK_IMPORTED_MODULE_3__["default"].MUC_NICK_CHANGED_CODE) && !occupant.isMember()) {
@@ -68294,6 +68350,8 @@ _converse_core__WEBPACK_IMPORTED_MODULE_3__["default"].plugins.add('converse-muc
 
       let contact = _converse.roster.get(from),
           result;
+
+      console.log('contact', contact);
 
       if (_converse.auto_join_on_invite) {
         result = true;
@@ -92998,11 +93056,11 @@ __e(o.__('Purpose')) +
 __e(o.__('Optional')) +
 ')</label>\n                            <input type="text" required="required" name="purpose" class="form-control" />\n                            <span>' +
 __e(o.__("What's the channel about?")) +
-'</span>\n                    </div>\n                    <div class="form-group channel-invite">\n                            <label for="users">' +
+'</span>\n                    </div>\n                    <div class="form-group channel-invite">\n                        <label for="users">' +
 __e(o.__('Invite Users')) +
 '</label>\n                            <select class="selectpicker" multiple data-live-search="true">\n                                <option>Mustard</option>\n                                <option>Ketchup</option>\n                                <option>Relish</option>\n                            </select>\n                            <span>' +
 __e(o.__('Name must be a lowercase,without space, period, and shorter than 22 characters')) +
-'</span>\n                    </div>\n                    \n                        \n                    ';
+'</span>\n                    </div>\n                    ';
  if (!o._converse.locked_muc_nickname) { ;
 __p += '\n                    <div class="form-group" >\n                        <label for="nickname">' +
 __e(o.__('Nickname')) +
@@ -93012,7 +93070,7 @@ __e(o.__('This field is required')) +
 __e(o.nick) +
 '" class="form-control"/>\n                    </div>\n                    ';
  } ;
-__p += '\n                    <input type="button" class="btn cancel-btn" name="cancel" value="' +
+__p += '\n                    <input type="button" class="btn cancel-btn close" data-dismiss="modal" aria-label="Close" name="cancel" value="' +
 __e(o.__('Cancel')) +
 '"/>\n                    <input type="submit" class="btn create-btn" name="join" value="' +
 __e(o.__('Create')) +
@@ -93331,7 +93389,7 @@ var _ = {escape:__webpack_require__(/*! ./node_modules/lodash/escape.js */ "./no
 module.exports = function(o) {
 var __t, __p = '', __j = Array.prototype.join;
 function print() { __p += __j.call(arguments, '') }
-__p += '<!-- src/templates/chatbox.html -->\n<div class="flyout box-flyout">\n    <div class="chat-body">\n        <div class="top-toolbar">\n            <div class="container-fluid">\n                <div class="row">\n                    <!-- <div class="col-sm-6 room-description">\n                        <div class="container-fluid">\n                            <div class="row channel-name">\n                                #Announcements\n                            </div>\n                            <div class="row channel-summary">\n                                    <ul class="m-0 pl-0 d-block list-unstyled channel-info">\n                                    <li class="favorite-star">\n                                        <span class="favorite"><i class="fas fa-star"></i></span>\n                                    </li>\n                                    <li class="favorite-user">\n                                        <span class="mr-1 ">13</span>\n                                        <i class="far fa-user"></i>\n                                    </li>\n                                    <li class="favorite-channel">\n                                        <span class="channel-desc ">Company-wide announcements and work-based\n                                            matters</span>\n                                    </li>\n                                </ul>\n                            </div>\n                        </div>\n                        </div> -->\n                    <div class="col-sm-6 room-controls">\n                        <ul class="top-toolbar-menu">\n                        </ul>\n                    </div>\n                </div>\n            </div>\n        </div>\n        <div class="chat-content ';
+__p += '<!-- src/templates/chatbox.html -->\n<div class="flyout box-flyout">\n    <div class="chat-body">\n        <div class="chat-content ';
  if (o.show_send_button) { ;
 __p += 'chat-content-sendbutton';
  } ;
@@ -93372,7 +93430,11 @@ __e( o.status ) +
 __e(o.info_close) +
 '"></a>\n        <a class="chatbox-btn show-user-details-modal fa fa-id-card" title="' +
 __e(o.info_details) +
-'"></a>\n    </div> -->\n<!-- </div> -->\n';
+'"></a>\n    </div> -->\n<!-- </div> -->\n<div class="top-toolbar">\n        <div class="container-fluid">\n            <div class="row">\n                <!-- <div class="col-sm-6 room-description">\n                    <div class="container-fluid">\n                        <div class="row channel-name">\n                            #Announcements\n                        </div>\n                        <div class="row channel-summary">\n                                <ul class="m-0 pl-0 d-block list-unstyled channel-info">\n                                <li class="favorite-star">\n                                    <span class="favorite"><i class="fas fa-star"></i></span>\n                                </li>\n                                <li class="favorite-user">\n                                    <span class="mr-1 ">13</span>\n                                    <i class="far fa-user"></i>\n                                </li>\n                                <li class="favorite-channel">\n                                    <span class="channel-desc ">Company-wide announcements and work-based\n                                        matters</span>\n                                </li>\n                            </ul>\n                        </div>\n                    </div>\n                    </div> -->\n                <div class="col-sm-6 room-controls">\n                    <ul class="top-toolbar-menu">\n                    </ul>\n                </div>\n                <div class="chatbox-buttons row no-gutters">\n                    <a class="chatbox-btn close-chatbox-button fa fa-times" title="' +
+__e(o.info_close) +
+'"></a>\n                    <a class="chatbox-btn show-user-details-modal fa fa-id-card" title="' +
+__e(o.info_details) +
+'"></a>\n                </div>\n            </div>\n        </div>\n    </div>\n\n';
 return __p
 };
 
@@ -93391,7 +93453,7 @@ var __t, __p = '', __e = _.escape, __j = Array.prototype.join;
 function print() { __p += __j.call(arguments, '') }
 __p += '<!-- src/templates/chatbox_message_form.html -->\n<div class="message-form-container">\n<div class="new-msgs-indicator hidden">▼ ' +
 __e( o.unread_msgs ) +
-' ▼</div>\n<form class="sendXMPPMessage">\n    <div class="row">\n        <div class="col-sm-auto" >\n            <a href="javascript:void(0);" class="add-message m-auto">\n                <i class="fa fa-plus fa-2x"></i>\n            </a>\n        </div>\n        <div class="col-sm-8 message-input-area">\n            <input type="text" placeholder="' +
+' ▼</div>\n<form class="sendXMPPMessage">\n    <div class="row">\n        <div class="col-sm-auto" >\n            <a class="add-message m-auto">\n                <i class="fa fa-plus fa-2x"></i>\n            </a>\n        </div>\n        <div class="col-sm-8 message-input-area">\n            <input type="text" placeholder="' +
 ((__t = (o.label_spoiler_hint)) == null ? '' : __t) +
 '" value="' +
 ((__t = ( o.hint_value )) == null ? '' : __t) +
@@ -93917,7 +93979,7 @@ __e( o.Strophe.getDomainFromJid(o.jid) ) +
  } ;
 __p += '\n    </div> -->\n    <!-- Sanitized in converse-muc-views. We want to render links. -->\n    <p class="chatroom-description">' +
 ((__t = (o.description)) == null ? '' : __t) +
-'</p>\n<!-- </div>\n<div class="chatbox-buttons row no-gutters">\n    <a class="chatbox-btn close-chatbox-button fa fa-sign-out-alt" title="' +
+'</p>\n<!-- </div>-->\n<!-- <div class="chatbox-buttons row no-gutters">\n    <a class="chatbox-btn close-chatbox-button fa fa-sign-out-alt" title="' +
 __e(o.info_close) +
 '"></a>\n    ';
  if (o.affiliation == 'owner') { ;
@@ -93927,13 +93989,23 @@ __e(o.info_configure) +
  } ;
 __p += '\n    <a class="chatbox-btn show-room-details-modal fa fa-info-circle" title="' +
 __e(o.info_details) +
-'"></a>\n</div> -->\n<div class="chatbox-title">\n<div class="top-toolbar">\n        <div class="container-fluid">\n            <div class="row">\n                <div class="col-sm-6 room-description">\n                    <div class="container-fluid">\n                        <div class="row channel-name">\n                            #' +
-__e( o.Strophe.getNodeFromJid(o.jid) ) +
+'"></a>\n</div>  -->\n<div class="chatbox-title">\n<div class="top-toolbar">\n        <div class="container-fluid">\n            <div class="row">\n                <div class="col-sm-6 room-description">\n                    <div class="container-fluid">\n                        <div class="row channel-name">\n                            #' +
+((__t = ( o.name )) == null ? '' : __t) +
 '\n                        </div>\n                        <div class="row channel-summary">\n                                <ul class="m-0 pl-0 d-block list-unstyled channel-info">\n                                <li class="favorite-star">\n                                    <span class="favorite"><i class="fas fa-star"></i></span>\n                                </li>\n                                <li class="favorite-user">\n                                    <span class="mr-1 ">' +
 ((__t = (o.occupants)) == null ? '' : __t) +
 '</span>\n                                    <i class="far fa-user"></i>\n                                </li>\n                                <li class="favorite-channel">\n                                    <span class="channel-desc ">' +
 __e(o.room_description) +
-'</span>\n                                </li>\n                            </ul>\n                        </div>\n                    </div>\n                    </div>\n                <div class="col-sm-6 room-controls">\n                    <ul class="top-toolbar-menu">\n                    </ul>\n                </div>\n            </div>\n        </div>\n      </div>\n    </div>';
+'</span>\n                                </li>\n                            </ul>\n                        </div>\n                    </div>\n                    </div>\n                <div class="col-sm-6 room-controls">\n                    <ul class="top-toolbar-menu">\n                    </ul>\n                </div>\n                <div class="chatbox-buttons row no-gutters">\n                        <a class="chatbox-btn close-chatbox-button fa fa-sign-out-alt" title="' +
+__e(o.info_close) +
+'"></a>\n                        <!-- ';
+ if (o.affiliation == 'owner') { ;
+__p += '\n                        <a class="chatbox-btn configure-chatroom-button fa fa-wrench" title="' +
+__e(o.info_configure) +
+' "></a>\n                        ';
+ } ;
+__p += '\n                        <a class="chatbox-btn show-room-details-modal fa fa-info-circle" title="' +
+__e(o.info_details) +
+'"></a> -->\n                </div> \n            </div>\n        </div>\n      </div>\n    </div>';
 return __p
 };
 

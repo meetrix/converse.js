@@ -321,7 +321,6 @@ converse.plugins.add('converse-chatview', {
                 'keydown .chat-textarea': 'keyPressed',
                 'dragover .chat-textarea': 'onDragOver',
                 'drop .chat-textarea': 'onDrop',
-                'click .add-message': 'toggleFileUpload',
             },
 
             initialize () {
@@ -354,7 +353,6 @@ converse.plugins.add('converse-chatview', {
                 this.show = _.debounce(this._show, 250, {'leading': true});
             },
             videoCall(){
-                console.log('video call click')
             },
             render () {
                 // XXX: Is this still needed?
