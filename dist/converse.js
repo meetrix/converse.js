@@ -53707,6 +53707,7 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
         ev.preventDefault();
         const jid = ev.target.getAttribute('data-room-jid');
         const name = ev.target.getAttribute('data-room-name');
+        console.log('jid', jid, 'room', name);
         this.modal.hide();
 
         _converse.api.rooms.open(jid, {

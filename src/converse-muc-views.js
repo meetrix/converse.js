@@ -75,7 +75,7 @@ converse.plugins.add('converse-muc-views', {
                 });
                 this.roomspanel.model.fetch();
                 this.el.querySelector('.controlbox-pane').insertAdjacentElement(
-                    'beforeEnd', this.roomspanel.render().el);
+                    'beforeEnd', this.roomspanel.render().el);   
 
                 /**
                  * Triggered once the section of the _converse.ControlBoxView
@@ -306,9 +306,11 @@ converse.plugins.add('converse-muc-views', {
             },
 
             openRoom (ev) {
+               
                 ev.preventDefault();
                 const jid = ev.target.getAttribute('data-room-jid');
                 const name = ev.target.getAttribute('data-room-name');
+                console.log('jid',jid,'room',name)
                 this.modal.hide();
                 _converse.api.rooms.open(jid, {'name': name});
             },
