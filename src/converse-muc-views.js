@@ -573,7 +573,7 @@ converse.plugins.add('converse-muc-views', {
                 'dragover .chat-textarea': 'onDragOver',
                 'drop .chat-textarea': 'onDrop',
                 'click .top-toolbar-video-cal': 'videoCall',
-                'click .add-message': 'toggleFileUpload',
+                
             },
 
             initialize () {

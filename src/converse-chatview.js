@@ -321,7 +321,6 @@ converse.plugins.add('converse-chatview', {
                 'keydown .chat-textarea': 'keyPressed',
                 'dragover .chat-textarea': 'onDragOver',
                 'drop .chat-textarea': 'onDrop',
-                'click .add-message': 'toggleFileUpload',
             },
 
             initialize () {

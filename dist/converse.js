@@ -49297,8 +49297,7 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
         'input .chat-textarea': 'inputChanged',
         'keydown .chat-textarea': 'keyPressed',
         'dragover .chat-textarea': 'onDragOver',
-        'drop .chat-textarea': 'onDrop',
-        'click .add-message': 'toggleFileUpload'
+        'drop .chat-textarea': 'onDrop'
       },
 
       initialize() {
@@ -54004,8 +54003,7 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
         'input .chat-textarea': 'inputChanged',
         'dragover .chat-textarea': 'onDragOver',
         'drop .chat-textarea': 'onDrop',
-        'click .top-toolbar-video-cal': 'videoCall',
-        'click .add-message': 'toggleFileUpload'
+        'click .top-toolbar-video-cal': 'videoCall'
       },
 
       initialize() {
@@ -57987,6 +57985,7 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_4__["default"].plugins
 
       showProfileModal(ev) {
         if (_.isUndefined(this.profile_modal)) {
+          console.log('profile', this.model.toJSON());
           this.profile_modal = new _converse.ProfileModal({
             model: this.model
           });
@@ -64287,7 +64286,7 @@ _converse.initialize = async function (settings, callback) {
       _converse.setConnectionStatus(status);
     } else if (status === strophe_js__WEBPACK_IMPORTED_MODULE_0__["Strophe"].Status.AUTHFAIL) {
       if (!message) {
-        message = __('Your Jabber ID and/or password is incorrect. Please try again.');
+        message = __('Username and/or password is incorrect. Please try again.');
       }
 
       _converse.setConnectionStatus(status, message);
@@ -93430,7 +93429,7 @@ __e( o.status ) +
 __e(o.info_close) +
 '"></a>\n        <a class="chatbox-btn show-user-details-modal fa fa-id-card" title="' +
 __e(o.info_details) +
-'"></a>\n    </div> -->\n<!-- </div> -->\n';
+'"></a>\n    </div> -->\n<!-- </div> -->\n\n';
 return __p
 };
 
