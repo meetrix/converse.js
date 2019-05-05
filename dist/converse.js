@@ -93000,7 +93000,7 @@ __e(o.__('Optional')) +
 __e(o.__("What's the channel about?")) +
 '</span>\n                    </div>\n                    <div class="form-group channel-invite">\n                            <label for="users">' +
 __e(o.__('Invite Users')) +
-'</label>\n                            <input type="text" required="required" name="users" class="form-control" />\n                            <span>' +
+'</label>\n                            <select class="selectpicker" multiple data-live-search="true">\n                                <option>Mustard</option>\n                                <option>Ketchup</option>\n                                <option>Relish</option>\n                            </select>\n                            <span>' +
 __e(o.__('Name must be a lowercase,without space, period, and shorter than 22 characters')) +
 '</span>\n                    </div>\n                    \n                        \n                    ';
  if (!o._converse.locked_muc_nickname) { ;
@@ -94809,9 +94809,9 @@ __p += '\n                <p>Disconnected.</p>\n            ';
  } ;
 __p += '\n        ';
  } ;
-__p += '\n        </div>\n    </form>\n    <img className="image-bottom" src="' +
+__p += '\n        </div>\n    </form>\n    <!-- <img className="image-bottom" src="' +
 __e(o.login_bottom_image) +
-'" alt="" />\n\n</div>\n';
+'" alt="" /> -->\n\n</div>\n';
 return __p
 };
 
