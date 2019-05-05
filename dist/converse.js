@@ -93068,9 +93068,9 @@ __e(o.__('Purpose')) +
 __e(o.__('Optional')) +
 ')</label>\n                            <input type="text" required="required" name="purpose" class="form-control" />\n                            <span>' +
 __e(o.__("What's the channel about?")) +
-'</span>\n                    </div>\n                    <div class="form-group channel-invite">\n                            <label for="users">' +
+'</span>\n                    </div>\n                    <div class="form-group channel-invite">\n                        <label for="users">' +
 __e(o.__('Invite Users')) +
-'</label>\n                            <input type="text" required="required" name="invitees" class="form-control" />\n                            <span>' +
+'</label>\n                        <select class="form-control channel-users-invite-list" name="users" multiple="multiple"></select>\n                        <span>' +
 __e(o.__('Name must be a lowercase,without space, period, and shorter than 22 characters')) +
 '</span>\n                    </div>\n                    ';
  if (!o._converse.locked_muc_nickname) { ;
