@@ -58590,6 +58590,8 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_1__["default"].plugins
          * Depending on the available input fields, we delegate to
          * other methods.
          */
+        console.log('form submission');
+
         if (ev && ev.preventDefault) {
           ev.preventDefault();
         }
@@ -94831,7 +94833,7 @@ var _ = {escape:__webpack_require__(/*! ./node_modules/lodash/escape.js */ "./no
 module.exports = function(o) {
 var __t, __p = '', __e = _.escape, __j = Array.prototype.join;
 function print() { __p += __j.call(arguments, '') }
-__p += '<!-- src/templates/login_panel.html -->\n<div id="converse-login-panel" class="controlbox-pane fade-in row no-gutters">\n    <form id="converse-login" class="converse-form" method="post">\n        <div>\n        <div class="onboard-title">Welcome Back !</div>\n        <div class="onboard-text">We’re happy to have you here again!</div>\n        <div class="conn-feedback fade-in ';
+__p += '<!-- src/templates/login_panel.html -->\n<div id="converse-login-panel" class="controlbox-pane fade-in row no-gutters">\n    <form id="converse-login" class="converse-form" method="post">\n        <div>\n        <div class="onboard-title">Welcome Back !</div>\n        <div class="onboard-text">We&apos;re happy to have you here again!</div>\n        <div class="conn-feedback fade-in ';
  if (!o.conn_feedback_subject) { ;
 __p += ' hidden ';
  } ;
