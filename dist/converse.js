@@ -59735,8 +59735,9 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_4__["default"].plugins
           xhr.send();
         }, 300));
         this.name_auto_complete.on('suggestion-box-selectcomplete', ev => {
-          this.el.querySelector('input[name="name"]').value = ev.text.label;
-          this.el.querySelector('input[name="jid"]').value = ev.text.value;
+          this.el.querySelector('input[name="name"]').value = ev.text.label; //<----MDEV
+          // this.el.querySelector('input[name="jid"]').value = ev.text.value;
+          //---------
         });
       },
 
@@ -59793,20 +59794,29 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_4__["default"].plugins
       afterSubmission(form, jid, name) {
         _converse.roster.addAndSubscribe(jid, name);
 
-        this.model.clear();
-        const input_el = this.el.querySelector('input[name="jid"]');
+        this.model.clear(); //<-----MDEV
+        //const input_el = this.el.querySelector('input[name="jid"]');
+
+        const input_el = this.el.querySelector('input[name="name"]'); //------>
+
         input_el.value = '';
         this.modal.hide();
       },
 
       addContactFromForm(ev) {
         ev.preventDefault();
-        const data = new FormData(ev.target);
-        let jid = data.get('jid');
+        const data = new FormData(ev.target); //<------MDEV
+
+        let jid = data.get('name');
 
         if (_.compact(jid.split('@')).length < 2) {
           jid = _.compact(jid.split('@'))[0] + '@' + _converse.api.settings.get("default_domain");
-        }
+        } // let jid = data.get('jid');
+        // if(_.compact(jid.split('@')).length < 2){
+        //     jid = _.compact(jid.split('@'))[0]+'@'+_converse.api.settings.get("default_domain");
+        // }
+        //------>
+
 
         if (!jid && _converse.xhr_user_search_url && _.isString(_converse.xhr_user_search_url)) {
           const input_el = this.el.querySelector('input[name="name"]');
@@ -93056,9 +93066,9 @@ __e(o.__('Purpose')) +
 __e(o.__('Optional')) +
 ')</label>\n                            <input type="text" required="required" name="purpose" class="form-control" />\n                            <span>' +
 __e(o.__("What's the channel about?")) +
-'</span>\n                    </div>\n                    <div class="form-group channel-invite">\n                        <label for="users">' +
+'</span>\n                    </div>\n                    <div class="form-group channel-invite">\n                            <label for="users">' +
 __e(o.__('Invite Users')) +
-'</label>\n                            <select class="selectpicker" multiple data-live-search="true">\n                                <option>Mustard</option>\n                                <option>Ketchup</option>\n                                <option>Relish</option>\n                            </select>\n                            <span>' +
+'</label>\n                            <input type="text" required="required" name="invitees" class="form-control" />\n                            <span>' +
 __e(o.__('Name must be a lowercase,without space, period, and shorter than 22 characters')) +
 '</span>\n                    </div>\n                    ';
  if (!o._converse.locked_muc_nickname) { ;
@@ -93093,7 +93103,7 @@ var __t, __p = '', __e = _.escape, __j = Array.prototype.join;
 function print() { __p += __j.call(arguments, '') }
 __p += '<!-- src/templates/add_contact_modal.html -->\n<!-- Add contact Modal -->\n<div class="modal fade" id="add-contact-modal" tabindex="-1" role="dialog" aria-labelledby="addContactModalLabel" aria-hidden="true">\n    <div class="modal-dialog" role="document">\n        <div class="modal-content">\n            <div class="modal-header">\n                <h5 class="modal-title" id="addContactModalLabel">' +
 __e(o.heading_new_contact) +
-'</h5>\n                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><i class="fas fa-times"></i></button>\n            </div>\n            <form class="converse-form add-xmpp-contact">\n                <div class="modal-body">\n                    <div class="form-group add-xmpp-contact__jid">\n                        <label class="clearfix" for="jid">' +
+'</h5>\n                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><i class="fas fa-times"></i></button>\n            </div>\n            <form class="converse-form add-xmpp-contact">\n                <div class="modal-body">\n                    <!-- <div class="form-group add-xmpp-contact__jid">\n                        <label class="clearfix" for="jid">' +
 __e(o.label_xmpp_address) +
 ':</label>\n                        <div class="suggestion-box suggestion-box__jid">\n                            <ul class="suggestion-box__results suggestion-box__results--above" hidden=""></ul>\n                            <input type="text" name="jid"\n                                   ';
  if (!o._converse.xhr_user_search_url) { ;
@@ -93103,7 +93113,7 @@ __p += '\n                                   value="' +
 __e(o.jid) +
 '"\n                                   class="form-control suggestion-box__input"\n                                   placeholder="' +
 __e(o.contact_placeholder) +
-'"/>\n                            <span class="suggestion-box__additions visually-hidden" role="status" aria-live="assertive" aria-relevant="additions"></span>\n                        </div>\n                    </div>\n                    <div class="form-group add-xmpp-contact__name">\n                        <label class="clearfix" for="name">' +
+'"/>\n                            <span class="suggestion-box__additions visually-hidden" role="status" aria-live="assertive" aria-relevant="additions"></span>\n                        </div>\n                    </div> -->\n                    <div class="form-group add-xmpp-contact__name">\n                        <label class="clearfix" for="name">' +
 __e(o.label_nickname) +
 ':</label>\n                        <div class="suggestion-box suggestion-box__name">\n                            <ul class="suggestion-box__results suggestion-box__results--above" hidden=""></ul>\n                            <input type="text" name="name" value="' +
 __e(o.nickname) +
