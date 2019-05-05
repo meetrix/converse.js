@@ -616,6 +616,7 @@ converse.plugins.add('converse-register', {
              * @param { HTMLElement } form - The HTML form that was submitted
              */
             submitRegistrationForm (form) {
+                console.log('submit registation')
                 //<-----MDEV
                 if(!this.validationRegistationForm(form)){
                     return;

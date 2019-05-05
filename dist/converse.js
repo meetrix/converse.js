@@ -58876,7 +58876,8 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_1__["default"].plugins
        * @param { HTMLElement } form - The HTML form that was submitted
        */
       submitRegistrationForm(form) {
-        //<-----MDEV
+        console.log('submit registation'); //<-----MDEV
+
         if (!this.validationRegistationForm(form)) {
           return;
         } //-------->
