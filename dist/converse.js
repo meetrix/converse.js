@@ -53887,7 +53887,7 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
           'roomname': data.get('chatroom'),
           'roomdesc': data.get('purpose'),
           'publicroom': data.get('privatechannel') !== 'on' ? true : false,
-          'membersonly': data.get('privatechannel') === 'on' && data.get('readonlychannel') !== 'on' ? true : false,
+          'membersonly': data.get('privatechannel') === 'on' ? true : false,
           'moderatedroom': data.get('readonlychannel') === 'on' ? true : false,
           'allowpm': data.get('readonlychannel') === 'on' ? 'none' : 'anyone',
           'roomowners': [_converse.connection.jid.split('/')[0]]
@@ -53935,7 +53935,7 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
             }
 
             setTimeout(function () {
-              _converse.api.roomviews.get(jid).model.directInvite(user, 'invite to the room');
+              _converse.api.roomviews.get(jid.toLowerCase()).model.directInvite(user, 'invite to the room');
             }, 10000);
           });
         } //-------->
