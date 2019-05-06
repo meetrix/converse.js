@@ -45449,7 +45449,7 @@ _converse_core__WEBPACK_IMPORTED_MODULE_3__["default"].plugins.add('converse-muc
             'jid': recipient,
             'affiliation': 'member',
             'reason': reason
-          }], ['member', 'owner', 'admin'], deltaFunc);
+          }], ['member', 'owner', 'admin', 'visitor'], deltaFunc);
         }
 
         const attrs = {

@@ -491,11 +491,12 @@ converse.plugins.add('converse-muc', {
                     // the person to the member list by giving them an
                     // affiliation of 'member' (if they're not affiliated
                     // already), otherwise they won't be able to join.
+                    
                     const map = {}; map[recipient] = 'member';
                     const deltaFunc = _.partial(u.computeAffiliationsDelta, true, false);
                     this.updateMemberLists(
                         [{'jid': recipient, 'affiliation': 'member', 'reason': reason}],
-                        ['member', 'owner', 'admin'],
+                        ['member', 'owner', 'admin','visitor'],
                         deltaFunc
                     );
                 }

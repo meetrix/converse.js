@@ -99,7 +99,9 @@ converse.plugins.add('converse-message-view', {
                     }
                     this.renderFileUploadProgresBar();
                 } else if (this.model.get('type') === 'error') {
-                    this.renderErrorMessage();
+                    //<-----MDEV
+                    // this.renderErrorMessage();
+                    //------>
                 } else {
                     await this.renderChatMessage();
                 }

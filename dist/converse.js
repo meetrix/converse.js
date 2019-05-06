@@ -52342,8 +52342,9 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_1__["default"].plugins
           }
 
           this.renderFileUploadProgresBar();
-        } else if (this.model.get('type') === 'error') {
-          this.renderErrorMessage();
+        } else if (this.model.get('type') === 'error') {//<-----MDEV
+          // this.renderErrorMessage();
+          //------>
         } else {
           await this.renderChatMessage();
         }
@@ -53885,10 +53886,13 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
         var roomconfig = {
           'roomname': data.get('chatroom'),
           'roomdesc': data.get('purpose'),
-          'publicroom': data.get('privatechannel'),
-          'allowpm': data.get('readonlychannel') ? 'moderators' : 'anyone',
+          'publicroom': !data.get('privatechannel'),
+          'membersonly': data.get('privatechannel'),
+          'moderatedroom': data.get('readonlychannel'),
+          'allowpm': data.get('readonlychannel') ? 'none' : 'anyone',
           'roomowners': [_converse.connection.jid.split('/')[0]]
         };
+        console.log('roomconfig', roomconfig);
         return {
           'jid': jid,
           'nick': nick,
@@ -67390,7 +67394,7 @@ _converse_core__WEBPACK_IMPORTED_MODULE_3__["default"].plugins.add('converse-muc
             'jid': recipient,
             'affiliation': 'member',
             'reason': reason
-          }], ['member', 'owner', 'admin'], deltaFunc);
+          }], ['member', 'owner', 'admin', 'visitor'], deltaFunc);
         }
 
         const attrs = {

@@ -466,10 +466,13 @@ converse.plugins.add('converse-muc-views', {
                 var roomconfig = {
                     'roomname': data.get('chatroom'),
                     'roomdesc':  data.get('purpose'),
-                    'publicroom': data.get('privatechannel'),
-                    'allowpm':data.get('readonlychannel')?'moderators':'anyone',
+                    'publicroom': !data.get('privatechannel'),
+                    'membersonly': data.get('privatechannel'),
+                    'moderatedroom':data.get('readonlychannel'),
+                    'allowpm': data.get('readonlychannel')?'none':'anyone',
                     'roomowners':[_converse.connection.jid.split('/')[0]]
                 }
+                console.log('roomconfig',roomconfig);
                 return {
                     'jid': jid,
                     'nick': nick,
@@ -635,7 +638,6 @@ converse.plugins.add('converse-muc-views', {
                 this.el.setAttribute('id', this.model.get('box_id'));
                 this.el.innerHTML = tpl_chatroom();
                 this.renderHeading();
-          
                 this.renderChatArea();
                 this.renderMessageForm();
                 this.initMentionAutoComplete();
@@ -655,7 +657,7 @@ converse.plugins.add('converse-muc-views', {
             renderChatArea () {
                 /* Render the UI container in which groupchat messages will appear.
                  */
-                if (_.isNull(this.el.querySelector('.chat-area'))) {
+                if (_.isNull(this.el.querySelector('.chat-area')) ) {
                     const container_el = this.el.querySelector('.chatroom-body');
                     container_el.insertAdjacentHTML('beforeend', tpl_chatarea( {
                         '_converse': _converse,
