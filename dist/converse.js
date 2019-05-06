@@ -93445,11 +93445,11 @@ __e( o.status ) +
 __e(o.info_close) +
 '"></a>\n        <a class="chatbox-btn show-user-details-modal fa fa-id-card" title="' +
 __e(o.info_details) +
-'"></a>\n    </div> -->\n<!-- </div> -->\n<div class="top-toolbar">\n        <div class="container-fluid">\n            <div class="row">\n                <!-- <div class="col-sm-6 room-description">\n                    <div class="container-fluid">\n                        <div class="row channel-name">\n                            #Announcements\n                        </div>\n                        <div class="row channel-summary">\n                                <ul class="m-0 pl-0 d-block list-unstyled channel-info">\n                                <li class="favorite-star">\n                                    <span class="favorite"><i class="fas fa-star"></i></span>\n                                </li>\n                                <li class="favorite-user">\n                                    <span class="mr-1 ">13</span>\n                                    <i class="far fa-user"></i>\n                                </li>\n                                <li class="favorite-channel">\n                                    <span class="channel-desc ">Company-wide announcements and work-based\n                                        matters</span>\n                                </li>\n                            </ul>\n                        </div>\n                    </div>\n                    </div> -->\n                <div class="col-sm-6 room-controls">\n                    <ul class="top-toolbar-menu">\n                    </ul>\n                </div>\n                <div class="chatbox-buttons row no-gutters">\n                    <a class="chatbox-btn close-chatbox-button fa fa-times" title="' +
-__e(o.info_close) +
-'"></a>\n                    <a class="chatbox-btn show-user-details-modal fa fa-id-card" title="' +
+'"></a>\n    </div> -->\n<!-- </div> -->\n<div class="top-toolbar">\n        <div class="container-fluid">\n            <div class="row">\n                <!-- <div class="col-sm-6 room-description">\n                    <div class="container-fluid">\n                        <div class="row channel-name">\n                            #Announcements\n                        </div>\n                        <div class="row channel-summary">\n                                <ul class="m-0 pl-0 d-block list-unstyled channel-info">\n                                <li class="favorite-star">\n                                    <span class="favorite"><i class="fas fa-star"></i></span>\n                                </li>\n                                <li class="favorite-user">\n                                    <span class="mr-1 ">13</span>\n                                    <i class="far fa-user"></i>\n                                </li>\n                                <li class="favorite-channel">\n                                    <span class="channel-desc ">Company-wide announcements and work-based\n                                        matters</span>\n                                </li>\n                            </ul>\n                        </div>\n                    </div>\n                    </div> -->\n                <div class="col-sm-6"></div>\n                <div class="col-sm-6 room-controls">\n                    <ul class="top-toolbar-menu">\n                    </ul>\n                    <div class="chatbox-buttons">\n                        <a class="chatbox-btn show-user-details-modal fa fa-id-card" title="' +
 __e(o.info_details) +
-'"></a>\n                </div>\n            </div>\n        </div>\n    </div>\n\n';
+'"></a>\n                        <a class="chatbox-btn close-chatbox-button fa fa-times" title="' +
+__e(o.info_close) +
+'"></a>\n                    </div>\n                </div>\n            </div>\n        </div>\n    </div>\n\n';
 return __p
 };
 
@@ -94010,7 +94010,7 @@ __e(o.info_details) +
 ((__t = (o.occupants)) == null ? '' : __t) +
 '</span>\n                                    <i class="far fa-user"></i>\n                                </li>\n                                <li class="favorite-channel">\n                                    <span class="channel-desc ">' +
 __e(o.room_description) +
-'</span>\n                                </li>\n                            </ul>\n                        </div>\n                    </div>\n                    </div>\n                <div class="col-sm-6 room-controls">\n                    <ul class="top-toolbar-menu">\n                    </ul>\n                </div>\n                <div class="chatbox-buttons row no-gutters">\n                        <a class="chatbox-btn close-chatbox-button fa fa-sign-out-alt" title="' +
+'</span>\n                                </li>\n                            </ul>\n                        </div>\n                    </div>\n                    </div>\n                <div class="col-sm-6 room-controls">\n                    <ul class="top-toolbar-menu">\n                    </ul>\n                    <div class="chatbox-buttons-custom">\n                        <a class="chatbox-btn close-chatbox-button fa fa-sign-out-alt" title="' +
 __e(o.info_close) +
 '"></a>\n                        <!-- ';
  if (o.affiliation == 'owner') { ;
@@ -94020,7 +94020,7 @@ __e(o.info_configure) +
  } ;
 __p += '\n                        <a class="chatbox-btn show-room-details-modal fa fa-info-circle" title="' +
 __e(o.info_details) +
-'"></a> -->\n                </div> \n            </div>\n        </div>\n      </div>\n    </div>';
+'"></a> -->\n                    </div>\n                </div>\n            </div>\n        </div>\n      </div>\n    </div>';
 return __p
 };
 
