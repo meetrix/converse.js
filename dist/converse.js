@@ -53886,13 +53886,12 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
         var roomconfig = {
           'roomname': data.get('chatroom'),
           'roomdesc': data.get('purpose'),
-          'publicroom': !data.get('privatechannel'),
-          'membersonly': data.get('privatechannel'),
-          'moderatedroom': data.get('readonlychannel'),
-          'allowpm': data.get('readonlychannel') ? 'none' : 'anyone',
+          'publicroom': data.get('privatechannel') !== 'on' ? true : false,
+          'membersonly': data.get('privatechannel') === 'on' && data.get('readonlychannel') !== 'on' ? true : false,
+          'moderatedroom': data.get('readonlychannel') === 'on' ? true : false,
+          'allowpm': data.get('readonlychannel') === 'on' ? 'none' : 'anyone',
           'roomowners': [_converse.connection.jid.split('/')[0]]
         };
-        console.log('roomconfig', roomconfig);
         return {
           'jid': jid,
           'nick': nick,
@@ -93052,11 +93051,11 @@ __p += '<!-- src/templates/add_chatroom_modal.html -->\n<div class="modal fade" 
 __e(o.__('Create New Channel')) +
 '\n                </div>\n                <div class="modal-title" id="add-chatroom-modal-sublabel">\n                    ' +
 __e(o.__('Channels are where your members communicate. They are best when organized around a topic - #lead, for example')) +
-'\n                </div>\n                <form class="converse-form add-chatroom">\n                    <div class="form-group private-public">\n                        <div>\n                            <label class="switch">\n                                <input id="private-channel" type="checkbox" name="privatechannel" checked>\n                                <span class="slider round"></span>\n                            </label>\n                            <label for="private-channel" class="form-check-label" >' +
+'\n                </div>\n                <form class="converse-form add-chatroom">\n                    <div class="form-group private-public">\n                        <div>\n                            <label class="switch">\n                                <input id="private-channel" type="checkbox" name="privatechannel" checked>\n                                <span class="slider round"></span>\n                            </label>\n                            <label for="privatechannel" class="form-check-label" >' +
 __e(o.__('Private Channel')) +
 '</label>\n                        </div>\n                        <span>' +
 __e(o.__('Just invited people can access this channel')) +
-'</span>\n                    </div>\n                    <div class="form-group read-only">\n                        <div>\n                            <label class="switch">\n                                <input id="read-only-channel" type="checkbox" name="readonlychannel">\n                                <span class="slider round"></span>\n                            </label>\n                            <label for="read-only-channel" class="form-check-label">' +
+'</span>\n                    </div>\n                    <div class="form-group read-only">\n                        <div>\n                            <label class="switch">\n                                <input id="read-only-channel" type="checkbox" name="readonlychannel">\n                                <span class="slider round"></span>\n                            </label>\n                            <label for="readonlychannel" class="form-check-label">' +
 __e(o.__('Read-Only Channel')) +
 '</label>\n                        </div>\n                        <span>' +
 __e(o.__('All users in the channel can write messages')) +

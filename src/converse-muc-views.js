@@ -463,16 +463,16 @@ converse.plugins.add('converse-muc-views', {
                     nick = data.get('nickname').trim();
                 }
                 //<-----  Mdev
+               
                 var roomconfig = {
                     'roomname': data.get('chatroom'),
                     'roomdesc':  data.get('purpose'),
-                    'publicroom': !data.get('privatechannel'),
-                    'membersonly': data.get('privatechannel'),
-                    'moderatedroom':data.get('readonlychannel'),
-                    'allowpm': data.get('readonlychannel')?'none':'anyone',
+                    'publicroom': data.get('privatechannel') !=='on'? true:false,
+                    'membersonly': data.get('privatechannel') ==='on' && data.get('readonlychannel') !=='on' ? true:false,
+                    'moderatedroom': data.get('readonlychannel') ==='on'? true:false,
+                    'allowpm': data.get('readonlychannel') ==='on'?'none':'anyone',
                     'roomowners':[_converse.connection.jid.split('/')[0]]
                 }
-                console.log('roomconfig',roomconfig);
                 return {
                     'jid': jid,
                     'nick': nick,
