@@ -52342,8 +52342,9 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_1__["default"].plugins
           }
 
           this.renderFileUploadProgresBar();
-        } else if (this.model.get('type') === 'error') {
-          this.renderErrorMessage();
+        } else if (this.model.get('type') === 'error') {//<-----MDEV
+          // this.renderErrorMessage();
+          //------>
         } else {
           await this.renderChatMessage();
         }
@@ -53885,8 +53886,10 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
         var roomconfig = {
           'roomname': data.get('chatroom'),
           'roomdesc': data.get('purpose'),
-          'publicroom': data.get('privatechannel'),
-          'allowpm': data.get('readonlychannel') ? 'moderators' : 'anyone',
+          'publicroom': data.get('privatechannel') !== 'on' ? true : false,
+          'membersonly': data.get('privatechannel') === 'on' && data.get('readonlychannel') !== 'on' ? true : false,
+          'moderatedroom': data.get('readonlychannel') === 'on' ? true : false,
+          'allowpm': data.get('readonlychannel') === 'on' ? 'none' : 'anyone',
           'roomowners': [_converse.connection.jid.split('/')[0]]
         };
         return {
@@ -58590,6 +58593,8 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_1__["default"].plugins
          * Depending on the available input fields, we delegate to
          * other methods.
          */
+        console.log('form submission');
+
         if (ev && ev.preventDefault) {
           ev.preventDefault();
         }
@@ -59735,8 +59740,9 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_4__["default"].plugins
           xhr.send();
         }, 300));
         this.name_auto_complete.on('suggestion-box-selectcomplete', ev => {
-          this.el.querySelector('input[name="name"]').value = ev.text.label;
-          this.el.querySelector('input[name="jid"]').value = ev.text.value;
+          this.el.querySelector('input[name="name"]').value = ev.text.label; //<----MDEV
+          // this.el.querySelector('input[name="jid"]').value = ev.text.value;
+          //---------
         });
       },
 
@@ -59793,20 +59799,29 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_4__["default"].plugins
       afterSubmission(form, jid, name) {
         _converse.roster.addAndSubscribe(jid, name);
 
-        this.model.clear();
-        const input_el = this.el.querySelector('input[name="jid"]');
+        this.model.clear(); //<-----MDEV
+        //const input_el = this.el.querySelector('input[name="jid"]');
+
+        const input_el = this.el.querySelector('input[name="name"]'); //------>
+
         input_el.value = '';
         this.modal.hide();
       },
 
       addContactFromForm(ev) {
         ev.preventDefault();
-        const data = new FormData(ev.target);
-        let jid = data.get('jid');
+        const data = new FormData(ev.target); //<------MDEV
+
+        let jid = data.get('name');
 
         if (_.compact(jid.split('@')).length < 2) {
           jid = _.compact(jid.split('@'))[0] + '@' + _converse.api.settings.get("default_domain");
-        }
+        } // let jid = data.get('jid');
+        // if(_.compact(jid.split('@')).length < 2){
+        //     jid = _.compact(jid.split('@'))[0]+'@'+_converse.api.settings.get("default_domain");
+        // }
+        //------>
+
 
         if (!jid && _converse.xhr_user_search_url && _.isString(_converse.xhr_user_search_url)) {
           const input_el = this.el.querySelector('input[name="name"]');
@@ -67378,7 +67393,7 @@ _converse_core__WEBPACK_IMPORTED_MODULE_3__["default"].plugins.add('converse-muc
             'jid': recipient,
             'affiliation': 'member',
             'reason': reason
-          }], ['member', 'owner', 'admin'], deltaFunc);
+          }], ['member', 'owner', 'admin', 'visitor'], deltaFunc);
         }
 
         const attrs = {
@@ -93036,11 +93051,11 @@ __p += '<!-- src/templates/add_chatroom_modal.html -->\n<div class="modal fade" 
 __e(o.__('Create New Channel')) +
 '\n                </div>\n                <div class="modal-title" id="add-chatroom-modal-sublabel">\n                    ' +
 __e(o.__('Channels are where your members communicate. They are best when organized around a topic - #lead, for example')) +
-'\n                </div>\n                <form class="converse-form add-chatroom">\n                    <div class="form-group private-public">\n                        <div>\n                            <label class="switch">\n                                <input id="private-channel" type="checkbox" name="privatechannel" checked>\n                                <span class="slider round"></span>\n                            </label>\n                            <label for="private-channel" class="form-check-label" >' +
+'\n                </div>\n                <form class="converse-form add-chatroom">\n                    <div class="form-group private-public">\n                        <div>\n                            <label class="switch">\n                                <input id="private-channel" type="checkbox" name="privatechannel" checked>\n                                <span class="slider round"></span>\n                            </label>\n                            <label for="privatechannel" class="form-check-label" >' +
 __e(o.__('Private Channel')) +
 '</label>\n                        </div>\n                        <span>' +
 __e(o.__('Just invited people can access this channel')) +
-'</span>\n                    </div>\n                    <div class="form-group read-only">\n                        <div>\n                            <label class="switch">\n                                <input id="read-only-channel" type="checkbox" name="readonlychannel">\n                                <span class="slider round"></span>\n                            </label>\n                            <label for="read-only-channel" class="form-check-label">' +
+'</span>\n                    </div>\n                    <div class="form-group read-only">\n                        <div>\n                            <label class="switch">\n                                <input id="read-only-channel" type="checkbox" name="readonlychannel">\n                                <span class="slider round"></span>\n                            </label>\n                            <label for="readonlychannel" class="form-check-label">' +
 __e(o.__('Read-Only Channel')) +
 '</label>\n                        </div>\n                        <span>' +
 __e(o.__('All users in the channel can write messages')) +
@@ -93058,7 +93073,7 @@ __e(o.__('Optional')) +
 __e(o.__("What's the channel about?")) +
 '</span>\n                    </div>\n                    <div class="form-group channel-invite">\n                            <label for="users">' +
 __e(o.__('Invite Users')) +
-'</label>\n                            <input type="text" required="required" name="invitees" class="form-control" />\n                            <span>' +
+'</label>\n                        <select class="form-control channel-users-invite-list" name="users" multiple="multiple"></select>\n                        <span>' +
 __e(o.__('Name must be a lowercase,without space, period, and shorter than 22 characters')) +
 '</span>\n                    </div>\n                    ';
  if (!o._converse.locked_muc_nickname) { ;
@@ -93093,7 +93108,7 @@ var __t, __p = '', __e = _.escape, __j = Array.prototype.join;
 function print() { __p += __j.call(arguments, '') }
 __p += '<!-- src/templates/add_contact_modal.html -->\n<!-- Add contact Modal -->\n<div class="modal fade" id="add-contact-modal" tabindex="-1" role="dialog" aria-labelledby="addContactModalLabel" aria-hidden="true">\n    <div class="modal-dialog" role="document">\n        <div class="modal-content">\n            <div class="modal-header">\n                <h5 class="modal-title" id="addContactModalLabel">' +
 __e(o.heading_new_contact) +
-'</h5>\n                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><i class="fas fa-times"></i></button>\n            </div>\n            <form class="converse-form add-xmpp-contact">\n                <div class="modal-body">\n                    <div class="form-group add-xmpp-contact__jid">\n                        <label class="clearfix" for="jid">' +
+'</h5>\n                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><i class="fas fa-times"></i></button>\n            </div>\n            <form class="converse-form add-xmpp-contact">\n                <div class="modal-body">\n                    <!-- <div class="form-group add-xmpp-contact__jid">\n                        <label class="clearfix" for="jid">' +
 __e(o.label_xmpp_address) +
 ':</label>\n                        <div class="suggestion-box suggestion-box__jid">\n                            <ul class="suggestion-box__results suggestion-box__results--above" hidden=""></ul>\n                            <input type="text" name="jid"\n                                   ';
  if (!o._converse.xhr_user_search_url) { ;
@@ -93103,7 +93118,7 @@ __p += '\n                                   value="' +
 __e(o.jid) +
 '"\n                                   class="form-control suggestion-box__input"\n                                   placeholder="' +
 __e(o.contact_placeholder) +
-'"/>\n                            <span class="suggestion-box__additions visually-hidden" role="status" aria-live="assertive" aria-relevant="additions"></span>\n                        </div>\n                    </div>\n                    <div class="form-group add-xmpp-contact__name">\n                        <label class="clearfix" for="name">' +
+'"/>\n                            <span class="suggestion-box__additions visually-hidden" role="status" aria-live="assertive" aria-relevant="additions"></span>\n                        </div>\n                    </div> -->\n                    <div class="form-group add-xmpp-contact__name">\n                        <label class="clearfix" for="name">' +
 __e(o.label_nickname) +
 ':</label>\n                        <div class="suggestion-box suggestion-box__name">\n                            <ul class="suggestion-box__results suggestion-box__results--above" hidden=""></ul>\n                            <input type="text" name="name" value="' +
 __e(o.nickname) +
@@ -94821,7 +94836,7 @@ var _ = {escape:__webpack_require__(/*! ./node_modules/lodash/escape.js */ "./no
 module.exports = function(o) {
 var __t, __p = '', __e = _.escape, __j = Array.prototype.join;
 function print() { __p += __j.call(arguments, '') }
-__p += '<!-- src/templates/login_panel.html -->\n<div id="converse-login-panel" class="controlbox-pane fade-in row no-gutters">\n    <form id="converse-login" class="converse-form" method="post">\n        <div>\n        <div class="onboard-title">Welcome Back !</div>\n        <div class="onboard-text">We’re happy to have you here again!</div>\n        <div class="conn-feedback fade-in ';
+__p += '<!-- src/templates/login_panel.html -->\n<div id="converse-login-panel" class="controlbox-pane fade-in row no-gutters">\n    <form id="converse-login" class="converse-form" method="post">\n        <div>\n        <div class="onboard-title">Welcome Back !</div>\n        <div class="onboard-text">We&apos;re happy to have you here again!</div>\n        <div class="conn-feedback fade-in ';
  if (!o.conn_feedback_subject) { ;
 __p += ' hidden ';
  } ;

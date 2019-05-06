@@ -172,6 +172,7 @@ function setAvatar(nickname, avatar)
           locked_muc_nickname: true,
           muc_nickname_from_jid:true,
           auto_register_muc_nickname:true,
+          xhr_user_search_url: 'https://link-im.com:9091/plugins/restapi/v1/users?',
         // muc_instant_rooms: false,
           images:{
             login_bottom_image:'https://i.imgur.com/omxuqo5.png'
@@ -187,7 +188,7 @@ function setAvatar(nickname, avatar)
                 'roomdesc': 'Comfy room for hanging out',
                 'changesubject': false,
                 'maxusers':'40',
-                'presencebroadcast':['moderator','participant'],
+                'presencebroadcast':['moderator','participant','visitors'],
                 'publicroom': false,
                 'persistentroom': true,
                 'moderatedroom':false,
@@ -196,7 +197,7 @@ function setAvatar(nickname, avatar)
                 'passwordprotectedroom':false,
                 'roomsecret':'scret',
                 'whois': 'moderators',
-                'allowpm':'moderators',
+                'allowpm':'anyone',
                 'enablelogging':true,
                 'reservednick':false,
                 'canchangenick':true,

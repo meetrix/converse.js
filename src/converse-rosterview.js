@@ -182,7 +182,9 @@ converse.plugins.add('converse-rosterview', {
                 } , 300));
                 this.name_auto_complete.on('suggestion-box-selectcomplete', ev => {
                     this.el.querySelector('input[name="name"]').value = ev.text.label;
-                    this.el.querySelector('input[name="jid"]').value = ev.text.value;
+                    //<----MDEV
+                    // this.el.querySelector('input[name="jid"]').value = ev.text.value;
+                    //---------
                 });
             },
 
@@ -230,7 +232,10 @@ converse.plugins.add('converse-rosterview', {
             afterSubmission (form, jid, name) {
                 _converse.roster.addAndSubscribe(jid, name);
                 this.model.clear();
-                const input_el = this.el.querySelector('input[name="jid"]');
+                //<-----MDEV
+                //const input_el = this.el.querySelector('input[name="jid"]');
+                const input_el = this.el.querySelector('input[name="name"]');
+                //------>
                 input_el.value = '';
                 this.modal.hide();
             },
@@ -238,10 +243,16 @@ converse.plugins.add('converse-rosterview', {
             addContactFromForm (ev) {
                 ev.preventDefault();
                 const data = new FormData(ev.target)
-                let jid = data.get('jid');
+                //<------MDEV
+                let jid = data.get('name');
                 if(_.compact(jid.split('@')).length < 2){
                     jid = _.compact(jid.split('@'))[0]+'@'+_converse.api.settings.get("default_domain");
                 }
+                // let jid = data.get('jid');
+                // if(_.compact(jid.split('@')).length < 2){
+                //     jid = _.compact(jid.split('@'))[0]+'@'+_converse.api.settings.get("default_domain");
+                // }
+                //------>
                 if (!jid && _converse.xhr_user_search_url && _.isString(_converse.xhr_user_search_url)) {
                     const input_el = this.el.querySelector('input[name="name"]');
                     this.xhr.open("GET", `${_converse.xhr_user_search_url}q=${input_el.value}`, true);
