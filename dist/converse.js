@@ -94716,11 +94716,15 @@ return __p
 var _ = {escape:__webpack_require__(/*! ./node_modules/lodash/escape.js */ "./node_modules/lodash/escape.js")};
 module.exports = function(o) {
 var __t, __p = '', __e = _.escape;
-__p += '<!-- src/templates/image.html -->\n<a href="' +
+__p += '<!-- src/templates/image.html -->\n<!-- <<<<MDEV-->\n<!-- <a href="' +
 __e(o.url) +
 '" target="_blank" rel="noopener"><img class="chat-image img-thumbnail" src="' +
 __e(o.url) +
-'"/></a>\n';
+'"/></a> -->\n<div data-url="' +
+__e(o.url) +
+'"  rel="noopener"><img class="chat-image img-thumbnail" src="' +
+__e(o.url) +
+'"/></div>\n<!-- MDEV >>>>-->';
 return __p
 };
 
