@@ -1,15 +1,15 @@
 <div class="modal fade" id="add-chatroom-modal" tabindex="-1" role="dialog" aria-labelledby="add-chatroom-modal-label" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
-            <div class="modal-header">    
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <div class="modal-body">
+            <div class="modal-header">
                 <div class="modal-title" id="add-chatroom-modal-label">
                     {{{o.__('Create New Channel')}}}
                 </div>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
                 <div class="modal-title" id="add-chatroom-modal-sublabel">
                     {{{o.__('Channels are where your members communicate. They are best when organized around a topic - #lead, for example')}}}
                 </div>
@@ -55,7 +55,7 @@
                         <input type="text" pattern=".*\S+.*" title="{{{o.__('This field is required')}}}" required="required" name="nickname" value="{{{o.nick}}}" class="form-control"/>
                     </div>
                     {[ } ]}
-                    <input type="button" class="btn cancel-btn close" data-dismiss="modal" aria-label="Close" name="cancel" value="{{{o.__('Cancel')}}}"/>
+                    <input type="button" class="btn cancel-btn" data-dismiss="modal" aria-label="Close" name="cancel" value="{{{o.__('Cancel')}}}"/>
                     <input type="submit" class="btn create-btn" name="join" value="{{{o.__('Create')}}}"/>
                 </form>
             </div>

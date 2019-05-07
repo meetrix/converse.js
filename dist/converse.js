@@ -93048,9 +93048,9 @@ var _ = {escape:__webpack_require__(/*! ./node_modules/lodash/escape.js */ "./no
 module.exports = function(o) {
 var __t, __p = '', __e = _.escape, __j = Array.prototype.join;
 function print() { __p += __j.call(arguments, '') }
-__p += '<!-- src/templates/add_chatroom_modal.html -->\n<div class="modal fade" id="add-chatroom-modal" tabindex="-1" role="dialog" aria-labelledby="add-chatroom-modal-label" aria-hidden="true">\n    <div class="modal-dialog modal-lg" role="document">\n        <div class="modal-content">\n            <div class="modal-header">    \n                <button type="button" class="close" data-dismiss="modal" aria-label="Close">\n                        <i class="fas fa-times"></i>\n                </button>\n            </div>\n            <div class="modal-body">\n                <div class="modal-title" id="add-chatroom-modal-label">\n                    ' +
+__p += '<!-- src/templates/add_chatroom_modal.html -->\n<div class="modal fade" id="add-chatroom-modal" tabindex="-1" role="dialog" aria-labelledby="add-chatroom-modal-label" aria-hidden="true">\n    <div class="modal-dialog modal-lg" role="document">\n        <div class="modal-content">\n            <div class="modal-header">\n                <div class="modal-title" id="add-chatroom-modal-label">\n                    ' +
 __e(o.__('Create New Channel')) +
-'\n                </div>\n                <div class="modal-title" id="add-chatroom-modal-sublabel">\n                    ' +
+'\n                </div>\n                <button type="button" class="close" data-dismiss="modal" aria-label="Close">\n                    <i class="fas fa-times"></i>\n                </button>\n            </div>\n            <div class="modal-body">\n                <div class="modal-title" id="add-chatroom-modal-sublabel">\n                    ' +
 __e(o.__('Channels are where your members communicate. They are best when organized around a topic - #lead, for example')) +
 '\n                </div>\n                <form class="converse-form add-chatroom">\n                    <div class="form-group private-public">\n                        <div>\n                            <label class="switch">\n                                <input id="private-channel" type="checkbox" name="privatechannel" checked>\n                                <span class="slider round"></span>\n                            </label>\n                            <label for="privatechannel" class="form-check-label" >' +
 __e(o.__('Private Channel')) +
@@ -93086,7 +93086,7 @@ __e(o.__('This field is required')) +
 __e(o.nick) +
 '" class="form-control"/>\n                    </div>\n                    ';
  } ;
-__p += '\n                    <input type="button" class="btn cancel-btn close" data-dismiss="modal" aria-label="Close" name="cancel" value="' +
+__p += '\n                    <input type="button" class="btn cancel-btn" data-dismiss="modal" aria-label="Close" name="cancel" value="' +
 __e(o.__('Cancel')) +
 '"/>\n                    <input type="submit" class="btn create-btn" name="join" value="' +
 __e(o.__('Create')) +
