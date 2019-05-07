@@ -577,6 +577,7 @@ converse.plugins.add('converse-muc-views', {
                 'dragover .chat-textarea': 'onDragOver',
                 'drop .chat-textarea': 'onDrop',
                 'click .top-toolbar-video-cal': 'videoCall',
+                'keyup .chatapp-filter-all': 'channelContentSearch',
                 
             },
 
@@ -633,7 +634,9 @@ converse.plugins.add('converse-muc-views', {
             },
             videoCall(){
             },
+            channelContentSearch(ev){
 
+            },
             render () {
                 this.el.setAttribute('id', this.model.get('box_id'));
                 this.el.innerHTML = tpl_chatroom();
@@ -2047,7 +2050,7 @@ converse.plugins.add('converse-muc-views', {
 
                 if (_.reduce(_.values(picks), iteratee)) {
                     const el = this.el.querySelector('.chatroom-features');
-                    el.innerHTML = tpl_chatroom_features(_.extend(features.toJSON(), {__}));
+                    // el.innerHTML = tpl_chatroom_features(_.extend(features.toJSON(), {__}));
                     this.setOccupantsHeight();
                 }
                 return this;
