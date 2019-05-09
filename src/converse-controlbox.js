@@ -527,7 +527,9 @@ converse.plugins.add('converse-controlbox', {
                     'afterBegin',
                     _converse.xmppstatusview.render().el
                 );
-            }
+                
+            },
+           
         });
 
 
@@ -593,6 +595,20 @@ converse.plugins.add('converse-controlbox', {
                 } else {
                     this.showControlBox();
                 }
+            }
+        });
+        _converse.NotificationView = Backbone.VDOMView.extend({
+            tagName: "div",
+            class:'bell-notifications',
+            initialize () {
+                this.model.on("change", this.render, this);
+                // this.render();
+                console.log('notificationmodel',this.model.models.length)
+            },
+            toHTML () {
+                return tpl_notification({
+                    notificationCount:this.model.models.length
+                });
             }
         });
 

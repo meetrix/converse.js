@@ -8,9 +8,9 @@
 
 import converse from "@converse/headless/converse-core";
 
-const { Strophe, _, sizzle } = converse.env,
+const { Strophe, _, sizzle, Backbone } = converse.env,
       u = converse.env.utils;
-
+    //   const { Strophe, Backbone, Promise, $iq, $build, $msg, $pres, b64_sha1, sizzle, f, moment, _ } = converse.env;
 
 converse.plugins.add('converse-notification', {
 
@@ -36,7 +36,7 @@ converse.plugins.add('converse-notification', {
             notification_icon: 'logo/conversejs-filled.svg',
             notification_delay: 5000
         });
-
+        
         _converse.isOnlyChatStateNotification = (msg) =>
             // See XEP-0085 Chat State Notification
             _.isNull(msg.querySelector('body')) && (
@@ -187,6 +187,7 @@ converse.plugins.add('converse-notification', {
                 'icon': _converse.notification_icon,
                 'requireInteraction': !_converse.notification_delay
             });
+        
             if (_converse.notification_delay) {
                 setTimeout(n.close.bind(n), _converse.notification_delay);
             }
@@ -220,6 +221,7 @@ converse.plugins.add('converse-notification', {
                     lang: _converse.locale,
                     icon: _converse.notification_icon
                 });
+ 
             setTimeout(n.close.bind(n), 5000);
             //-------->
         };
@@ -232,6 +234,7 @@ converse.plugins.add('converse-notification', {
                     lang: _converse.locale,
                     icon: _converse.notification_icon
                 });
+   
             setTimeout(n.close.bind(n), 5000);
 
             //-------->
@@ -250,6 +253,7 @@ converse.plugins.add('converse-notification', {
                         lang: _converse.locale,
                         icon: _converse.notification_icon
                     });
+  
                 setTimeout(n.close.bind(n), 5000);
             }
         };
@@ -308,6 +312,8 @@ converse.plugins.add('converse-notification', {
             // We only register event handlers after all plugins are
             // registered, because other plugins might override some of our
             // handlers.
+            
+
             _converse.api.listen.on('contactRequest',  _converse.handleContactRequestNotification);
             _converse.api.listen.on('contactPresenceChanged',  _converse.handleChatStateNotification);
             _converse.api.listen.on('message',  _converse.handleMessageNotification);

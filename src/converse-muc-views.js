@@ -468,7 +468,7 @@ converse.plugins.add('converse-muc-views', {
                     'roomname': data.get('chatroom'),
                     'roomdesc':  data.get('purpose'),
                     'publicroom': data.get('privatechannel') !=='on'? true:false,
-                    'membersonly': data.get('privatechannel') ==='on' && data.get('readonlychannel') !=='on' ? true:false,
+                    'membersonly': data.get('privatechannel') ==='on'? true:false,
                     'moderatedroom': data.get('readonlychannel') ==='on'? true:false,
                     'allowpm': data.get('readonlychannel') ==='on'?'none':'anyone',
                     'roomowners':[_converse.connection.jid.split('/')[0]]
@@ -505,7 +505,7 @@ converse.plugins.add('converse-muc-views', {
                             user = `${o}@${_converse.api.settings.get("default_domain")}`
                         }
                         setTimeout(function(){
-                            _converse.api.roomviews.get(jid).model.directInvite(user, 'invite to the room');
+                            _converse.api.roomviews.get(jid.toLowerCase()).model.directInvite(user, 'invite to the room');
                         },10000);
                     })
                 }
@@ -577,6 +577,7 @@ converse.plugins.add('converse-muc-views', {
                 'dragover .chat-textarea': 'onDragOver',
                 'drop .chat-textarea': 'onDrop',
                 'click .top-toolbar-video-cal': 'videoCall',
+                'keyup .chatapp-filter-all': 'channelContentSearch',
                 
             },
 
@@ -633,7 +634,9 @@ converse.plugins.add('converse-muc-views', {
             },
             videoCall(){
             },
+            channelContentSearch(ev){
 
+            },
             render () {
                 this.el.setAttribute('id', this.model.get('box_id'));
                 this.el.innerHTML = tpl_chatroom();
@@ -876,8 +879,18 @@ converse.plugins.add('converse-muc-views', {
                     u.removeClass('col-12', chat_area);
                     u.addClass('col-md-9', chat_area);
                     u.addClass('col-8', chat_area);
+                    if(this.el.querySelector('.searched-message')){
+                        u.hideElement(this.el.querySelector('.searched-message'));
+                    }
+                    if(this.el.querySelector('.plugin-contentbox')){
+                        u.hideElement(this.el.querySelector('.plugin-contentbox'));
+                    }
+                    if(this.el.querySelector('.conference')){
+                        u.hideElement(this.el.querySelector('.conference'));
+                    }
                 }
                 this.occupantsview.setOccupantsHeight();
+                
             },
 
             hideOccupants (ev, preserve_state) {
@@ -2047,7 +2060,7 @@ converse.plugins.add('converse-muc-views', {
 
                 if (_.reduce(_.values(picks), iteratee)) {
                     const el = this.el.querySelector('.chatroom-features');
-                    el.innerHTML = tpl_chatroom_features(_.extend(features.toJSON(), {__}));
+                    // el.innerHTML = tpl_chatroom_features(_.extend(features.toJSON(), {__}));
                     this.setOccupantsHeight();
                 }
                 return this;
