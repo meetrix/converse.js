@@ -225,7 +225,6 @@ converse.plugins.add('converse-profile', {
                 );
             }
         });
-
         _converse.XMPPStatusView = _converse.VDOMViewWithAvatar.extend({
             tagName: "div",
             events: {
@@ -238,6 +237,7 @@ converse.plugins.add('converse-profile', {
             initialize () {
                 this.model.on("change", this.render, this);
                 this.model.vcard.on("change", this.render, this);
+                // 
             },
 
             toHTML () {
@@ -262,8 +262,10 @@ converse.plugins.add('converse-profile', {
 
             afterRender () {
                 this.renderAvatar();
-
+               
+               
             },
+            
 
             showProfileModal (ev) {
                 if (_.isUndefined(this.profile_modal)) {

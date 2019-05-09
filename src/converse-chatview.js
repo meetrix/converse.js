@@ -464,26 +464,34 @@ converse.plugins.add('converse-chatview', {
                  * messages, based on whether the contact's client supports
                  * it.
                  */
+
                 if (!options.show_spoiler_button || this.model.get('type') === _converse.CHATROOMS_TYPE) {
                     return;
                 }
+
                 const contact_jid = this.model.get('jid');
-                if (this.model.presence.resources.length === 0) {
-                    return;
-                }
+
+                // if (this.model.presence.resources.length === 0) {
+                //     return;
+                // }
+           
                 const results = await Promise.all(
                     this.model.presence.resources.map(
                         res => _converse.api.disco.supports(Strophe.NS.SPOILER, `${contact_jid}/${res.get('name')}`)
                     )
                 );
-                if (_.filter(results, 'length').length) {
+  
+                // if (_.filter(results, 'length').length) {
+                   
                     const html = tpl_spoiler_button(this.model.toJSON());
                     if (_converse.visible_toolbar_buttons.emoji) {
+         
                         this.el.querySelector('.toggle-smiley').insertAdjacentHTML('afterEnd', html);
                     } else {
+                     
                         this.el.querySelector('.chat-toolbar').insertAdjacentHTML('afterBegin', html);
                     }
-                }
+                // }
             },
 
             insertHeading () {

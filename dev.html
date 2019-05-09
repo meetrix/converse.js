@@ -159,7 +159,7 @@ function setAvatar(nickname, avatar)
           //show_send_button: getSetting("showSendButton", false),
           sounds_path: 'chatapp/sounds/',
           view_mode: 'fullscreen',
-          visible_toolbar_buttons: {'emoji': true, 'call': false, 'clear': true, spoiler:true },
+          visible_toolbar_buttons: {'emoji': true, 'call': true, 'clear': true, spoiler:true },
           //websocket_url: connUrl,
         //   theme: 'concord',
            whitelisted_plugins: whitelistedPlugins,
@@ -172,6 +172,7 @@ function setAvatar(nickname, avatar)
           locked_muc_nickname: true,
           muc_nickname_from_jid:true,
           auto_register_muc_nickname:true,
+          blacklisted_plugins:['converse-omemo'],
           xhr_user_search_url: 'https://link-im.com:9091/plugins/restapi/v1/users?',
         // muc_instant_rooms: false,
           images:{

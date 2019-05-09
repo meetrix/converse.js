@@ -49453,23 +49453,20 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
           return;
         }
 
-        const contact_jid = this.model.get('jid');
+        const contact_jid = this.model.get('jid'); // if (this.model.presence.resources.length === 0) {
+        //     return;
+        // }
 
-        if (this.model.presence.resources.length === 0) {
-          return;
-        }
+        const results = await Promise.all(this.model.presence.resources.map(res => _converse.api.disco.supports(Strophe.NS.SPOILER, `${contact_jid}/${res.get('name')}`))); // if (_.filter(results, 'length').length) {
 
-        const results = await Promise.all(this.model.presence.resources.map(res => _converse.api.disco.supports(Strophe.NS.SPOILER, `${contact_jid}/${res.get('name')}`)));
+        const html = templates_spoiler_button_html__WEBPACK_IMPORTED_MODULE_16___default()(this.model.toJSON());
 
-        if (_.filter(results, 'length').length) {
-          const html = templates_spoiler_button_html__WEBPACK_IMPORTED_MODULE_16___default()(this.model.toJSON());
+        if (_converse.visible_toolbar_buttons.emoji) {
+          this.el.querySelector('.toggle-smiley').insertAdjacentHTML('afterEnd', html);
+        } else {
+          this.el.querySelector('.chat-toolbar').insertAdjacentHTML('afterBegin', html);
+        } // }
 
-          if (_converse.visible_toolbar_buttons.emoji) {
-            this.el.querySelector('.toggle-smiley').insertAdjacentHTML('afterEnd', html);
-          } else {
-            this.el.querySelector('.chat-toolbar').insertAdjacentHTML('afterBegin', html);
-          }
-        }
       },
 
       insertHeading() {
@@ -51161,6 +51158,23 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
         } else {
           this.showControlBox();
         }
+      }
+
+    });
+    _converse.NotificationView = Backbone.VDOMView.extend({
+      tagName: "div",
+      class: 'bell-notifications',
+
+      initialize() {
+        this.model.on("change", this.render, this); // this.render();
+
+        console.log('notificationmodel', this.model.models.length);
+      },
+
+      toHTML() {
+        return tpl_notification({
+          notificationCount: this.model.models.length
+        });
       }
 
     });
@@ -54339,6 +54353,18 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
           u.removeClass('col-12', chat_area);
           u.addClass('col-md-9', chat_area);
           u.addClass('col-8', chat_area);
+
+          if (this.el.querySelector('.searched-message')) {
+            u.hideElement(this.el.querySelector('.searched-message'));
+          }
+
+          if (this.el.querySelector('.plugin-contentbox')) {
+            u.hideElement(this.el.querySelector('.plugin-contentbox'));
+          }
+
+          if (this.el.querySelector('.conference')) {
+            u.hideElement(this.el.querySelector('.conference'));
+          }
         }
 
         this.occupantsview.setOccupantsHeight();
@@ -55913,7 +55939,9 @@ const _converse$env = _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_
       Strophe = _converse$env.Strophe,
       _ = _converse$env._,
       sizzle = _converse$env.sizzle,
-      u = _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_0__["default"].env.utils;
+      Backbone = _converse$env.Backbone,
+      u = _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_0__["default"].env.utils; //   const { Strophe, Backbone, Promise, $iq, $build, $msg, $pres, b64_sha1, sizzle, f, moment, _ } = converse.env;
+
 _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_0__["default"].plugins.add('converse-notification', {
   dependencies: ["converse-chatboxes"],
 
@@ -57963,7 +57991,7 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_4__["default"].plugins
 
       initialize() {
         this.model.on("change", this.render, this);
-        this.model.vcard.on("change", this.render, this);
+        this.model.vcard.on("change", this.render, this); // 
       },
 
       toHTML() {
@@ -95381,7 +95409,7 @@ __e(o.fullname) +
 __e(o.title_change_status) +
 '" data-toggle="modal" data-target="#changeStatusModal">Change Status</a>\n            <a href="javascript:void(0);" class="dropdown-item logout align-self-center">Log out</a>\n        </div>\n        <div class="user-role font-size-xs opacity-75">\n                ' +
 __e(o.role) +
-'\n        </div>\n    </div>\n    <div>\n        <i class="fas fa-bell"></i>\n    </div>\n    <!-- <span class="username w-100 align-self-center">' +
+'\n        </div>\n        \n    </div>\n    <div>\n        <i class="fas fa-bell"></i>\n    </div>\n    <!-- <span class="username w-100 align-self-center">' +
 __e(o.fullname) +
 '</span>\n    ';
  if (o._converse.show_client_info) { ;

@@ -879,8 +879,18 @@ converse.plugins.add('converse-muc-views', {
                     u.removeClass('col-12', chat_area);
                     u.addClass('col-md-9', chat_area);
                     u.addClass('col-8', chat_area);
+                    if(this.el.querySelector('.searched-message')){
+                        u.hideElement(this.el.querySelector('.searched-message'));
+                    }
+                    if(this.el.querySelector('.plugin-contentbox')){
+                        u.hideElement(this.el.querySelector('.plugin-contentbox'));
+                    }
+                    if(this.el.querySelector('.conference')){
+                        u.hideElement(this.el.querySelector('.conference'));
+                    }
                 }
                 this.occupantsview.setOccupantsHeight();
+                
             },
 
             hideOccupants (ev, preserve_state) {
