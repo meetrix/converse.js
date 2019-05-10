@@ -1,0 +1,58 @@
+<div class="modal fade" id="add-chatroom-modal" tabindex="-1" role="dialog" aria-labelledby="add-chatroom-modal-label" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+      <div class="modal-content">
+          <div class="modal-header">
+              <div class="modal-title" id="add-chatroom-modal-label">
+                  {{{o.__('Channel Configuration')}}}
+              </div>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <i class="fas fa-times"></i>
+              </button>
+          </div>
+          <div class="modal-body">
+              <div class="modal-title" id="add-chatroom-modal-sublabel">
+                  {{{o.__('Channels are where your members communicate. They are best when organized around a topic - #lead, for example')}}}
+              </div>
+              <form class="converse-form add-chatroom">
+                  <div class="form-group private-public">
+                      <div>
+                          <label class="switch">
+                              <input id="private-channel" type="checkbox" name="privatechannel" checked="{{{o.publicroom !== '1'?'checked':''}}}">
+                              <span class="slider round"></span>
+                          </label>
+                          <label for="privatechannel" class="form-check-label" >{{{o.__('Private Channel')}}}</label>
+                      </div>
+                      <span>{{{o.__('Just invited people can access this channel')}}}</span>
+                  </div>
+                  <div class="form-group read-only">
+                      <div>
+                          <label class="switch">
+                              <input id="read-only-channel" type="checkbox" name="readonlychannel" checked="{{{o.moderatedroom === '1'?'checked':''}}}">
+                              <span class="slider round"></span>
+                          </label>
+                          <label for="readonlychannel" class="form-check-label">{{{o.__('Read-Only Channel')}}}</label>
+                      </div>
+                      <span>{{{o.__('Only the admin can write messages')}}}</span>
+                  </div>
+                  <div class="form-group channel-name">
+                          <label for="chatroom">{{{o.label_room_address}}}</label>
+                          <input type="text" required="required" name="chatroom" class="form-control" placeholder="{{{o.chatroom_placeholder}}}" value={{{o.roomname}}} />
+                          <span>{{{o.__('Names must be lowercase without spaces or period, and shorter than 22 characters')}}}</span>
+                  </div>
+                  <div class="form-group channel-about">
+                          <label for="purpose">{{{o.__('Purpose')}}}&nbsp;({{{o.__('Optional')}}})</label>
+                          <input type="text" required="required" name="purpose" class="form-control" value={{{o.roomdesc}}} />
+                          <span>{{{o.__("What's the channel about?")}}}</span>
+                  </div>
+                  <!-- <div class="form-group channel-invite">
+                      <label for="users">{{{o.__('Invite Users')}}}</label>
+                      <select class="form-control channel-users-invite-list" name="users" multiple="multiple"></select>
+                      <span>{{{o.__('Name must be a lowercase,without space, period, and shorter than 22 characters')}}}</span>
+                  </div> -->
+                  <input type="button" class="btn cancel-btn" data-dismiss="modal" aria-label="Close" name="cancel" value="{{{o.__('Cancel')}}}"/>
+                  <input type="submit" class="btn create-btn" name="join" value="{{{o.__('Update')}}}"/>
+              </form>
+          </div>
+      </div>
+  </div>
+</div>
