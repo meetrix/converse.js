@@ -54177,10 +54177,7 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
         this.registerHandlers();
         this.enterRoom();
         console.log('model', this.model);
-
-        if (this.model.get('role') === 'visitor') {
-          this.el.querySelector('.chat-textarea').disabled = true;
-        }
+        this.disableChat();
       },
 
       async enterRoom(ev) {
@@ -54215,6 +54212,12 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
       videoCall() {},
 
       channelContentSearch(ev) {},
+
+      disableChat() {
+        if (this.model.get('role') === 'visitor') {
+          this.el.querySelector('.chat-textarea').disabled = true;
+        }
+      },
 
       render() {
         this.el.setAttribute('id', this.model.get('box_id'));
@@ -94266,13 +94269,13 @@ __e(o.info_configure) +
  } ;
 __p += '\n    <a class="chatbox-btn show-room-details-modal fa fa-info-circle" title="' +
 __e(o.info_details) +
-'"></a>\n</div>  -->\n<div class="chatbox-title">\n<div class="top-toolbar">\n        <div class="container-fluid">\n            <div class="row">\n                <div class="col-sm-6 room-description">\n                    <div class="container-fluid">\n                        <div class="row channel-name">\n                            #' +
+'"></a>\n</div>  -->\n<div class="chatbox-title">\n<div class="top-toolbar">\n        <div class="container-fluid">\n            <div class="rowx">\n                <div class="room-description arc arc--r">\n                    <div class="container-fluid">\n                        <div class="row channel-name">\n                            #' +
 ((__t = ( o.name )) == null ? '' : __t) +
 '\n                        </div>\n                        <div class="row channel-summary">\n                                <ul class="m-0 pl-0 d-block list-unstyled channel-info">\n                                <li class="favorite-star">\n                                    <span class="favorite"><i class="fas fa-star"></i></span>\n                                </li>\n                                <li class="favorite-user">\n                                    <span class="mr-1 ">' +
 ((__t = (o.occupants)) == null ? '' : __t) +
 '</span>\n                                    <i class="far fa-user"></i>\n                                </li>\n                                <li class="favorite-channel">\n                                    <span class="channel-desc ">' +
 __e(o.room_description) +
-'</span>\n                                </li>\n                            </ul>\n                        </div>\n                    </div>\n                    </div>\n                <div class="col-sm-6 room-controls">\n                    <ul class="top-toolbar-menu">\n                    </ul>\n                    <div class="chatbox-buttons-custom">\n                        <a class="chatbox-btn close-chatbox-button fa fa-sign-out-alt" title="' +
+'</span>\n                                </li>\n                            </ul>\n                        </div>\n                    </div>\n                    </div>\n                <div class="room-controls">\n                    <ul class="top-toolbar-menu">\n                    </ul>\n                    <div class="chatbox-buttons-custom">\n                        <a class="chatbox-btn close-chatbox-button fa fa-sign-out-alt" title="' +
 __e(o.info_close) +
 '"></a>\n                        <!-- ';
  if (o.affiliation == 'owner') { ;

@@ -724,10 +724,9 @@ converse.plugins.add('converse-muc-views', {
                 this.registerHandlers();
                 this.enterRoom();
                 console.log('model',this.model)
+                this.disableChat()
                 
-                if(this.model.get('role') === 'visitor'){
-                    this.el.querySelector('.chat-textarea').disabled = true;
-                }
+                
             },
 
             async enterRoom (ev) {
@@ -755,6 +754,11 @@ converse.plugins.add('converse-muc-views', {
             },
             channelContentSearch(ev){
 
+            },
+            disableChat(){
+                if(this.model.get('role') === 'visitor'){
+                    this.el.querySelector('.chat-textarea').disabled = true;
+                }
             },
             render () {
                 this.el.setAttribute('id', this.model.get('box_id'));
