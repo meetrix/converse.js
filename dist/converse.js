@@ -49453,13 +49453,16 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
           return;
         }
 
-        const contact_jid = this.model.get('jid'); // if (this.model.presence.resources.length === 0) {
+        const contact_jid = this.model.get('jid'); //<----MDEV
+        // if (this.model.presence.resources.length === 0) {
         //     return;
         // }
+        ///---->
 
-        const results = await Promise.all(this.model.presence.resources.map(res => _converse.api.disco.supports(Strophe.NS.SPOILER, `${contact_jid}/${res.get('name')}`))); // if (_.filter(results, 'length').length) {
+        const results = await Promise.all(this.model.presence.resources.map(res => _converse.api.disco.supports(Strophe.NS.SPOILER, `${contact_jid}/${res.get('name')}`))); //<----MDEV
+        // if (_.filter(results, 'length').length) {
 
-        const html = templates_spoiler_button_html__WEBPACK_IMPORTED_MODULE_16___default()(this.model.toJSON());
+        const html = templates_spoiler_button_html__WEBPACK_IMPORTED_MODULE_16___default()(_.extend(this.model.toJSON(), options));
 
         if (_converse.visible_toolbar_buttons.emoji) {
           this.el.querySelector('.toggle-smiley').insertAdjacentHTML('afterEnd', html);

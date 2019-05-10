@@ -470,20 +470,19 @@ converse.plugins.add('converse-chatview', {
                 }
 
                 const contact_jid = this.model.get('jid');
-
+                //<----MDEV
                 // if (this.model.presence.resources.length === 0) {
                 //     return;
                 // }
-           
+                ///---->
                 const results = await Promise.all(
                     this.model.presence.resources.map(
                         res => _converse.api.disco.supports(Strophe.NS.SPOILER, `${contact_jid}/${res.get('name')}`)
                     )
                 );
-  
+                //<----MDEV
                 // if (_.filter(results, 'length').length) {
-                   
-                    const html = tpl_spoiler_button(this.model.toJSON());
+                    const html = tpl_spoiler_button(_.extend(this.model.toJSON(),options));
                     if (_converse.visible_toolbar_buttons.emoji) {
          
                         this.el.querySelector('.toggle-smiley').insertAdjacentHTML('afterEnd', html);
