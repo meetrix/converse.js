@@ -954,10 +954,7 @@ converse.plugins.add('converse-muc', {
                 if (data.type === 'error' || (!data.jid && !data.nick)) {
                     return true;
                 }
-                console.log('data:pres',pres)
-                console.log('data:data',data)
                 const occupant = this.occupants.findOccupant(data);
-                console.log('data:occupant',occupant)
                 if (data.type === 'unavailable' && occupant) {
                     if (!_.includes(data.states, converse.MUC_NICK_CHANGED_CODE) && !occupant.isMember()) {
                         // We only destroy the occupant if this is not a nickname change operation.

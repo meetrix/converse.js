@@ -725,8 +725,6 @@ converse.plugins.add('converse-muc-views', {
                 this.enterRoom();
                 console.log('model',this.model)
                 this.disableChat()
-                
-                
             },
 
             async enterRoom (ev) {
@@ -778,7 +776,7 @@ converse.plugins.add('converse-muc-views', {
                 document.getElementsByClassName('room-description').innerHTML = u.addHyperlinks(xss.filterXSS(_.get(this.model.get('subject'), 'text'), {'whiteList': {}}))
                  this.el.querySelector('.chat-head-chatroom').innerHTML = this.generateHeadingHTML();
 
-        
+                 this.disableChat()
             },
             renderChatArea () {
                 /* Render the UI container in which groupchat messages will appear.
@@ -936,6 +934,7 @@ converse.plugins.add('converse-muc-views', {
                 this.occupantsview.setOccupantsHeight();
                 this.scrollDown();
                 this.renderEmojiPicker();
+                this.disableChat()
             },
 
             show () {

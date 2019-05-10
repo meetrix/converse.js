@@ -54240,6 +54240,7 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
           'whiteList': {}
         }));
         this.el.querySelector('.chat-head-chatroom').innerHTML = this.generateHeadingHTML();
+        this.disableChat();
       },
 
       renderChatArea() {
@@ -54420,6 +54421,7 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
         this.occupantsview.setOccupantsHeight();
         this.scrollDown();
         this.renderEmojiPicker();
+        this.disableChat();
       },
 
       show() {
@@ -68129,10 +68131,7 @@ _converse_core__WEBPACK_IMPORTED_MODULE_3__["default"].plugins.add('converse-muc
           return true;
         }
 
-        console.log('data:pres', pres);
-        console.log('data:data', data);
         const occupant = this.occupants.findOccupant(data);
-        console.log('data:occupant', occupant);
 
         if (data.type === 'unavailable' && occupant) {
           if (!_.includes(data.states, _converse_core__WEBPACK_IMPORTED_MODULE_3__["default"].MUC_NICK_CHANGED_CODE) && !occupant.isMember()) {
