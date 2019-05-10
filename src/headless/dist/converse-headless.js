@@ -45608,6 +45608,57 @@ _converse_core__WEBPACK_IMPORTED_MODULE_3__["default"].plugins.add('converse-muc
         });
       },
 
+      //<----MDEV
+      saveCustomConfiguration(config) {
+        return new Promise((resolve, reject) => {
+          this.fetchRoomConfiguration().then(stanza => {
+            const configArray = [],
+                  fields = stanza.querySelectorAll('field');
+            let count = fields.length;
+            console.log('config1', config);
+
+            _.each(fields, field => {
+              let fieldname;
+              const type = field.getAttribute('type');
+
+              if (type !== 'fixed') {
+                fieldname = field.getAttribute('var').replace('muc#roomconfig_', '');
+              }
+
+              let values; // <---- MDEV 
+
+              if (fieldname in config) {
+                switch (type) {
+                  case 'boolean':
+                    values = [config[fieldname] ? 1 : 0];
+                    break;
+
+                  case 'list-multi':
+                    // TODO: we don't yet handle "list-multi" types
+                    //value = field.innerHTML;
+                    values = config[fieldname];
+                    break;
+
+                  default:
+                    values = [config[fieldname]];
+                }
+
+                field.innerHTML = values.reduce((accumulator, currentValue) => `${accumulator}${$build('value').t(currentValue)}`, '');
+              } //---------->MDEV
+
+
+              console.log('config', configArray);
+              configArray.push(field);
+
+              if (! --count) {
+                this.sendConfiguration(configArray, resolve, reject);
+              }
+            });
+          });
+        });
+      },
+
+      //------>
       autoConfigureChatRoom() {
         /* Automatically configure groupchat based on this model's
          * 'roomconfig' data.

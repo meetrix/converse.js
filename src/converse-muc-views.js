@@ -22,6 +22,8 @@ import tpl_chatroom_details_modal from "templates/chatroom_details_modal.html";
 import tpl_chatroom_disconnect from "templates/chatroom_disconnect.html";
 import tpl_chatroom_features from "templates/chatroom_features.html";
 import tpl_chatroom_form from "templates/chatroom_form.html";
+// eslint-disable-next-line sort-imports
+import tpl_chatroom_edit_form from "templates/room_configuration_modal.html";
 import tpl_chatroom_head from "templates/chatroom_head.html";
 import tpl_chatroom_invite from "templates/chatroom_invite.html";
 import tpl_chatroom_nickname_form from "templates/chatroom_nickname_form.html";
@@ -515,7 +517,119 @@ converse.plugins.add('converse-muc-views', {
             },
         });
 
+        _converse.EditChatRoomModal = _converse.BootstrapModal.extend({
 
+            events: {
+                'submit form.add-chatroom': 'saveChatRoom',
+                'click .cancel-btn':'clearForm',
+                'click .close':'clearForm'
+            },
+
+            initialize () {
+                _converse.BootstrapModal.prototype.initialize.apply(this, arguments);
+                this.model.on('change:muc_domain', this.render, this);
+            },
+
+            toHTML () {
+                let placeholder = `# e.g link solutions`;
+                console.log('config1:',this.model.get('roomConfiguration'))
+                if (!_converse.locked_muc_domain) {
+                    const muc_domain = this.model.get('muc_domain') || _converse.muc_domain;
+                    placeholder = muc_domain ? `name@${muc_domain}` : __('name@conference.example.org');
+                }
+                return tpl_chatroom_edit_form(_.extend(this.model.get('model').toJSON(), {
+                    '__': _converse.__,
+                    '_converse': _converse,
+                    'label_room_address': _converse.muc_domain ? __('Channel Name') :  __('Channel Address'),
+                    'chatroom_placeholder': placeholder
+                },this.model.get('roomConfiguration')));
+            },
+
+            afterRender () {
+                // this.el.addEventListener('shown.bs.modal', () => {
+                //     this.el.querySelector('input[name="chatroom"]').focus();
+                // }, false);
+                 //<-----  Mdev
+                // _converse.roster.each(o => {
+                //     let label = o.getDisplayName()
+                //     if(_.includes(label, '@')) {
+                //         label = label.split('@')[0];
+                //     }
+                //     const user = document.createElement('option')
+                //     user.setAttribute('value',o.getDisplayName())
+                //     user.innerHTML = label
+                //     this.el.querySelector('.channel-users-invite-list').insertAdjacentElement('beforeend',user)
+                // })
+                 //-------->
+            },
+             //<-----  Mdev
+            clearForm(){
+                this.el.querySelector('form.add-chatroom').reset()
+            },
+            //---------->MDEV
+            parseRoomDataFromEvent (form) {
+                const data = new FormData(form);
+                const jid = data.get('chatroom');
+                let nick;
+                if (_converse.locked_muc_nickname) {
+                    nick = _converse.getDefaultMUCNickname();
+                    if (!nick) {
+                        throw new Error("Using locked_muc_nickname but no nickname found!");
+                    }
+                } else {
+                    nick = data.get('nickname').trim();
+                }
+                //<-----  Mdev
+               
+                var roomconfig = {
+                    'roomname': data.get('chatroom'),
+                    'roomdesc':  data.get('purpose'),
+                    'publicroom': data.get('privatechannel') !=='on'? true:false,
+                    'membersonly': data.get('privatechannel') ==='on'? true:false,
+                    'moderatedroom': data.get('readonlychannel') ==='on'? true:false,
+                    // 'allowpm': data.get('readonlychannel') ==='on'?'none':'anyone',
+                    // 'roomowners':[_converse.connection.jid.split('/')[0]]
+                }
+                return {
+                    'roomconfig': _.extend(this.model.get('roomConfiguration'),roomconfig) ,
+                    // 'users':data.getAll('users')
+                }
+                 //-------->
+            },
+
+            saveChatRoom (ev) {
+                ev.preventDefault();
+                const data = this.parseRoomDataFromEvent(ev.target);
+                if (data.nick === "") {
+                    // Make sure defaults apply if no nick is provided.
+                    data.nick = undefined;
+                }
+                let jid;
+                if (_converse.locked_muc_domain || (_converse.muc_domain && !u.isValidJID(data.jid))) {
+                    jid = `${Strophe.escapeNode(data.jid)}@${_converse.muc_domain}`;
+                } else {
+                    jid = data.jid
+                    this.model.setDomain(jid);
+                }
+                
+                //<-----  MDEV
+                // if (data.users.length > 0 ) {
+                //     data.users.forEach(o => {
+                //         let user = o;
+                //         if (!_.includes(o, '@')) {
+                //             user = `${o}@${_converse.api.settings.get("default_domain")}`
+                //         }
+                //         setTimeout(function(){
+                //             _converse.api.roomviews.get(jid.toLowerCase()).model.directInvite(user, 'invite to the room');
+                //         },10000);
+                //     })
+                // }
+                //-------->
+                this.model.get('model').saveCustomConfiguration(data.roomconfig).then(() => this.model.get('model').refreshRoomFeatures());
+                this.modal.hide();
+                ev.target.reset();
+            },
+        });
         _converse.RoomDetailsModal = _converse.BootstrapModal.extend({
 
             initialize () {
@@ -1259,7 +1373,7 @@ converse.plugins.add('converse-muc-views', {
                 const container_el = this.el.querySelector('.chatroom-body');
                 _.each(container_el.querySelectorAll('.chatroom-form-container'), u.removeElement);
                 _.each(container_el.children, u.hideElement);
-                container_el.insertAdjacentHTML('beforeend', tpl_chatroom_form());
+                // container_el.insertAdjacentHTML('beforeend', tpl_chatroom_form());
 
                 const form_el = container_el.querySelector('form.chatroom-form'),
                       fieldset_el = form_el.querySelector('fieldset'),
@@ -1276,6 +1390,7 @@ converse.plugins.add('converse-muc-views', {
                 _.each(fields, field => {
                     if (_converse.roomconfig_whitelist.length === 0 ||
                             _.includes(_converse.roomconfig_whitelist, field.getAttribute('var'))) {
+                                console.log('field',field)
                         fieldset_el.insertAdjacentHTML('beforeend', u.xForm2webForm(field, stanza));
                     }
                 });
@@ -1305,7 +1420,46 @@ converse.plugins.add('converse-muc-views', {
                     false
                 );
             },
+            renderCustomConfiguration(stanza){
+                const container_el = this.el.querySelector('.chatroom-body');
+                _.each(container_el.querySelectorAll('.chatroom-form-container'), u.removeElement);
+                _.each(container_el.children, u.hideElement);
+                const fields = stanza.querySelectorAll('field')
+                var roomConfiguration = {};
+                _.each(fields, field => {
+                    if (_converse.roomconfig_whitelist.length === 0 ||
+                            _.includes(_converse.roomconfig_whitelist, field.getAttribute('var'))) {
+                                if(field.getAttribute('var') === 'muc#roomconfig_roomname'  ){
+                                    roomConfiguration.roomname =  _.get(field.querySelector('value'), 'textContent')
+                                }else if(field.getAttribute('var') === 'muc#roomconfig_roomdesc'  ){
+                                    roomConfiguration.roomdesc =  _.get(field.querySelector('value'), 'textContent')
+                                }else if(field.getAttribute('var') === 'muc#roomconfig_publicroom'){
+                                    roomConfiguration.publicroom = _.get(field.querySelector('value'), 'textContent')
+                                }else if(field.getAttribute('var') === 'muc#roomconfig_moderatedroom'){
+                                    roomConfiguration.moderatedroom = _.get(field.querySelector('value'), 'textContent')
+                                }
+                                else if(field.getAttribute('var') === 'muc#roomconfig_membersonly'){
+                                    roomConfiguration.membersonly = _.get(field.querySelector('value'), 'textContent') 
+                                }
+                                else if(field.getAttribute('var') === 'muc#roomconfig_allowpm'){
+                                    roomConfiguration.allowpm =  _.get(field.querySelector('value'), 'textContent')
+                                }
+                                else if(field.getAttribute('var') === 'muc#roomconfig_roomowners'){
+                                    const values = _.map(
+                                        u.queryChildren(field, 'value'),
+                                        _.partial(_.get, _, 'textContent')
+                                    );
+                                    roomConfiguration.roomowners = [values]
+                                }
+                        
+                    }
+                });
+                // if (_.isUndefined(this.edit_room_modal)) {
+                    this.edit_room_modal = new _converse.EditChatRoomModal({'model':new converse.env.Backbone.Model({'model': this.model,'roomConfiguration':roomConfiguration})});
+                // }
+                this.edit_room_modal.show();
 
+            },
             closeForm () {
                 /* Remove the configuration form without submitting and
                  * return to the chat view.
@@ -1330,9 +1484,16 @@ converse.plugins.add('converse-muc-views', {
                  *      the settings.
                  */
                 this.showSpinner();
+                //<---MDEV
+                // this.model.fetchRoomConfiguration()
+                //     .then(iq => this.renderConfigurationForm(iq))
+                //     .catch(_.partial(_converse.log, _, Strophe.LogLevel.ERROR));
+                //------>
                 this.model.fetchRoomConfiguration()
-                    .then(iq => this.renderConfigurationForm(iq))
+                    .then(iq => this.renderCustomConfiguration(iq))
                     .catch(_.partial(_converse.log, _, Strophe.LogLevel.ERROR));
+    
+                
             },
 
             submitNickname (ev) {
