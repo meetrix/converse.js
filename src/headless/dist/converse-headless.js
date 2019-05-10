@@ -45435,6 +45435,7 @@ _converse_core__WEBPACK_IMPORTED_MODULE_3__["default"].plugins.add('converse-muc
        * @param { String } reason - Optional reason for the invitation
        */
       directInvite(recipient, reason) {
+        //<-----MDEV
         if (this.features.get('membersonly')) {
           // When inviting to a members-only groupchat, we first add
           // the person to the member list by giving them an
@@ -45450,7 +45451,8 @@ _converse_core__WEBPACK_IMPORTED_MODULE_3__["default"].plugins.add('converse-muc
             'affiliation': 'member',
             'reason': reason
           }], ['member', 'owner', 'admin', 'visitor'], deltaFunc);
-        }
+        } //------MDEV
+
 
         const attrs = {
           'xmlns': 'jabber:x:conference',

@@ -470,7 +470,7 @@ converse.plugins.add('converse-muc-views', {
                     'roomname': data.get('chatroom'),
                     'roomdesc':  data.get('purpose'),
                     'publicroom': data.get('privatechannel') !=='on'? true:false,
-                    'membersonly': data.get('privatechannel') ==='on'? true:false,
+                    'membersonly': data.get('privatechannel') ==='on' && data.get('readonlychannel') ==='on' ? false:true ,
                     'moderatedroom': data.get('readonlychannel') ==='on'? true:false,
                     'allowpm': data.get('readonlychannel') ==='on'?'none':'anyone',
                     'roomowners':[_converse.connection.jid.split('/')[0]]
@@ -723,6 +723,11 @@ converse.plugins.add('converse-muc-views', {
                 this.render().insertIntoDOM();
                 this.registerHandlers();
                 this.enterRoom();
+                console.log('model',this.model)
+                
+                if(this.model.get('role') === 'visitor'){
+                    this.el.querySelector('.chat-textarea').disabled = true;
+                }
             },
 
             async enterRoom (ev) {

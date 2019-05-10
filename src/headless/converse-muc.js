@@ -486,12 +486,12 @@ converse.plugins.add('converse-muc', {
              * @param { String } reason - Optional reason for the invitation
              */
             directInvite (recipient, reason) {
+                //<-----MDEV
                 if (this.features.get('membersonly')) {
                     // When inviting to a members-only groupchat, we first add
                     // the person to the member list by giving them an
                     // affiliation of 'member' (if they're not affiliated
                     // already), otherwise they won't be able to join.
-                    
                     const map = {}; map[recipient] = 'member';
                     const deltaFunc = _.partial(u.computeAffiliationsDelta, true, false);
                     this.updateMemberLists(
@@ -500,6 +500,7 @@ converse.plugins.add('converse-muc', {
                         deltaFunc
                     );
                 }
+                //------MDEV
                 const attrs = {
                     'xmlns': 'jabber:x:conference',
                     'jid': this.get('jid')
