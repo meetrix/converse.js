@@ -94271,13 +94271,15 @@ __e(o.info_configure) +
  } ;
 __p += '\n    <a class="chatbox-btn show-room-details-modal fa fa-info-circle" title="' +
 __e(o.info_details) +
-'"></a>\n</div>  -->\n<div class="chatbox-title">\n<div class="top-toolbar">\n        <div class="container-fluid">\n            <div class="rowx">\n                <div class="room-description arc arc--r">\n                    <div class="container-fluid">\n                        <div class="row channel-name">\n                            #' +
+'"></a>\n</div>  -->\n<div class="chatbox-title">\n<div class="top-toolbar">\n        <div class="container-fluid">\n            <div class="rowx">\n                <div class="room-description left-flex">\n                    <div class="container-fluid">\n                        <div class="row channel-name">\n                            #' +
 ((__t = ( o.name )) == null ? '' : __t) +
 '\n                        </div>\n                        <div class="row channel-summary">\n                                <ul class="m-0 pl-0 d-block list-unstyled channel-info">\n                                <li class="favorite-star">\n                                    <span class="favorite"><i class="fas fa-star"></i></span>\n                                </li>\n                                <li class="favorite-user">\n                                    <span class="mr-1 ">' +
 ((__t = (o.occupants)) == null ? '' : __t) +
-'</span>\n                                    <i class="far fa-user"></i>\n                                </li>\n                                <li class="favorite-channel">\n                                    <span class="channel-desc ">' +
+'</span>\n                                    <i class="far fa-user"></i>\n                                </li>\n                                <li class="favorite-channel">\n                                    <span class="channel-desc" title="' +
 __e(o.room_description) +
-'</span>\n                                </li>\n                            </ul>\n                        </div>\n                    </div>\n                    </div>\n                <div class="room-controls">\n                    <ul class="top-toolbar-menu">\n                    </ul>\n                    <div class="chatbox-buttons-custom">\n                        <a class="chatbox-btn close-chatbox-button fa fa-sign-out-alt" title="' +
+'">' +
+__e(o.room_description) +
+'</span>\n                                </li>\n                            </ul>\n                        </div>\n                    </div>\n                    </div>\n                <div class="room-controls right-flex">\n                    <ul class="top-toolbar-menu">\n                    </ul>\n                    <div class="chatbox-buttons-custom">\n                        <a class="chatbox-btn close-chatbox-button fa fa-sign-out-alt" title="' +
 __e(o.info_close) +
 '"></a>\n                        <!-- ';
  if (o.affiliation == 'owner') { ;
