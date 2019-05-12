@@ -469,7 +469,7 @@ converse.plugins.add('converse-muc-views', {
                 var roomconfig = {
                     'roomname': data.get('chatroom'),
                     'roomdesc':  data.get('purpose'),
-                    'publicroom': data.get('privatechannel') !=='on'? true:false,
+                    // 'publicroom': data.get('privatechannel') !=='on'? true:false,
                     'membersonly': data.get('privatechannel') ==='on' && data.get('readonlychannel') ==='on' ? false:true ,
                     'moderatedroom': data.get('readonlychannel') ==='on'? true:false,
                     'allowpm': data.get('readonlychannel') ==='on'?'none':'anyone',
@@ -508,7 +508,7 @@ converse.plugins.add('converse-muc-views', {
                         }
                         setTimeout(function(){
                             _converse.api.roomviews.get(jid.toLowerCase()).model.directInvite(user, 'invite to the room');
-                        },10000);
+                        },5000);
                     })
                 }
                 //-------->
@@ -546,20 +546,34 @@ converse.plugins.add('converse-muc-views', {
             },
 
             afterRender () {
+                
                 // this.el.addEventListener('shown.bs.modal', () => {
                 //     this.el.querySelector('input[name="chatroom"]').focus();
                 // }, false);
                  //<-----  Mdev
-                // _converse.roster.each(o => {
-                //     let label = o.getDisplayName()
-                //     if(_.includes(label, '@')) {
-                //         label = label.split('@')[0];
-                //     }
-                //     const user = document.createElement('option')
-                //     user.setAttribute('value',o.getDisplayName())
-                //     user.innerHTML = label
-                //     this.el.querySelector('.channel-users-invite-list').insertAdjacentElement('beforeend',user)
-                // })
+                 const currentUSers = [];
+                 this.model.get('model').occupants.each(o => {
+                    let user = o.get('jid')
+                    if(_.includes(user, '@')) {
+                        user = user.split('@')[0];
+                        currentUSers.push(user);
+                    }
+                 })
+                _converse.roster.each(o => {
+                    let label = o.getDisplayName()
+                    if(_.includes(label, '@')) {
+                        label = label.split('@')[0];
+                    }
+                    if(!_.includes(currentUSers, label)) {
+                        const user = document.createElement('option')
+                        user.setAttribute('value',o.getDisplayName())
+                        // user.setAttribute('selected',true)
+                        user.innerHTML = label
+                        this.el.querySelector('.channel-users-invite-list').insertAdjacentElement('beforeend',user)
+                    }
+                    
+                    
+                })
                  //-------->
             },
              //<-----  Mdev
@@ -584,7 +598,7 @@ converse.plugins.add('converse-muc-views', {
                 var roomconfig = {
                     'roomname': data.get('chatroom'),
                     'roomdesc':  data.get('purpose'),
-                    'publicroom': data.get('privatechannel') !=='on'? true:false,
+                    // 'publicroom': data.get('privatechannel') !=='on'? true:false,
                     'membersonly': data.get('privatechannel') ==='on'? true:false,
                     'moderatedroom': data.get('readonlychannel') ==='on'? true:false,
                     // 'allowpm': data.get('readonlychannel') ==='on'?'none':'anyone',
@@ -613,17 +627,37 @@ converse.plugins.add('converse-muc-views', {
                 }
                 
                 //<-----  MDEV
-                // if (data.users.length > 0 ) {
-                //     data.users.forEach(o => {
-                //         let user = o;
-                //         if (!_.includes(o, '@')) {
-                //             user = `${o}@${_converse.api.settings.get("default_domain")}`
-                //         }
-                //         setTimeout(function(){
-                //             _converse.api.roomviews.get(jid.toLowerCase()).model.directInvite(user, 'invite to the room');
-                //         },10000);
-                //     })
-                // }
+                // const currentUSers = [];
+                // this.model.get('model').occupants.each(o => {
+                //    let user = o.get('jid')
+                //    if(_.includes(user, '@')) {
+                //        user = user.split('@')[0];
+                //        currentUSers.push(user);
+                //    }
+                // })
+                // const invitedUsers = []
+                if (data.users.length > 0 ) {
+                    data.users.forEach(o => {
+                        let user = o;
+                        // let tempUser = o;
+                        if (!_.includes(o, '@')) {
+                            user = `${o}@${_converse.api.settings.get("default_domain")}`
+                        }
+                        // if(_.includes(o, '@')) {
+                        //     tempUser = tempUser.split('@')[0];
+                        // }
+                        // if(!_.includes(currentUSers, tempUser)) {
+                        //     invitedUsers.push(tempUser)
+                        //     setTimeout(function(){
+                        //         _converse.api.roomviews.get(jid.toLowerCase()).model.directInvite(user, 'invite to the room');
+                        //     },3000);
+                        // }
+                        setTimeout(function(){
+                            _converse.api.roomviews.get(jid.toLowerCase()).model.directInvite(user, 'invite to the room');
+                        },5000);
+                       
+                    })
+                }
                 //-------->
                 this.model.get('model').saveCustomConfiguration(data.roomconfig).then(() => this.model.get('model').refreshRoomFeatures());
                 this.modal.hide();

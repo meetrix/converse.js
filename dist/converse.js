@@ -53907,7 +53907,7 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
         var roomconfig = {
           'roomname': data.get('chatroom'),
           'roomdesc': data.get('purpose'),
-          'publicroom': data.get('privatechannel') !== 'on' ? true : false,
+          // 'publicroom': data.get('privatechannel') !=='on'? true:false,
           'membersonly': data.get('privatechannel') === 'on' && data.get('readonlychannel') === 'on' ? false : true,
           'moderatedroom': data.get('readonlychannel') === 'on' ? true : false,
           'allowpm': data.get('readonlychannel') === 'on' ? 'none' : 'anyone',
@@ -53957,7 +53957,7 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
 
             setTimeout(function () {
               _converse.api.roomviews.get(jid.toLowerCase()).model.directInvite(user, 'invite to the room');
-            }, 10000);
+            }, 5000);
           });
         } //-------->
 
@@ -53998,21 +53998,37 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
         }, this.model.get('roomConfiguration')));
       },
 
-      afterRender() {// this.el.addEventListener('shown.bs.modal', () => {
+      afterRender() {
+        // this.el.addEventListener('shown.bs.modal', () => {
         //     this.el.querySelector('input[name="chatroom"]').focus();
         // }, false);
         //<-----  Mdev
-        // _converse.roster.each(o => {
-        //     let label = o.getDisplayName()
-        //     if(_.includes(label, '@')) {
-        //         label = label.split('@')[0];
-        //     }
-        //     const user = document.createElement('option')
-        //     user.setAttribute('value',o.getDisplayName())
-        //     user.innerHTML = label
-        //     this.el.querySelector('.channel-users-invite-list').insertAdjacentElement('beforeend',user)
-        // })
-        //-------->
+        const currentUSers = [];
+        this.model.get('model').occupants.each(o => {
+          let user = o.get('jid');
+
+          if (_.includes(user, '@')) {
+            user = user.split('@')[0];
+            currentUSers.push(user);
+          }
+        });
+
+        _converse.roster.each(o => {
+          let label = o.getDisplayName();
+
+          if (_.includes(label, '@')) {
+            label = label.split('@')[0];
+          }
+
+          if (!_.includes(currentUSers, label)) {
+            const user = document.createElement('option');
+            user.setAttribute('value', o.getDisplayName()); // user.setAttribute('selected',true)
+
+            user.innerHTML = label;
+            this.el.querySelector('.channel-users-invite-list').insertAdjacentElement('beforeend', user);
+          }
+        }); //-------->
+
       },
 
       //<-----  Mdev
@@ -54040,7 +54056,7 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
         var roomconfig = {
           'roomname': data.get('chatroom'),
           'roomdesc': data.get('purpose'),
-          'publicroom': data.get('privatechannel') !== 'on' ? true : false,
+          // 'publicroom': data.get('privatechannel') !=='on'? true:false,
           'membersonly': data.get('privatechannel') === 'on' ? true : false,
           'moderatedroom': data.get('readonlychannel') === 'on' ? true : false // 'allowpm': data.get('readonlychannel') ==='on'?'none':'anyone',
           // 'roomowners':[_converse.connection.jid.split('/')[0]]
@@ -54070,18 +54086,39 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
           jid = data.jid;
           this.model.setDomain(jid);
         } //<-----  MDEV
-        // if (data.users.length > 0 ) {
-        //     data.users.forEach(o => {
-        //         let user = o;
-        //         if (!_.includes(o, '@')) {
-        //             user = `${o}@${_converse.api.settings.get("default_domain")}`
-        //         }
-        //         setTimeout(function(){
-        //             _converse.api.roomviews.get(jid.toLowerCase()).model.directInvite(user, 'invite to the room');
-        //         },10000);
-        //     })
-        // }
-        //-------->
+        // const currentUSers = [];
+        // this.model.get('model').occupants.each(o => {
+        //    let user = o.get('jid')
+        //    if(_.includes(user, '@')) {
+        //        user = user.split('@')[0];
+        //        currentUSers.push(user);
+        //    }
+        // })
+        // const invitedUsers = []
+
+
+        if (data.users.length > 0) {
+          data.users.forEach(o => {
+            let user = o; // let tempUser = o;
+
+            if (!_.includes(o, '@')) {
+              user = `${o}@${_converse.api.settings.get("default_domain")}`;
+            } // if(_.includes(o, '@')) {
+            //     tempUser = tempUser.split('@')[0];
+            // }
+            // if(!_.includes(currentUSers, tempUser)) {
+            //     invitedUsers.push(tempUser)
+            //     setTimeout(function(){
+            //         _converse.api.roomviews.get(jid.toLowerCase()).model.directInvite(user, 'invite to the room');
+            //     },3000);
+            // }
+
+
+            setTimeout(function () {
+              _converse.api.roomviews.get(jid.toLowerCase()).model.directInvite(user, 'invite to the room');
+            }, 5000);
+          });
+        } //-------->
 
 
         this.model.get('model').saveCustomConfiguration(data.roomconfig).then(() => this.model.get('model').refreshRoomFeatures());
@@ -95851,7 +95888,7 @@ __e(o.__('Channel Configuration')) +
 '\n              </div>\n              <button type="button" class="close" data-dismiss="modal" aria-label="Close">\n                  <i class="fas fa-times"></i>\n              </button>\n          </div>\n          <div class="modal-body">\n              <div class="modal-title" id="add-chatroom-modal-sublabel">\n                  ' +
 __e(o.__('Channels are where your members communicate. They are best when organized around a topic - #lead, for example')) +
 '\n              </div>\n              <form class="converse-form add-chatroom">\n                  <div class="form-group private-public">\n                      <div>\n                          <label class="switch">\n                              <input id="private-channel" type="checkbox" name="privatechannel" checked="' +
-__e(o.publicroom !== '1'?'checked':'') +
+__e(o.membersonly === '1'?'checked':'') +
 '">\n                              <span class="slider round"></span>\n                          </label>\n                          <label for="privatechannel" class="form-check-label" >' +
 __e(o.__('Private Channel')) +
 '</label>\n                      </div>\n                      <span>' +
@@ -95878,11 +95915,11 @@ __e(o.__('Optional')) +
 __e(o.roomdesc) +
 ' />\n                          <span>' +
 __e(o.__("What's the channel about?")) +
-'</span>\n                  </div>\n                  <!-- <div class="form-group channel-invite">\n                      <label for="users">' +
+'</span>\n                  </div>\n                  <div class="form-group channel-invite">\n                      <label for="users">' +
 __e(o.__('Invite Users')) +
 '</label>\n                      <select class="form-control channel-users-invite-list" name="users" multiple="multiple"></select>\n                      <span>' +
 __e(o.__('Name must be a lowercase,without space, period, and shorter than 22 characters')) +
-'</span>\n                  </div> -->\n                  <input type="button" class="btn cancel-btn" data-dismiss="modal" aria-label="Close" name="cancel" value="' +
+'</span>\n                  </div>\n                  <input type="button" class="btn cancel-btn" data-dismiss="modal" aria-label="Close" name="cancel" value="' +
 __e(o.__('Cancel')) +
 '"/>\n                  <input type="submit" class="btn create-btn" name="join" value="' +
 __e(o.__('Update')) +

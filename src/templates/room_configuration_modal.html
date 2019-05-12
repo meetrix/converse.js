@@ -17,7 +17,7 @@
                   <div class="form-group private-public">
                       <div>
                           <label class="switch">
-                              <input id="private-channel" type="checkbox" name="privatechannel" checked="{{{o.publicroom !== '1'?'checked':''}}}">
+                              <input id="private-channel" type="checkbox" name="privatechannel" checked="{{{o.membersonly === '1'?'checked':''}}}">
                               <span class="slider round"></span>
                           </label>
                           <label for="privatechannel" class="form-check-label" >{{{o.__('Private Channel')}}}</label>
@@ -44,11 +44,11 @@
                           <input type="text" required="required" name="purpose" class="form-control" value={{{o.roomdesc}}} />
                           <span>{{{o.__("What's the channel about?")}}}</span>
                   </div>
-                  <!-- <div class="form-group channel-invite">
+                  <div class="form-group channel-invite">
                       <label for="users">{{{o.__('Invite Users')}}}</label>
                       <select class="form-control channel-users-invite-list" name="users" multiple="multiple"></select>
                       <span>{{{o.__('Name must be a lowercase,without space, period, and shorter than 22 characters')}}}</span>
-                  </div> -->
+                  </div>
                   <input type="button" class="btn cancel-btn" data-dismiss="modal" aria-label="Close" name="cancel" value="{{{o.__('Cancel')}}}"/>
                   <input type="submit" class="btn create-btn" name="join" value="{{{o.__('Update')}}}"/>
               </form>
