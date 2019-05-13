@@ -465,12 +465,17 @@ converse.plugins.add('converse-muc-views', {
                     nick = data.get('nickname').trim();
                 }
                 //<-----  Mdev
-               
+                let membersonly = true;
+                if(data.get('readonlychannel') ==='on'){
+                    membersonly = false;
+                }else if(data.get('privatechannel') !=='on' ){
+                    membersonly = false;
+                }
                 var roomconfig = {
                     'roomname': data.get('chatroom'),
                     'roomdesc':  data.get('purpose'),
                     'publicroom': data.get('privatechannel') !=='on'? true:false,
-                    'membersonly': data.get('privatechannel') ==='on' && data.get('readonlychannel') ==='on' ? false:true ,
+                    'membersonly': membersonly,
                     'moderatedroom': data.get('readonlychannel') ==='on'? true:false,
                     'allowpm': data.get('readonlychannel') ==='on'?'none':'anyone',
                     'roomowners':[_converse.connection.jid.split('/')[0]]
@@ -594,12 +599,17 @@ converse.plugins.add('converse-muc-views', {
                     nick = data.get('nickname').trim();
                 }
                 //<-----  Mdev
-               
+                let membersonly = true;
+                if(data.get('readonlychannel') ==='on'){
+                    membersonly = false;
+                }else if(data.get('privatechannel') !=='on' ){
+                    membersonly = false;
+                }
                 var roomconfig = {
                     'roomname': data.get('chatroom'),
                     'roomdesc':  data.get('purpose'),
                     'publicroom': data.get('privatechannel') !=='on'? true:false,
-                    'membersonly': data.get('privatechannel') ==='on'? true:false,
+                    'membersonly': membersonly,
                     'moderatedroom': data.get('readonlychannel') ==='on'? true:false,
                     'allowpm': data.get('readonlychannel') ==='on'?'none':'anyone',
                     // 'roomowners':[_converse.connection.jid.split('/')[0]]
