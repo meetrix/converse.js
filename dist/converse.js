@@ -53386,8 +53386,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var templates_chatroom_features_html__WEBPACK_IMPORTED_MODULE_14___default = /*#__PURE__*/__webpack_require__.n(templates_chatroom_features_html__WEBPACK_IMPORTED_MODULE_14__);
 /* harmony import */ var templates_chatroom_form_html__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! templates/chatroom_form.html */ "./src/templates/chatroom_form.html");
 /* harmony import */ var templates_chatroom_form_html__WEBPACK_IMPORTED_MODULE_15___default = /*#__PURE__*/__webpack_require__.n(templates_chatroom_form_html__WEBPACK_IMPORTED_MODULE_15__);
-/* harmony import */ var templates_room_configuration_modal_html__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! templates/room_configuration_modal.html */ "./src/templates/room_configuration_modal.html");
-/* harmony import */ var templates_room_configuration_modal_html__WEBPACK_IMPORTED_MODULE_16___default = /*#__PURE__*/__webpack_require__.n(templates_room_configuration_modal_html__WEBPACK_IMPORTED_MODULE_16__);
+/* harmony import */ var templates_chatroom_configuration_modal_html__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! templates/chatroom_configuration_modal.html */ "./src/templates/chatroom_configuration_modal.html");
+/* harmony import */ var templates_chatroom_configuration_modal_html__WEBPACK_IMPORTED_MODULE_16___default = /*#__PURE__*/__webpack_require__.n(templates_chatroom_configuration_modal_html__WEBPACK_IMPORTED_MODULE_16__);
 /* harmony import */ var templates_chatroom_head_html__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! templates/chatroom_head.html */ "./src/templates/chatroom_head.html");
 /* harmony import */ var templates_chatroom_head_html__WEBPACK_IMPORTED_MODULE_17___default = /*#__PURE__*/__webpack_require__.n(templates_chatroom_head_html__WEBPACK_IMPORTED_MODULE_17__);
 /* harmony import */ var templates_chatroom_invite_html__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__(/*! templates/chatroom_invite.html */ "./src/templates/chatroom_invite.html");
@@ -53998,7 +53998,7 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
           placeholder = muc_domain ? `name@${muc_domain}` : __('name@conference.example.org');
         }
 
-        return templates_room_configuration_modal_html__WEBPACK_IMPORTED_MODULE_16___default()(_.extend(this.model.get('model').toJSON(), {
+        return templates_chatroom_configuration_modal_html__WEBPACK_IMPORTED_MODULE_16___default()(_.extend(this.model.get('model').toJSON(), {
           '__': _converse.__,
           '_converse': _converse,
           'label_room_address': _converse.muc_domain ? __('Channel Name') : __('Channel Address'),
@@ -93949,6 +93949,62 @@ return __p
 
 /***/ }),
 
+/***/ "./src/templates/chatroom_configuration_modal.html":
+/*!*********************************************************!*\
+  !*** ./src/templates/chatroom_configuration_modal.html ***!
+  \*********************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+var _ = {escape:__webpack_require__(/*! ./node_modules/lodash/escape.js */ "./node_modules/lodash/escape.js")};
+module.exports = function(o) {
+var __t, __p = '', __e = _.escape;
+__p += '<!-- src/templates/chatroom_configuration_modal.html -->\n<div class="modal fade" id="add-chatroom-modal" tabindex="-1" role="dialog" aria-labelledby="add-chatroom-modal-label" aria-hidden="true">\n  <div class="modal-dialog modal-lg" role="document">\n      <div class="modal-content">\n          <div class="modal-header">\n              <div class="modal-title" id="add-chatroom-modal-label">\n                  ' +
+__e(o.__('Channel Configuration')) +
+'\n              </div>\n              <button type="button" class="close" data-dismiss="modal" aria-label="Close">\n                  <i class="fas fa-times"></i>\n              </button>\n          </div>\n          <div class="modal-body">\n              <div class="modal-title" id="add-chatroom-modal-sublabel">\n                  ' +
+__e(o.__('Channels are where your members communicate. They are best when organized around a topic - #lead, for example')) +
+'\n              </div>\n              <form class="converse-form add-chatroom">\n                  <div class="form-group private-public">\n                      <div>\n                          <label class="switch">\n                              <input id="private-channel" type="checkbox" name="privatechannel" checked="' +
+__e(o.publicroom !== '1'?'checked':'') +
+'">\n                              <span class="slider round"></span>\n                          </label>\n                          <label for="privatechannel" class="form-check-label" >' +
+__e(o.__('Private Channel')) +
+'</label>\n                      </div>\n                      <span>' +
+__e(o.__('Just invited people can access this channel')) +
+'</span>\n                  </div>\n                  <div class="form-group read-only">\n                      <div>\n                          <label class="switch">\n                              <input id="read-only-channel" type="checkbox" name="readonlychannel" checked="' +
+__e(o.moderatedroom === '1'?'checked':'') +
+'">\n                              <span class="slider round"></span>\n                          </label>\n                          <label for="readonlychannel" class="form-check-label">' +
+__e(o.__('Read-Only Channel')) +
+'</label>\n                      </div>\n                      <span>' +
+__e(o.__('Only the admin can write messages')) +
+'</span>\n                  </div>\n                  <div class="form-group channel-name">\n                          <label for="chatroom">' +
+__e(o.label_room_address) +
+'</label>\n                          <input type="text" required="required" name="chatroom" class="form-control" placeholder="' +
+__e(o.chatroom_placeholder) +
+'" value=' +
+__e(o.roomname) +
+' />\n                          <span>' +
+__e(o.__('Names must be lowercase without spaces or period, and shorter than 22 characters')) +
+'</span>\n                  </div>\n                  <div class="form-group channel-about">\n                          <label for="purpose">' +
+__e(o.__('Purpose')) +
+'&nbsp;(' +
+__e(o.__('Optional')) +
+')</label>\n                          <input type="text" required="required" name="purpose" class="form-control" value=' +
+__e(o.roomdesc) +
+' />\n                          <span>' +
+__e(o.__("What's the channel about?")) +
+'</span>\n                  </div>\n                  <div class="form-group channel-invite">\n                      <label for="users">' +
+__e(o.__('Invite Users')) +
+'</label>\n                      <select class="form-control channel-users-invite-list" name="users" multiple="multiple"></select>\n                      <span>' +
+__e(o.__('Name must be a lowercase,without space, period, and shorter than 22 characters')) +
+'</span>\n                  </div>\n                  <input type="button" class="btn cancel-btn" data-dismiss="modal" aria-label="Close" name="cancel" value="' +
+__e(o.__('Cancel')) +
+'"/>\n                  <input type="submit" class="btn create-btn" name="join" value="' +
+__e(o.__('Update')) +
+'"/>\n              </form>\n          </div>\n      </div>\n  </div>\n</div>\n';
+return __p
+};
+
+/***/ }),
+
 /***/ "./src/templates/chatroom_destroyed.html":
 /*!***********************************************!*\
   !*** ./src/templates/chatroom_destroyed.html ***!
@@ -95914,62 +95970,6 @@ __e(o.desc_decline) +
 '" title="' +
 __e(o.desc_decline) +
 '" href="#"></a>\n';
-return __p
-};
-
-/***/ }),
-
-/***/ "./src/templates/room_configuration_modal.html":
-/*!*****************************************************!*\
-  !*** ./src/templates/room_configuration_modal.html ***!
-  \*****************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-var _ = {escape:__webpack_require__(/*! ./node_modules/lodash/escape.js */ "./node_modules/lodash/escape.js")};
-module.exports = function(o) {
-var __t, __p = '', __e = _.escape;
-__p += '<!-- src/templates/room_configuration_modal.html -->\n<div class="modal fade" id="add-chatroom-modal" tabindex="-1" role="dialog" aria-labelledby="add-chatroom-modal-label" aria-hidden="true">\n  <div class="modal-dialog modal-lg" role="document">\n      <div class="modal-content">\n          <div class="modal-header">\n              <div class="modal-title" id="add-chatroom-modal-label">\n                  ' +
-__e(o.__('Channel Configuration')) +
-'\n              </div>\n              <button type="button" class="close" data-dismiss="modal" aria-label="Close">\n                  <i class="fas fa-times"></i>\n              </button>\n          </div>\n          <div class="modal-body">\n              <div class="modal-title" id="add-chatroom-modal-sublabel">\n                  ' +
-__e(o.__('Channels are where your members communicate. They are best when organized around a topic - #lead, for example')) +
-'\n              </div>\n              <form class="converse-form add-chatroom">\n                  <div class="form-group private-public">\n                      <div>\n                          <label class="switch">\n                              <input id="private-channel" type="checkbox" name="privatechannel" checked="' +
-__e(o.publicroom !== '1'?'checked':'') +
-'">\n                              <span class="slider round"></span>\n                          </label>\n                          <label for="privatechannel" class="form-check-label" >' +
-__e(o.__('Private Channel')) +
-'</label>\n                      </div>\n                      <span>' +
-__e(o.__('Just invited people can access this channel')) +
-'</span>\n                  </div>\n                  <div class="form-group read-only">\n                      <div>\n                          <label class="switch">\n                              <input id="read-only-channel" type="checkbox" name="readonlychannel" checked="' +
-__e(o.moderatedroom === '1'?'checked':'') +
-'">\n                              <span class="slider round"></span>\n                          </label>\n                          <label for="readonlychannel" class="form-check-label">' +
-__e(o.__('Read-Only Channel')) +
-'</label>\n                      </div>\n                      <span>' +
-__e(o.__('Only the admin can write messages')) +
-'</span>\n                  </div>\n                  <div class="form-group channel-name">\n                          <label for="chatroom">' +
-__e(o.label_room_address) +
-'</label>\n                          <input type="text" required="required" name="chatroom" class="form-control" placeholder="' +
-__e(o.chatroom_placeholder) +
-'" value=' +
-__e(o.roomname) +
-' />\n                          <span>' +
-__e(o.__('Names must be lowercase without spaces or period, and shorter than 22 characters')) +
-'</span>\n                  </div>\n                  <div class="form-group channel-about">\n                          <label for="purpose">' +
-__e(o.__('Purpose')) +
-'&nbsp;(' +
-__e(o.__('Optional')) +
-')</label>\n                          <input type="text" required="required" name="purpose" class="form-control" value=' +
-__e(o.roomdesc) +
-' />\n                          <span>' +
-__e(o.__("What's the channel about?")) +
-'</span>\n                  </div>\n                  <div class="form-group channel-invite">\n                      <label for="users">' +
-__e(o.__('Invite Users')) +
-'</label>\n                      <select class="form-control channel-users-invite-list" name="users" multiple="multiple"></select>\n                      <span>' +
-__e(o.__('Name must be a lowercase,without space, period, and shorter than 22 characters')) +
-'</span>\n                  </div>\n                  <input type="button" class="btn cancel-btn" data-dismiss="modal" aria-label="Close" name="cancel" value="' +
-__e(o.__('Cancel')) +
-'"/>\n                  <input type="submit" class="btn create-btn" name="join" value="' +
-__e(o.__('Update')) +
-'"/>\n              </form>\n          </div>\n      </div>\n  </div>\n</div>\n';
 return __p
 };
 

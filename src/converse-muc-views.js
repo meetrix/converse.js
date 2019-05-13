@@ -23,7 +23,7 @@ import tpl_chatroom_disconnect from "templates/chatroom_disconnect.html";
 import tpl_chatroom_features from "templates/chatroom_features.html";
 import tpl_chatroom_form from "templates/chatroom_form.html";
 // eslint-disable-next-line sort-imports
-import tpl_chatroom_edit_form from "templates/room_configuration_modal.html";
+import tpl_chatroom_edit_form from "templates/chatroom_configuration_modal.html";
 import tpl_chatroom_head from "templates/chatroom_head.html";
 import tpl_chatroom_invite from "templates/chatroom_invite.html";
 import tpl_chatroom_nickname_form from "templates/chatroom_nickname_form.html";
