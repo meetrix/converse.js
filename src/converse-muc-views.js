@@ -537,7 +537,6 @@ converse.plugins.add('converse-muc-views', {
 
             toHTML () {
                 let placeholder = `# e.g link solutions`;
-                console.log('config1:',this.model.get('roomConfiguration'))
                 if (!_converse.locked_muc_domain) {
                     const muc_domain = this.model.get('muc_domain') || _converse.muc_domain;
                     placeholder = muc_domain ? `name@${muc_domain}` : __('name@conference.example.org');
@@ -1473,8 +1472,8 @@ converse.plugins.add('converse-muc-views', {
             },
             renderCustomConfiguration(stanza){
                 const container_el = this.el.querySelector('.chatroom-body');
-                _.each(container_el.querySelectorAll('.chatroom-form-container'), u.removeElement);
-                _.each(container_el.children, u.hideElement);
+                // _.each(container_el.querySelectorAll('.chatroom-form-container'), u.removeElement);
+                // _.each(container_el.children, u.hideElement);
                 const fields = stanza.querySelectorAll('field')
                 var roomConfiguration = {};
                 _.each(fields, field => {
@@ -1505,6 +1504,7 @@ converse.plugins.add('converse-muc-views', {
                         
                     }
                 });
+                this.hideSpinner();
                 // if (_.isUndefined(this.edit_room_modal)) {
                     this.edit_room_modal = new _converse.EditChatRoomModal({'model':new converse.env.Backbone.Model({'model': this.model,'roomConfiguration':roomConfiguration})});
                 // }

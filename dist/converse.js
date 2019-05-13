@@ -53990,7 +53990,6 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
 
       toHTML() {
         let placeholder = `# e.g link solutions`;
-        console.log('config1:', this.model.get('roomConfiguration'));
 
         if (!_converse.locked_muc_domain) {
           const muc_domain = this.model.get('muc_domain') || _converse.muc_domain;
@@ -55003,11 +55002,8 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
       },
 
       renderCustomConfiguration(stanza) {
-        const container_el = this.el.querySelector('.chatroom-body');
-
-        _.each(container_el.querySelectorAll('.chatroom-form-container'), u.removeElement);
-
-        _.each(container_el.children, u.hideElement);
+        const container_el = this.el.querySelector('.chatroom-body'); // _.each(container_el.querySelectorAll('.chatroom-form-container'), u.removeElement);
+        // _.each(container_el.children, u.hideElement);
 
         const fields = stanza.querySelectorAll('field');
         var roomConfiguration = {};
@@ -55032,8 +55028,9 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
               roomConfiguration.roomowners = [values];
             }
           }
-        }); // if (_.isUndefined(this.edit_room_modal)) {
+        });
 
+        this.hideSpinner(); // if (_.isUndefined(this.edit_room_modal)) {
 
         this.edit_room_modal = new _converse.EditChatRoomModal({
           'model': new _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].env.Backbone.Model({
