@@ -96619,7 +96619,7 @@ __e(o.label_start_call) +
  } ;
 __p += '\n';
  if (o.show_occupants_toggle)  { ;
-__p += '\n<li class="toggle-occupants fa ';
+__p += '\n<!-- <li class="toggle-occupants fa ';
  if (o.hidden_occupants)  { ;
 __p += ' fa-angle-double-left ';
  } else { ;
@@ -96627,7 +96627,7 @@ __p += ' fa-angle-double-right ';
  } ;
 __p += '"\n    title="' +
 __e(o.label_hide_occupants) +
-'"></li>\n';
+'"></li> -->\n';
  } ;
 __p += '\n';
 return __p
