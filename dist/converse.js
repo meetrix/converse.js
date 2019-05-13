@@ -54232,7 +54232,6 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
         this.render().insertIntoDOM();
         this.registerHandlers();
         this.enterRoom();
-        console.log('model', this.model);
         this.disableChat();
       },
 
@@ -55803,6 +55802,7 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
         Backbone.OrderedListView.prototype.initialize.apply(this, arguments);
         this.chatroomview = this.model.chatroomview;
         this.chatroomview.model.on('change:affiliation', this.renderInviteWidget, this);
+        this.chatroomview.model.on('change', this.renderUserDetail, this);
         this.chatroomview.model.features.on('change:open', this.renderInviteWidget, this);
         this.chatroomview.model.features.on('change', this.renderRoomFeatures, this);
         this.render();
@@ -55815,8 +55815,12 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
 
       render() {
         this.el.innerHTML = templates_chatroom_sidebar_html__WEBPACK_IMPORTED_MODULE_21___default()(_.extend(this.chatroomview.model.toJSON(), {
+          '_': _,
+          '__': __,
           'allow_muc_invitations': _converse.allow_muc_invitations,
-          'label_occupants': __('Participants')
+          'label_occupants': __('Participants') //  'num_occupants': this.model.chatroom.occupants.length,
+          //  'name':this.model.chatroom.get('name')
+
         }));
 
         if (_converse.allow_muc_invitations) {
@@ -55827,12 +55831,15 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
       },
 
       renderInviteWidget() {
+        this.renderUserDetail();
         const widget = this.el.querySelector('.room-invite');
 
         if (this.shouldInviteWidgetBeShown()) {
           if (_.isNull(widget)) {
             const heading = this.el.querySelector('.occupants-heading');
             heading.insertAdjacentHTML('afterend', templates_chatroom_invite_html__WEBPACK_IMPORTED_MODULE_18___default()({
+              '_': _,
+              '__': __,
               'error_message': null,
               'label_invitation': __('Invite')
             }));
@@ -55843,6 +55850,19 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
         }
 
         return this;
+      },
+
+      renderUserDetail() {
+        let onlineCount = 0;
+
+        _.each(this.getAll(), contact_view => {
+          if (contact_view.model.get('show') === 'online') {
+            onlineCount++;
+          }
+        });
+
+        this.el.querySelector('.numberofoccupants').innerHTML = this.model.models.length;
+        this.el.querySelector('.numberofonline').innerHTML = onlineCount;
       },
 
       renderRoomFeatures() {
@@ -94359,7 +94379,9 @@ var _ = {escape:__webpack_require__(/*! ./node_modules/lodash/escape.js */ "./no
 module.exports = function(o) {
 var __t, __p = '', __e = _.escape, __j = Array.prototype.join;
 function print() { __p += __j.call(arguments, '') }
-__p += '<!-- src/templates/chatroom_invite.html -->\n<div class="suggestion-box room-invite">\n    <form>\n        ';
+__p += '<!-- src/templates/chatroom_invite.html -->\n<div class="suggestion-box room-invite">\n        <i class="fa fa-user"></i>\n    <span>' +
+__e(o.__('invite others to this channel')) +
+'</span>\n    <form>\n        ';
  if (o.error_message) { ;
 __p += ' <span class="error">' +
 __e(o.error_message) +
@@ -94429,8 +94451,16 @@ return __p
 var _ = {escape:__webpack_require__(/*! ./node_modules/lodash/escape.js */ "./node_modules/lodash/escape.js")};
 module.exports = function(o) {
 var __t, __p = '', __e = _.escape;
-__p += '<!-- src/templates/chatroom_sidebar.html -->\n<!-- <div class="occupants"> -->\n<div class="occupants-header">\n    <i class="hide-occupants fa fa-times"></i>\n    <p class="occupants-heading">' +
+__p += '<!-- src/templates/chatroom_sidebar.html -->\n<!-- <div class="occupants"> -->\n<div class="occupants-header">\n    <p class="room-info"><strong>' +
+__e(o.__('ABOUT#')) +
+'</strong> ' +
+__e(o.name) +
+'</p>\n    <i class="hide-occupants fa fa-times"></i>\n    <p class="occupants-heading">' +
 __e(o.label_occupants) +
+'</p>\n</div>\n<div>\n<i class="fa fa-users"></i>\n<div>\n    <span class="numberofonline">0</span>/<span class="numberofoccupants">0</span>\n</div>\n<p class="room-info"><strong>' +
+__e(o.__('Online users')) +
+'</strong>: ' +
+__e(o.num_occupants) +
 '</p>\n</div>\n<ul class="occupant-list"></ul>\n<div class="chatroom-features"></div>\n<!-- </div> -->\n';
 return __p
 };

@@ -767,7 +767,6 @@ converse.plugins.add('converse-muc-views', {
                 this.render().insertIntoDOM();
                 this.registerHandlers();
                 this.enterRoom();
-                console.log('model',this.model)
                 this.disableChat()
             },
 
@@ -2222,6 +2221,7 @@ converse.plugins.add('converse-muc-views', {
 
                 this.chatroomview = this.model.chatroomview;
                 this.chatroomview.model.on('change:affiliation', this.renderInviteWidget, this);
+                this.chatroomview.model.on('change', this.renderUserDetail, this);
                 this.chatroomview.model.features.on('change:open', this.renderInviteWidget, this);
                 this.chatroomview.model.features.on('change', this.renderRoomFeatures, this);
 
@@ -2234,19 +2234,26 @@ converse.plugins.add('converse-muc-views', {
             },
 
             render () {
+                
                 this.el.innerHTML = tpl_chatroom_sidebar(
                     _.extend(this.chatroomview.model.toJSON(), {
+                        '_': _,
+                        '__': __,
                         'allow_muc_invitations': _converse.allow_muc_invitations,
-                        'label_occupants': __('Participants')
+                        'label_occupants': __('Participants'),
+                        //  'num_occupants': this.model.chatroom.occupants.length,
+                        //  'name':this.model.chatroom.get('name')
                     })
                 );
                 if (_converse.allow_muc_invitations) {
                     _converse.api.waitUntil('rosterContactsFetched').then(() => this.renderInviteWidget());
+                    
                 }
                 return this.renderRoomFeatures();
             },
 
             renderInviteWidget () {
+                this.renderUserDetail();
                 const widget = this.el.querySelector('.room-invite');
                 if (this.shouldInviteWidgetBeShown()) {
                     if (_.isNull(widget)) {
@@ -2254,6 +2261,8 @@ converse.plugins.add('converse-muc-views', {
                         heading.insertAdjacentHTML(
                             'afterend',
                             tpl_chatroom_invite({
+                                '_': _,
+                                '__': __,
                                 'error_message': null,
                                 'label_invitation': __('Invite'),
                             })
@@ -2264,6 +2273,16 @@ converse.plugins.add('converse-muc-views', {
                     widget.remove();
                 }
                 return this;
+            },
+            renderUserDetail(){
+                let onlineCount = 0
+                _.each(this.getAll(), (contact_view) => {
+                    if(contact_view.model.get('show') === 'online'){
+                        onlineCount++;
+                    }
+                });
+                this.el.querySelector('.numberofoccupants').innerHTML = this.model.models.length
+                this.el.querySelector('.numberofonline').innerHTML = onlineCount
             },
 
             renderRoomFeatures () {

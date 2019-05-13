@@ -1,7 +1,15 @@
 <!-- <div class="occupants"> -->
 <div class="occupants-header">
+    <p class="room-info"><strong>{{{o.__('ABOUT#')}}}</strong> {{{o.name}}}</p>
     <i class="hide-occupants fa fa-times"></i>
     <p class="occupants-heading">{{{o.label_occupants}}}</p>
+</div>
+<div>
+<i class="fa fa-users"></i>
+<div>
+    <span class="numberofonline">0</span>/<span class="numberofoccupants">0</span>
+</div>
+<p class="room-info"><strong>{{{o.__('Online users')}}}</strong>: {{{o.num_occupants}}}</p>
 </div>
 <ul class="occupant-list"></ul>
 <div class="chatroom-features"></div>
