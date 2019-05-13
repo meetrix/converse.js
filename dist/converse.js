@@ -53907,7 +53907,7 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
         var roomconfig = {
           'roomname': data.get('chatroom'),
           'roomdesc': data.get('purpose'),
-          // 'publicroom': data.get('privatechannel') !=='on'? true:false,
+          'publicroom': data.get('privatechannel') !== 'on' ? true : false,
           'membersonly': data.get('privatechannel') === 'on' && data.get('readonlychannel') === 'on' ? false : true,
           'moderatedroom': data.get('readonlychannel') === 'on' ? true : false,
           'allowpm': data.get('readonlychannel') === 'on' ? 'none' : 'anyone',
@@ -54056,10 +54056,10 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
         var roomconfig = {
           'roomname': data.get('chatroom'),
           'roomdesc': data.get('purpose'),
-          // 'publicroom': data.get('privatechannel') !=='on'? true:false,
+          'publicroom': data.get('privatechannel') !== 'on' ? true : false,
           'membersonly': data.get('privatechannel') === 'on' ? true : false,
-          'moderatedroom': data.get('readonlychannel') === 'on' ? true : false // 'allowpm': data.get('readonlychannel') ==='on'?'none':'anyone',
-          // 'roomowners':[_converse.connection.jid.split('/')[0]]
+          'moderatedroom': data.get('readonlychannel') === 'on' ? true : false,
+          'allowpm': data.get('readonlychannel') === 'on' ? 'none' : 'anyone' // 'roomowners':[_converse.connection.jid.split('/')[0]]
 
         };
         return {
@@ -95888,7 +95888,7 @@ __e(o.__('Channel Configuration')) +
 '\n              </div>\n              <button type="button" class="close" data-dismiss="modal" aria-label="Close">\n                  <i class="fas fa-times"></i>\n              </button>\n          </div>\n          <div class="modal-body">\n              <div class="modal-title" id="add-chatroom-modal-sublabel">\n                  ' +
 __e(o.__('Channels are where your members communicate. They are best when organized around a topic - #lead, for example')) +
 '\n              </div>\n              <form class="converse-form add-chatroom">\n                  <div class="form-group private-public">\n                      <div>\n                          <label class="switch">\n                              <input id="private-channel" type="checkbox" name="privatechannel" checked="' +
-__e(o.membersonly === '1'?'checked':'') +
+__e(o.publicroom !== '1'?'checked':'') +
 '">\n                              <span class="slider round"></span>\n                          </label>\n                          <label for="privatechannel" class="form-check-label" >' +
 __e(o.__('Private Channel')) +
 '</label>\n                      </div>\n                      <span>' +

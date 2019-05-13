@@ -17,7 +17,7 @@
                   <div class="form-group private-public">
                       <div>
                           <label class="switch">
-                              <input id="private-channel" type="checkbox" name="privatechannel" checked="{{{o.membersonly === '1'?'checked':''}}}">
+                              <input id="private-channel" type="checkbox" name="privatechannel" checked="{{{o.publicroom !== '1'?'checked':''}}}">
                               <span class="slider round"></span>
                           </label>
                           <label for="privatechannel" class="form-check-label" >{{{o.__('Private Channel')}}}</label>

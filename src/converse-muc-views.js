@@ -469,7 +469,7 @@ converse.plugins.add('converse-muc-views', {
                 var roomconfig = {
                     'roomname': data.get('chatroom'),
                     'roomdesc':  data.get('purpose'),
-                    // 'publicroom': data.get('privatechannel') !=='on'? true:false,
+                    'publicroom': data.get('privatechannel') !=='on'? true:false,
                     'membersonly': data.get('privatechannel') ==='on' && data.get('readonlychannel') ==='on' ? false:true ,
                     'moderatedroom': data.get('readonlychannel') ==='on'? true:false,
                     'allowpm': data.get('readonlychannel') ==='on'?'none':'anyone',
@@ -598,10 +598,10 @@ converse.plugins.add('converse-muc-views', {
                 var roomconfig = {
                     'roomname': data.get('chatroom'),
                     'roomdesc':  data.get('purpose'),
-                    // 'publicroom': data.get('privatechannel') !=='on'? true:false,
+                    'publicroom': data.get('privatechannel') !=='on'? true:false,
                     'membersonly': data.get('privatechannel') ==='on'? true:false,
                     'moderatedroom': data.get('readonlychannel') ==='on'? true:false,
-                    // 'allowpm': data.get('readonlychannel') ==='on'?'none':'anyone',
+                    'allowpm': data.get('readonlychannel') ==='on'?'none':'anyone',
                     // 'roomowners':[_converse.connection.jid.split('/')[0]]
                 }
                 return {
