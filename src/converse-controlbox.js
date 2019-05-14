@@ -670,6 +670,17 @@ converse.plugins.add('converse-controlbox', {
                 delete view.controlbox_pane;
             }
         });
+        _converse.api.listen.on('chatBoxViewPortCalculate', () => {
+            const vh = window.innerHeight * 0.01;
+            document.documentElement.style.setProperty('--vh', `${vh}px`);
+        });
+        _converse.api.listen.on('chatBoxViewPortCaclulateWhenResize', () => {
+            console.log('resize')
+            window.addEventListener('resize', () => {
+                const vh = window.innerHeight * 0.01;
+                document.documentElement.style.setProperty('--vh', `${vh}px`);
+            });
+        });
 
 
         /************************ BEGIN API ************************/

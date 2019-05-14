@@ -196,6 +196,8 @@ converse.plugins.add('converse-chatboxviews', {
              * @event _converse#chatBoxViewsInitialized
              * @example _converse.api.listen.on('chatBoxViewsInitialized', () => { ... });
              */
+            _converse.api.trigger('chatBoxViewPortCalculate');
+            _converse.api.trigger('chatBoxViewPortCaclulateWhenResize');
             _converse.api.trigger('chatBoxViewsInitialized');
         });
 

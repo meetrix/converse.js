@@ -48914,6 +48914,10 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_3__["default"].plugins
        * @example _converse.api.listen.on('chatBoxViewsInitialized', () => { ... });
        */
 
+      _converse.api.trigger('chatBoxViewPortCalculate');
+
+      _converse.api.trigger('chatBoxViewPortCaclulateWhenResize');
+
       _converse.api.trigger('chatBoxViewsInitialized');
     });
 
@@ -51250,6 +51254,19 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
         view.controlbox_pane.remove();
         delete view.controlbox_pane;
       }
+    });
+
+    _converse.api.listen.on('chatBoxViewPortCalculate', () => {
+      const vh = window.innerHeight * 0.01;
+      document.documentElement.style.setProperty('--vh', `${vh}px`);
+    });
+
+    _converse.api.listen.on('chatBoxViewPortCaclulateWhenResize', () => {
+      console.log('resize');
+      window.addEventListener('resize', () => {
+        const vh = window.innerHeight * 0.01;
+        document.documentElement.style.setProperty('--vh', `${vh}px`);
+      });
     });
     /************************ BEGIN API ************************/
 
