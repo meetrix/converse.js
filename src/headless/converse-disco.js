@@ -311,7 +311,7 @@ converse.plugins.add('converse-disco', {
             _converse.api.trigger('discoInitialized');
         }
 
-        _converse.api.listen.on('sessionInitialized', initStreamFeatures);
+        _converse.api.listen.on('setUserJID', initStreamFeatures);
         _converse.api.listen.on('reconnected', initializeDisco);
         _converse.api.listen.on('connected', initializeDisco);
 
@@ -362,7 +362,7 @@ converse.plugins.add('converse-disco', {
         }
 
 
-        _.extend(_converse.api, {
+        Object.assign(_converse.api, {
             /**
              * The XEP-0030 service discovery API
              *

@@ -211,6 +211,10 @@ converse.plugins.add('converse-roster', {
             },
 
             setVCard () {
+                if (!_converse.vcards) {
+                    // VCards aren't supported
+                    return;
+                }
                 const jid = this.get('jid');
                 this.vcard = _converse.vcards.findWhere({'jid': jid}) || _converse.vcards.create({'jid': jid});
             },
@@ -246,9 +250,6 @@ converse.plugins.add('converse-roster', {
                     'jid': bare_jid,
                     'user_id': Strophe.getNodeFromJid(jid)
                 }, attributes));
-
-                this.setChatBox();
-
                 /**
                  * When a contact's presence status has changed.
                  * The presence status is either `online`, `offline`, `dnd`, `away` or `xa`.
@@ -260,20 +261,22 @@ converse.plugins.add('converse-roster', {
                 this.presence.on('change:show', () => this.trigger('presenceChanged'));
             },
 
-            setChatBox (chatbox=null) {
-                chatbox = chatbox || _converse.chatboxes.get(this.get('jid'));
-                if (chatbox) {
-                    this.chatbox = chatbox;
-                    this.chatbox.on('change:hidden', this.render, this);
+            getDisplayName () {
+                if (this.get('nickname')) {
+                    return this.get('nickname');
+                } else if (this.vcard) {
+                    return this.vcard.getDisplayName();
+                } else {
+                    return this.get('jid');
                 }
             },
 
-            getDisplayName () {
-                return this.get('nickname') || this.vcard.get('nickname') || this.vcard.get('fullname') || this.get('jid');
-            },
-
             getFullname () {
-                return this.vcard.get('fullname');
+                if (this.vcard) {
+                    return this.vcard.get('fullname');
+                } else {
+                    return this.get('jid');
+                }
             },
 
             /**
@@ -877,30 +880,24 @@ converse.plugins.add('converse-roster', {
 
 
         /********** Event Handlers *************/
-        function addRelatedContactToChatbox (chatbox, contact) {
-            if (!_.isUndefined(contact)) {
-                chatbox.contact = contact;
-                chatbox.trigger('contactAdded', contact);
-            }
-        }
-
         function updateUnreadCounter (chatbox) {
             const contact = _converse.roster.findWhere({'jid': chatbox.get('jid')});
             if (!_.isUndefined(contact)) {
                 contact.save({'num_unread': chatbox.get('num_unread')});
             }
         }
-        _converse.api.listen.on('chatBoxesInitialized', () => {
-            _converse.chatboxes.on('change:num_unread', updateUnreadCounter)
 
-            _converse.chatboxes.on('add', async chatbox => {
-                await _converse.api.waitUntil('rosterContactsFetched');
-                addRelatedContactToChatbox(chatbox, _converse.roster.findWhere({'jid': chatbox.get('jid')}));
+        _converse.api.listen.on('chatBoxesInitialized', () => {
+            _converse.chatboxes.on('change:num_unread', updateUnreadCounter);
+
+            _converse.chatboxes.on('add', chatbox => {
+                if (chatbox.get('type') === _converse.PRIVATE_CHAT_TYPE) {
+                    chatbox.setRosterContact(chatbox.get('jid'));
+                }
             });
         });
 
         _converse.api.listen.on('beforeTearDown', _converse.unregisterPresenceHandler());
-
 
         _converse.api.waitUntil('rosterContactsFetched').then(() => {
             _converse.roster.on('add', (contact) => {
@@ -909,7 +906,7 @@ converse.plugins.add('converse-roster', {
                  */
                 const chatbox = _converse.chatboxes.findWhere({'jid': contact.get('jid')});
                 if (chatbox) {
-                    addRelatedContactToChatbox(chatbox, contact);
+                    chatbox.setRosterContact(contact.get('jid'));
                 }
             });
         });
@@ -971,7 +968,7 @@ converse.plugins.add('converse-roster', {
         /************************ API ************************/
         // API methods only available to plugins
 
-        _.extend(_converse.api, {
+        Object.assign(_converse.api, {
             /**
              * @namespace _converse.api.contacts
              * @memberOf _converse.api
@@ -983,20 +980,20 @@ converse.plugins.add('converse-roster', {
                  * @method _converse.api.contacts.get
                  * @params {(string[]|string)} jid|jids The JID or JIDs of
                  *      the contacts to be returned.
-                 * @returns {(RosterContact[]|RosterContact)} [Backbone.Model](http://backbonejs.org/#Model)
-                 *      (or an array of them) representing the contact.
+                 * @returns {promise} Promise which resolves with the
+                 *  _converse.RosterContact (or an array of them) representing the contact.
                  *
                  * @example
                  * // Fetch a single contact
                  * _converse.api.listen.on('rosterContactsFetched', function () {
-                 *     const contact = _converse.api.contacts.get('buddy@example.com')
+                 *     const contact = await _converse.api.contacts.get('buddy@example.com')
                  *     // ...
                  * });
                  *
                  * @example
                  * // To get multiple contacts, pass in an array of JIDs:
                  * _converse.api.listen.on('rosterContactsFetched', function () {
-                 *     const contacts = _converse.api.contacts.get(
+                 *     const contacts = await _converse.api.contacts.get(
                  *         ['buddy1@example.com', 'buddy2@example.com']
                  *     )
                  *     // ...
@@ -1005,14 +1002,13 @@ converse.plugins.add('converse-roster', {
                  * @example
                  * // To return all contacts, simply call ``get`` without any parameters:
                  * _converse.api.listen.on('rosterContactsFetched', function () {
-                 *     const contacts = _converse.api.contacts.get();
+                 *     const contacts = await _converse.api.contacts.get();
                  *     // ...
                  * });
                  */
-                'get' (jids) {
-                    const _getter = function (jid) {
-                        return _converse.roster.get(Strophe.getBareJidFromJid(jid)) || null;
-                    };
+                async get (jids) {
+                    await _converse.api.waitUntil('rosterContactsFetched');
+                    const _getter = jid => _converse.roster.get(Strophe.getBareJidFromJid(jid));
                     if (_.isUndefined(jids)) {
                         jids = _converse.roster.pluck('jid');
                     } else if (_.isString(jids)) {

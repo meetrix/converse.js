@@ -10,6 +10,7 @@ import converse from "@converse/headless/converse-core";
 import tpl_alert_modal from "templates/alert_modal.html";
 
 const { Strophe, Backbone, _ } = converse.env;
+const u = converse.env.utils;
 
 
 converse.plugins.add('converse-modal', {
@@ -74,7 +75,7 @@ converse.plugins.add('converse-modal', {
         // We extend the default converse.js API to add methods specific to MUC chat rooms.
         let alert 
 
-        _.extend(_converse.api, {
+        Object.assign(_converse.api, {
             'alert': {
                 'show' (type, title, messages) {
                     if (_.isString(messages)) {

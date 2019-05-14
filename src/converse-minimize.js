@@ -68,6 +68,14 @@ converse.plugins.add('converse-minimize', {
                     'time_minimized': moment().format()
                 });
             },
+
+            maybeShow (force) {
+                if (!force && this.get('minimized')) {
+                    // Must return the chatbox
+                    return this;
+                }
+                return this.__super__.maybeShow.apply(this, arguments);
+            }
         },
 
         ChatBoxView: {
@@ -219,13 +227,6 @@ converse.plugins.add('converse-minimize', {
             }
         },
 
-        ChatBoxes: {
-            chatBoxMayBeShown (chatbox) {
-                return this.__super__.chatBoxMayBeShown.apply(this, arguments) &&
-                       !chatbox.get('minimized');
-            },
-        },
-
         ChatBoxViews: {
             getChatBoxWidth (view) {
                 if (!view.model.get('minimized') && u.isVisible(view.el)) {
@@ -347,7 +348,7 @@ converse.plugins.add('converse-minimize', {
             },
 
             render () {
-                const data = _.extend(
+                const data = Object.assign(
                     this.model.toJSON(),
                     { 'tooltip': __('Click to restore this chat') }
                 );
@@ -509,7 +510,7 @@ converse.plugins.add('converse-minimize', {
 
             render () {
                 this.el.innerHTML = tpl_toggle_chats(
-                    _.extend(this.model.toJSON(), {
+                    Object.assign(this.model.toJSON(), {
                         'Minimized': __('Minimized')
                     })
                 );

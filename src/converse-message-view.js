@@ -67,7 +67,7 @@ converse.plugins.add('converse-message-view', {
 
         _converse.MessageVersionsModal = _converse.BootstrapModal.extend({
             toHTML () {
-                return tpl_message_versions_modal(_.extend(
+                return tpl_message_versions_modal(Object.assign(
                     this.model.toJSON(), {
                     '__': __
                 }));
@@ -81,9 +81,14 @@ converse.plugins.add('converse-message-view', {
             },
 
             initialize () {
+                this.debouncedRender = _.debounce(this.render, 50);
                 if (this.model.vcard) {
-                    this.model.vcard.on('change', this.render, this);
+                    this.model.vcard.on('change', this.debouncedRender, this);
                 }
+                this.model.on('rosterContactAdded', () => {
+                    this.model.contact.on('change:nickname', this.debouncedRender, this);
+                    this.debouncedRender();
+                });
                 this.model.on('change', this.onChanged, this);
                 this.model.on('destroy', this.remove, this);
             },
@@ -119,7 +124,7 @@ converse.plugins.add('converse-message-view', {
                 }
                 if (_.filter(['correcting', 'message', 'type', 'upload', 'received'],
                              prop => Object.prototype.hasOwnProperty.call(this.model.changed, prop)).length) {
-                    await this.render();
+                    await this.debouncedRender();
                 }
                 if (edited) {
                     this.onMessageEdited();
@@ -149,7 +154,7 @@ converse.plugins.add('converse-message-view', {
                       roles = role ? role.split(',') : [];
 
                 const msg = u.stringToElement(tpl_message(
-                    _.extend(
+                    Object.assign(
                         this.model.toJSON(), {
                         '__': __,
                         'is_me_message': is_me_message,
@@ -198,7 +203,7 @@ converse.plugins.add('converse-message-view', {
             renderErrorMessage () {
                 const moment_time = moment(this.model.get('time')),
                       msg = u.stringToElement(
-                        tpl_info(_.extend(this.model.toJSON(), {
+                        tpl_info(Object.assign(this.model.toJSON(), {
                             'extra_classes': 'chat-error',
                             'isodate': moment_time.format()
                         })));
@@ -239,7 +244,7 @@ converse.plugins.add('converse-message-view', {
 
             renderFileUploadProgresBar () {
                 const msg = u.stringToElement(tpl_file_progress(
-                    _.extend(this.model.toJSON(), {
+                    Object.assign(this.model.toJSON(), {
                         '__': __,
                         'filename': this.model.file.name,
                         'filesize': filesize(this.model.file.size)

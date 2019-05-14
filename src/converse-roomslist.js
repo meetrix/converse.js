@@ -113,7 +113,7 @@ converse.plugins.add('converse-roomslist', {
 
             toHTML () {
                 return tpl_rooms_list_item(
-                    _.extend(this.model.toJSON(), {
+                    Object.assign(this.model.toJSON(), {
                         // XXX: By the time this renders, the _converse.bookmarks
                         // collection should already exist if bookmarks are
                         // supported by the XMPP server. So we can use it
@@ -219,7 +219,7 @@ converse.plugins.add('converse-roomslist', {
                 const data = {
                     'name': name || Strophe.unescapeNode(Strophe.getNodeFromJid(jid)) || jid
                 }
-                await _converse.api.rooms.open(jid, data);
+                await _converse.api.rooms.open(jid, data, true);
                 _converse.api.chatviews.get(jid).focus();
             },
 

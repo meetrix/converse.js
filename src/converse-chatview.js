@@ -102,7 +102,7 @@ converse.plugins.add('converse-chatview', {
 
             toHTML () {
                 return tpl_emojis(
-                    _.extend(
+                    Object.assign(
                         this.model.toJSON(), {
                             '_': _,
                             'transform': u.getEmojiRenderer(_converse),
@@ -161,16 +161,27 @@ converse.plugins.add('converse-chatview', {
         _converse.ChatBoxHeading = _converse.ViewWithAvatar.extend({
             initialize () {
                 this.model.on('change:status', this.onStatusMessageChanged, this);
-                this.model.vcard.on('change', this.render, this);
+
+                this.debouncedRender = _.debounce(this.render, 50);
+                if (this.model.vcard) {
+                    this.model.vcard.on('change', this.debouncedRender, this);
+                }
+                this.model.on('rosterContactAdded', () => {
+                    this.model.contact.on('change:nickname', this.debouncedRender, this);
+                    this.debouncedRender();
+                });
             },
 
             render () {
+                const vcard = _.get(this.model, 'vcard'),
+                      vcard_json = vcard ? vcard.toJSON() : {};
                 this.el.innerHTML = tpl_chatbox_head(
-                    _.extend(
-                        this.model.vcard.toJSON(),
+                    Object.assign(
+                        vcard_json,
                         this.model.toJSON(),
                         { '_converse': _converse,
-                          'info_close': __('Close this chat box')
+                          'info_close': __('Close this chat box'),
+                          'display_name': this.model.getDisplayName()
                         }
                     )
                 );
@@ -179,7 +190,7 @@ converse.plugins.add('converse-chatview', {
             },
 
             onStatusMessageChanged (item) {
-                this.render();
+                this.debouncedRender();
                 /**
                  * When a contact's custom status message has changed.
                  * @event _converse#contactStatusMessageChanged
@@ -206,7 +217,7 @@ converse.plugins.add('converse-chatview', {
 
             initialize () {
                 _converse.BootstrapModal.prototype.initialize.apply(this, arguments);
-                this.model.on('contactAdded', this.registerContactEventHandlers, this);
+                this.model.on('rosterContactAdded', this.registerContactEventHandlers, this);
                 this.model.on('change', this.render, this);
                 this.registerContactEventHandlers();
                 /**
@@ -219,9 +230,11 @@ converse.plugins.add('converse-chatview', {
             },
 
             toHTML () {
-                return tpl_user_details_modal(_.extend(
+                const vcard = _.get(this.model, 'vcard'),
+                      vcard_json = vcard ? vcard.toJSON() : {};
+                return tpl_user_details_modal(Object.assign(
                     this.model.toJSON(),
-                    this.model.vcard.toJSON(), {
+                    vcard_json, {
                     '_': _,
                     '__': __,
                     'view': this,
@@ -356,7 +369,7 @@ converse.plugins.add('converse-chatview', {
                 // XXX: Is this still needed?
                 this.el.setAttribute('id', this.model.get('box_id'));
                 this.el.innerHTML = tpl_chatbox(
-                    _.extend(this.model.toJSON(), {
+                    Object.assign(this.model.toJSON(), {
                             'unread_msgs': __('You have unread messages')
                         }
                     ));
@@ -395,9 +408,9 @@ converse.plugins.add('converse-chatview', {
                 } else {
                     placeholder = __('Message');
                 }
-                const form_container = this.el.querySelector('.message-form-container');
+                const form_container = this.el.querySelector('.bottom-panel');
                 form_container.innerHTML = tpl_chatbox_message_form(
-                    _.extend(this.model.toJSON(), {
+                    Object.assign(this.model.toJSON(), {
                         'hint_value': _.get(this.el.querySelector('.spoiler-hint'), 'value'),
                         'label_message': placeholder,
                         'label_send': __('Send'),
@@ -503,7 +516,7 @@ converse.plugins.add('converse-chatview', {
                 } else {
                     label_toggle_spoiler = __('Click to write your message as a spoiler');
                 }
-                return _.extend(options || {}, {
+                return Object.assign(options || {}, {
                     'label_clear': __('Clear all messages'),
                     'tooltip_insert_smiley': __('Insert emojis'),
                     'tooltip_start_call': __('Start a call'),
@@ -915,6 +928,7 @@ converse.plugins.add('converse-chatview', {
                         ['Sorry, the connection has been lost, and your message could not be sent'],
                         'error'
                     );
+                    _converse.reconnect();
                     return;
                 }
                 let spoiler_hint, hint_el = {};
@@ -1278,7 +1292,7 @@ converse.plugins.add('converse-chatview', {
                 this.focus();
             },
 
-            _show (f) {
+            _show () {
                 /* Inner show method that gets debounced */
                 if (u.isVisible(this.el)) {
                     this.focus();
@@ -1370,10 +1384,10 @@ converse.plugins.add('converse-chatview', {
         });
 
         _converse.api.listen.on('chatBoxViewsInitialized', () => {
-            const that = _converse.chatboxviews;
+            const views = _converse.chatboxviews;
             _converse.chatboxes.on('add', item => {
-                if (!that.get(item.get('id')) && item.get('type') === _converse.PRIVATE_CHAT_TYPE) {
-                    that.add(item.get('id'), new _converse.ChatBoxView({model: item}));
+                if (!views.get(item.get('id')) && item.get('type') === _converse.PRIVATE_CHAT_TYPE) {
+                    views.add(item.get('id'), new _converse.ChatBoxView({model: item}));
                 }
             });
         });
@@ -1384,7 +1398,7 @@ converse.plugins.add('converse-chatview', {
         });
 
         /************************ BEGIN API ************************/
-        _.extend(_converse.api, {
+        Object.assign(_converse.api, {
             /**
              * The "chatview" namespace groups methods pertaining to views
              * for one-on-one chats.
@@ -1411,7 +1425,7 @@ converse.plugins.add('converse-chatview', {
                 'get' (jids) {
                     if (_.isUndefined(jids)) {
                         _converse.log(
-                            "chats.create: You need to provide at least one JID",
+                            "chatviews.get: You need to provide at least one JID",
                             Strophe.LogLevel.ERROR
                         );
                         return null;
