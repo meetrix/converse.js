@@ -53989,6 +53989,7 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
       },
 
       toHTML() {
+        console.log('config', this.model.get('roomConfiguration').roomdesc);
         let placeholder = `# e.g link solutions`;
 
         if (!_converse.locked_muc_domain) {
@@ -54112,7 +54113,7 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
         // const invitedUsers = []
 
 
-        if (data.users.length > 0) {
+        if (data.users && data.users.length && data.users.length > 0) {
           data.users.forEach(o => {
             let user = o; // let tempUser = o;
 
@@ -54203,7 +54204,8 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
         'dragover .chat-textarea': 'onDragOver',
         'drop .chat-textarea': 'onDrop',
         'click .top-toolbar-video-cal': 'videoCall',
-        'keyup .chatapp-filter-all': 'channelContentSearch'
+        'keyup .chatapp-filter-all': 'channelContentSearch',
+        'click .add-message': 'openFileUploadModel'
       },
 
       initialize() {
@@ -54211,6 +54213,8 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
         this.model.messages.on('add', this.onMessageAdded, this);
         this.model.messages.on('rendered', this.scrollDown, this);
         this.model.on('change:affiliation', this.renderHeading, this);
+        this.model.on('change:name', this.renderHeading, this);
+        this.model.on('change:description', this.renderHeading, this);
         this.model.on('change:connection_status', this.afterConnected, this);
         this.model.on('change:jid', this.renderHeading, this);
         this.model.on('change:name', this.renderHeading, this);
@@ -54232,6 +54236,11 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
         this.registerHandlers();
         this.enterRoom();
         this.disableChat();
+      },
+
+      openFileUploadModel(ev) {
+        ev.preventDefault();
+        console.log('openfire upload');
       },
 
       async enterRoom(ev) {
@@ -55005,6 +55014,7 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
         const container_el = this.el.querySelector('.chatroom-body'); // _.each(container_el.querySelectorAll('.chatroom-form-container'), u.removeElement);
         // _.each(container_el.children, u.hideElement);
 
+        console.log();
         const fields = stanza.querySelectorAll('field');
         var roomConfiguration = {};
 
@@ -59168,8 +59178,7 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_1__["default"].plugins
        * @param { HTMLElement } form - The HTML form that was submitted
        */
       submitRegistrationForm(form) {
-        console.log('submit registation'); //<-----MDEV
-
+        //<-----MDEV
         if (!this.validationRegistationForm(form)) {
           return;
         } //-------->
@@ -93805,7 +93814,7 @@ var __t, __p = '', __e = _.escape, __j = Array.prototype.join;
 function print() { __p += __j.call(arguments, '') }
 __p += '<!-- src/templates/chatbox_message_form.html -->\n<div class="message-form-container">\n<div class="new-msgs-indicator hidden">▼ ' +
 __e( o.unread_msgs ) +
-' ▼</div>\n<form class="sendXMPPMessage">\n    <div class="row">\n        <div class="col-sm-auto" >\n            <a class="add-message m-auto">\n                <i class="fa fa-plus fa-2x"></i>\n            </a>\n        </div>\n        <div class="col-sm-8 message-input-area">\n            <input type="text" placeholder="' +
+' ▼</div>\n<form class="sendXMPPMessage">\n    <div class="row">\n        <div class="col-sm-auto" >\n            <a href="#" class="add-message m-auto">\n                <i class="fa fa-plus fa-2x"></i>\n            </a>\n        </div>\n        <div class="col-sm-8 message-input-area">\n            <input type="text" placeholder="' +
 ((__t = (o.label_spoiler_hint)) == null ? '' : __t) +
 '" value="' +
 ((__t = ( o.hint_value )) == null ? '' : __t) +
@@ -93984,15 +93993,15 @@ __e(o.__('Names must be lowercase without spaces or period, and shorter than 22 
 __e(o.__('Purpose')) +
 '&nbsp;(' +
 __e(o.__('Optional')) +
-')</label>\n                          <input type="text" required="required" name="purpose" class="form-control" value=' +
+')</label>\n                          <input type="text" required="required" name="purpose" class="form-control" value="' +
 __e(o.roomdesc) +
-' />\n                          <span>' +
+'" />\n                          <span>' +
 __e(o.__("What's the channel about?")) +
-'</span>\n                  </div>\n                  <div class="form-group channel-invite">\n                      <label for="users">' +
+'</span>\n                  </div>\n                \n                  <div class="form-group channel-invite">\n                      <label for="users">' +
 __e(o.__('Invite Users')) +
 '</label>\n                      <select class="form-control channel-users-invite-list" name="users" multiple="multiple"></select>\n                      <span>' +
 __e(o.__('Name must be a lowercase,without space, period, and shorter than 22 characters')) +
-'</span>\n                  </div>\n                  <input type="button" class="btn cancel-btn" data-dismiss="modal" aria-label="Close" name="cancel" value="' +
+'</span>\n                  </div> \n                  <input type="button" class="btn cancel-btn" data-dismiss="modal" aria-label="Close" name="cancel" value="' +
 __e(o.__('Cancel')) +
 '"/>\n                  <input type="submit" class="btn create-btn" name="join" value="' +
 __e(o.__('Update')) +
@@ -94405,7 +94414,7 @@ __e(o.info_details) +
 __e(o.room_description) +
 '">' +
 __e(o.room_description) +
-'</span>\n                                </li>\n                            </ul>\n                        </div>\n                    </div>\n                    </div>\n                <div class="room-controls right-flex">\n                    <ul class="top-toolbar-menu">\n                    </ul>\n                    <div class="chatbox-buttons-custom">\n                        <a class="chatbox-btn close-chatbox-button fa fa-sign-out-alt" title="' +
+'</span>\n                                </li>\n                            </ul>\n                        </div>\n                    </div>\n                    </div>\n                <div class="room-controls right-flex">\n                    <ul class="top-toolbar-menu">\n                    </ul>\n                    <div class="chatbox-buttons-custom">\n                        <a class="chatbox-btn close-chatbox-button fa fa-times" title="' +
 __e(o.info_close) +
 '"></a>\n                        <!-- ';
  if (o.affiliation == 'owner') { ;

@@ -41,14 +41,15 @@
                   </div>
                   <div class="form-group channel-about">
                           <label for="purpose">{{{o.__('Purpose')}}}&nbsp;({{{o.__('Optional')}}})</label>
-                          <input type="text" required="required" name="purpose" class="form-control" value={{{o.roomdesc}}} />
+                          <input type="text" required="required" name="purpose" class="form-control" value="{{{o.roomdesc}}}" />
                           <span>{{{o.__("What's the channel about?")}}}</span>
                   </div>
+                
                   <div class="form-group channel-invite">
                       <label for="users">{{{o.__('Invite Users')}}}</label>
                       <select class="form-control channel-users-invite-list" name="users" multiple="multiple"></select>
                       <span>{{{o.__('Name must be a lowercase,without space, period, and shorter than 22 characters')}}}</span>
-                  </div>
+                  </div> 
                   <input type="button" class="btn cancel-btn" data-dismiss="modal" aria-label="Close" name="cancel" value="{{{o.__('Cancel')}}}"/>
                   <input type="submit" class="btn create-btn" name="join" value="{{{o.__('Update')}}}"/>
               </form>

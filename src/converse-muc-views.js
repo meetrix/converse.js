@@ -536,6 +536,7 @@ converse.plugins.add('converse-muc-views', {
             },
 
             toHTML () {
+                console.log('config',this.model.get('roomConfiguration').roomdesc)
                 let placeholder = `# e.g link solutions`;
                 if (!_converse.locked_muc_domain) {
                     const muc_domain = this.model.get('muc_domain') || _converse.muc_domain;
@@ -545,7 +546,7 @@ converse.plugins.add('converse-muc-views', {
                     '__': _converse.__,
                     '_converse': _converse,
                     'label_room_address': _converse.muc_domain ? __('Channel Name') :  __('Channel Address'),
-                    'chatroom_placeholder': placeholder
+                    'chatroom_placeholder': placeholder,
                 },this.model.get('roomConfiguration')));
             },
 
@@ -645,7 +646,7 @@ converse.plugins.add('converse-muc-views', {
                 //    }
                 // })
                 // const invitedUsers = []
-                if (data.users.length > 0 ) {
+                if (data.users && data.users.length && data.users.length > 0 ) {
                     data.users.forEach(o => {
                         let user = o;
                         // let tempUser = o;
@@ -735,7 +736,7 @@ converse.plugins.add('converse-muc-views', {
                 'drop .chat-textarea': 'onDrop',
                 'click .top-toolbar-video-cal': 'videoCall',
                 'keyup .chatapp-filter-all': 'channelContentSearch',
-                
+                'click .add-message': 'openFileUploadModel',
             },
 
             initialize () {
@@ -745,6 +746,8 @@ converse.plugins.add('converse-muc-views', {
                 this.model.messages.on('rendered', this.scrollDown, this);
 
                 this.model.on('change:affiliation', this.renderHeading, this);
+                this.model.on('change:name', this.renderHeading, this);
+                this.model.on('change:description', this.renderHeading, this);
                 this.model.on('change:connection_status', this.afterConnected, this);
                 this.model.on('change:jid', this.renderHeading, this);
                 this.model.on('change:name', this.renderHeading, this);
@@ -768,7 +771,10 @@ converse.plugins.add('converse-muc-views', {
                 this.enterRoom();
                 this.disableChat()
             },
-
+            openFileUploadModel(ev){
+                ev.preventDefault();
+                console.log('openfire upload')
+            },
             async enterRoom (ev) {
                 if (ev) { ev.preventDefault(); }
                 if (this.model.get('connection_status') !==  converse.ROOMSTATUS.ENTERED) {
@@ -1474,6 +1480,7 @@ converse.plugins.add('converse-muc-views', {
                 const container_el = this.el.querySelector('.chatroom-body');
                 // _.each(container_el.querySelectorAll('.chatroom-form-container'), u.removeElement);
                 // _.each(container_el.children, u.hideElement);
+                console.log()
                 const fields = stanza.querySelectorAll('field')
                 var roomConfiguration = {};
                 _.each(fields, field => {
