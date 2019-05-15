@@ -287,7 +287,7 @@ converse.plugins.add('converse-register', {
             },
             //<----MDEV
             registerFieldTips(){
-                this.el.querySelector('.input-group-prepend').insertAdjacentHTML(
+                this.el.querySelector('input[name=username]').insertAdjacentHTML(
                     'afterend',
                     '<p>characters A-Z, a-z and 0-9</p>'
                     

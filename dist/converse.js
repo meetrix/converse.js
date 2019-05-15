@@ -58886,7 +58886,7 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_1__["default"].plugins
 
       //<----MDEV
       registerFieldTips() {
-        this.el.querySelector('.input-group-prepend').insertAdjacentHTML('afterend', '<p>characters A-Z, a-z and 0-9</p>');
+        this.el.querySelector('input[name=username]').insertAdjacentHTML('afterend', '<p>characters A-Z, a-z and 0-9</p>');
         this.el.querySelector('input[name=name]').insertAdjacentHTML('afterend', '<p>characters A-Z, a-z and space</p>');
         this.el.querySelector('input[name=password]').insertAdjacentHTML('afterend', '<p>characters A-Z, a-z, 0-9,[!@#$%^&*], more than 8</p>');
       },
@@ -95063,7 +95063,7 @@ __p += '\n    <label>\n        ' +
 __e(o.label) +
 '\n    </label>\n    ';
  } ;
-__p += '\n    <div class="input-group">\n        <div class="input-group-prepend">\n            <input name="' +
+__p += '\n    <div class="input-group">\n        <!-- <div class="input-group-prepend"> -->\n            <input class="form-control" name="' +
 __e(o.name) +
 '" type="' +
 __e(o.type) +
@@ -95077,11 +95077,11 @@ __p += '\n                ';
  if (o.required) { ;
 __p += ' required="required" ';
  } ;
-__p += ' />\n            <div class="input-group-text col" title="' +
+__p += ' />\n            <!-- <div class="input-group-text col" title="' +
 __e(o.domain) +
 '">' +
 __e(o.domain) +
-'</div>\n        </div>\n    </div>\n</div>\n';
+'</div> -->\n        <!-- </div> -->\n    </div>\n</div>\n';
 return __p
 };
 
