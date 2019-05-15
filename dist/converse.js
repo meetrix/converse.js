@@ -52275,11 +52275,14 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _converse_headless_utils_emoji__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! @converse/headless/utils/emoji */ "./src/headless/utils/emoji.js");
 /* harmony import */ var xss__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! xss */ "./node_modules/xss/dist/xss.js");
 /* harmony import */ var xss__WEBPACK_IMPORTED_MODULE_10___default = /*#__PURE__*/__webpack_require__.n(xss__WEBPACK_IMPORTED_MODULE_10__);
+/* harmony import */ var moment__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! moment */ "./node_modules/moment/moment.js");
+/* harmony import */ var moment__WEBPACK_IMPORTED_MODULE_11___default = /*#__PURE__*/__webpack_require__.n(moment__WEBPACK_IMPORTED_MODULE_11__);
 // Converse.js
 // https://conversejs.org
 //
 // Copyright (c) 2013-2019, the Converse.js developers
 // Licensed under the Mozilla Public License (MPLv2)
+
 
 
 
@@ -52432,6 +52435,12 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_1__["default"].plugins
               moment_time = moment(this.model.get('time')),
               role = this.model.vcard ? this.model.vcard.get('role') : null,
               roles = role ? role.split(',') : [];
+        let username = this.model.getDisplayName();
+
+        if (_.includes(username, '@')) {
+          username = username.split('@')[0];
+        }
+
         const msg = _converse_headless_utils_emoji__WEBPACK_IMPORTED_MODULE_9__["default"].stringToElement(templates_message_html__WEBPACK_IMPORTED_MODULE_7___default()(_.extend(this.model.toJSON(), {
           '__': __,
           'is_me_message': is_me_message,
@@ -52440,7 +52449,7 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_1__["default"].plugins
           'time': moment_time.format(),
           'extra_classes': this.getExtraMessageClasses(),
           'label_show': __('Show more'),
-          'username': this.model.getDisplayName()
+          'username': username
         })));
         const url = this.model.get('oob_url');
 
@@ -52485,8 +52494,12 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_1__["default"].plugins
 
       renderChatStateNotification() {
         let text;
-        const from = this.model.get('from'),
-              name = this.model.getDisplayName();
+        const from = this.model.get('from');
+        let name = this.model.getDisplayName();
+
+        if (_.includes(name, '@')) {
+          name = name.split('@')[0];
+        }
 
         if (this.model.get('chat_state') === _converse.COMPOSING) {
           if (this.model.get('sender') === 'me') {
@@ -54221,8 +54234,7 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
         'dragover .chat-textarea': 'onDragOver',
         'drop .chat-textarea': 'onDrop',
         'click .top-toolbar-video-cal': 'videoCall',
-        'keyup .chatapp-filter-all': 'channelContentSearch',
-        'click .add-message': 'openFileUploadModel'
+        'keyup .chatapp-filter-all': 'channelContentSearch'
       },
 
       initialize() {
@@ -54253,11 +54265,6 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
         this.registerHandlers();
         this.enterRoom();
         this.disableChat();
-      },
-
-      openFileUploadModel(ev) {
-        ev.preventDefault();
-        console.log('openfire upload');
       },
 
       async enterRoom(ev) {
@@ -55791,6 +55798,8 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
         }
 
         const show = this.model.get('show');
+        console.log(this.model.toJSON().jid);
+        const occupant_name = this.model.toJSON().jid.split('@')[0];
         return templates_occupant_html__WEBPACK_IMPORTED_MODULE_24___default()(_.extend({
           '_': _,
           'jid': '',
@@ -55805,7 +55814,8 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
           'label_visitor': __('Visitor'),
           'label_owner': __('Owner'),
           'label_member': __('Member'),
-          'label_admin': __('Admin')
+          'label_admin': __('Admin'),
+          'occupant_name': occupant_name
         }, this.model.toJSON()));
       },
 
@@ -55827,6 +55837,7 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
         this.chatroomview = this.model.chatroomview;
         this.chatroomview.model.on('change:affiliation', this.renderInviteWidget, this);
         this.chatroomview.model.on('change', this.renderUserDetail, this);
+        this.model.on('change', this.renderUserDetail, this);
         this.chatroomview.model.features.on('change:open', this.renderInviteWidget, this);
         this.chatroomview.model.features.on('change', this.renderRoomFeatures, this);
         this.render();
@@ -58907,8 +58918,6 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_1__["default"].plugins
          * Depending on the available input fields, we delegate to
          * other methods.
          */
-        console.log('form submission');
-
         if (ev && ev.preventDefault) {
           ev.preventDefault();
         }
@@ -95580,8 +95589,10 @@ __e(o.image) +
 __e(o.show) +
 ' circle" title="' +
 __e(o.hint_show) +
-'"></div>\n        </div>\n        <div class="col occupant-nick-badge">\n            <span class="occupant-nick">' +
+'"></div>\n        </div>\n        <div class="col occupant-nick-badge">\n           <!-- <span class="occupant-nick">' +
 __e(o.nick || o.jid) +
+'</span> -->\n           <span class="occupant-nick">' +
+__e(o.occupant_name) +
 '</span>\n            <span class="occupant-badges">\n                ';
  if (o.affiliation === "owner") { ;
 __p += '\n                    <span class="badge badge-groupchat">' +

@@ -15,6 +15,7 @@ import tpl_message from "templates/message.html";
 import tpl_message_versions_modal from "templates/message_versions_modal.html";
 import u from "@converse/headless/utils/emoji";
 import xss from "xss";
+import { localeData } from "moment";
 
 const { Backbone, _, moment } = converse.env;
 
@@ -149,7 +150,10 @@ converse.plugins.add('converse-message-view', {
                       moment_time = moment(this.model.get('time')),
                       role = this.model.vcard ? this.model.vcard.get('role') : null,
                       roles = role ? role.split(',') : [];
-
+                let username = this.model.getDisplayName();
+                if(_.includes(username,'@')){
+                    username = username.split('@')[0]
+                }
                 const msg = u.stringToElement(tpl_message(
                     _.extend(
                         this.model.toJSON(), {
@@ -160,7 +164,7 @@ converse.plugins.add('converse-message-view', {
                         'time': moment_time.format(),
                         'extra_classes': this.getExtraMessageClasses(),
                         'label_show': __('Show more'),
-                        'username': this.model.getDisplayName()
+                        'username': username
                     })
                 ));
 
@@ -209,9 +213,11 @@ converse.plugins.add('converse-message-view', {
 
             renderChatStateNotification () {
                 let text;
-                const from = this.model.get('from'),
-                      name = this.model.getDisplayName();
-
+                const from = this.model.get('from');
+                let  name = this.model.getDisplayName();
+                    if(_.includes(name, '@')){
+                        name = name.split('@')[0]
+                    }
                 if (this.model.get('chat_state') === _converse.COMPOSING) {
                     if (this.model.get('sender') === 'me') {
                         text = __('Typing from another device');

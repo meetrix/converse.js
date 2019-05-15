@@ -736,7 +736,6 @@ converse.plugins.add('converse-muc-views', {
                 'drop .chat-textarea': 'onDrop',
                 'click .top-toolbar-video-cal': 'videoCall',
                 'keyup .chatapp-filter-all': 'channelContentSearch',
-                'click .add-message': 'openFileUploadModel',
             },
 
             initialize () {
@@ -770,10 +769,6 @@ converse.plugins.add('converse-muc-views', {
                 this.registerHandlers();
                 this.enterRoom();
                 this.disableChat()
-            },
-            openFileUploadModel(ev){
-                ev.preventDefault();
-                console.log('openfire upload')
             },
             async enterRoom (ev) {
                 if (ev) { ev.preventDefault(); }
@@ -2190,6 +2185,8 @@ converse.plugins.add('converse-muc-views', {
                     }
                 }
                 const show = this.model.get('show');
+                console.log(this.model.toJSON().jid)
+                const occupant_name = this.model.toJSON().jid.split('@')[0]
                 return tpl_occupant(
                     _.extend(
                         { '_': _,
@@ -2205,7 +2202,8 @@ converse.plugins.add('converse-muc-views', {
                           'label_visitor': __('Visitor'),
                           'label_owner': __('Owner'),
                           'label_member': __('Member'),
-                          'label_admin': __('Admin')
+                          'label_admin': __('Admin'),
+                          'occupant_name':occupant_name,
                         }, this.model.toJSON())
                 );
             },
@@ -2229,6 +2227,7 @@ converse.plugins.add('converse-muc-views', {
                 this.chatroomview = this.model.chatroomview;
                 this.chatroomview.model.on('change:affiliation', this.renderInviteWidget, this);
                 this.chatroomview.model.on('change', this.renderUserDetail, this);
+                this.model.on('change', this.renderUserDetail, this)
                 this.chatroomview.model.features.on('change:open', this.renderInviteWidget, this);
                 this.chatroomview.model.features.on('change', this.renderRoomFeatures, this);
 

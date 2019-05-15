@@ -329,7 +329,6 @@ converse.plugins.add('converse-register', {
                  * Depending on the available input fields, we delegate to
                  * other methods.
                  */
-                console.log('form submission')
                 if (ev && ev.preventDefault) { ev.preventDefault(); }
                 if (_.isNull(ev.target.querySelector('input[name=domain]'))) {
                     this.submitRegistrationForm(ev.target);
