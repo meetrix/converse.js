@@ -53899,13 +53899,14 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
 
         _converse.roster.each(o => {
           let label = o.getDisplayName();
+          const jid = o.get('jid');
 
           if (_.includes(label, '@')) {
             label = label.split('@')[0];
           }
 
           const user = document.createElement('option');
-          user.setAttribute('value', o.getDisplayName());
+          user.setAttribute('value', jid);
           user.innerHTML = label;
           this.el.querySelector('.channel-users-invite-list').insertAdjacentElement('beforeend', user);
         }); //-------->
@@ -53995,7 +53996,7 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
 
             setTimeout(function () {
               _converse.api.roomviews.get(jid.toLowerCase()).model.directInvite(user, 'invite to the room');
-            }, 5000);
+            }, 10000);
           });
         } //-------->
 
@@ -54019,7 +54020,6 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
       },
 
       toHTML() {
-        console.log('config', this.model.get('roomConfiguration').roomdesc);
         let placeholder = `# e.g link solutions`;
 
         if (!_converse.locked_muc_domain) {
@@ -54036,37 +54036,32 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
         }, this.model.get('roomConfiguration')));
       },
 
-      afterRender() {
-        // this.el.addEventListener('shown.bs.modal', () => {
+      afterRender() {// this.el.addEventListener('shown.bs.modal', () => {
         //     this.el.querySelector('input[name="chatroom"]').focus();
         // }, false);
         //<-----  Mdev
-        const currentUSers = [];
-        this.model.get('model').occupants.each(o => {
-          let user = o.get('jid');
-
-          if (_.includes(user, '@')) {
-            user = user.split('@')[0];
-            currentUSers.push(user);
-          }
-        });
-
-        _converse.roster.each(o => {
-          let label = o.getDisplayName();
-
-          if (_.includes(label, '@')) {
-            label = label.split('@')[0];
-          }
-
-          if (!_.includes(currentUSers, label)) {
-            const user = document.createElement('option');
-            user.setAttribute('value', o.getDisplayName()); // user.setAttribute('selected',true)
-
-            user.innerHTML = label;
-            this.el.querySelector('.channel-users-invite-list').insertAdjacentElement('beforeend', user);
-          }
-        }); //-------->
-
+        //  const currentUSers = [];
+        //  this.model.get('model').occupants.each(o => {
+        //     let user = o.get('jid')
+        //     if(_.includes(user, '@')) {
+        //         user = user.split('@')[0];
+        //         currentUSers.push(user);
+        //     }
+        //  })
+        // _converse.roster.each(o => {
+        //     let label = o.getDisplayName()
+        //     if(_.includes(label, '@')) {
+        //         label = label.split('@')[0];
+        //     }
+        //     if(!_.includes(currentUSers, label)) {
+        //         const user = document.createElement('option')
+        //         user.setAttribute('value',o.getDisplayName())
+        //         // user.setAttribute('selected',true)
+        //         user.innerHTML = label
+        //         this.el.querySelector('.channel-users-invite-list').insertAdjacentElement('beforeend',user)
+        //     }
+        // })
+        //-------->
       },
 
       //<-----  Mdev
@@ -54141,30 +54136,28 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
         //    }
         // })
         // const invitedUsers = []
-
-
-        if (data.users && data.users.length && data.users.length > 0) {
-          data.users.forEach(o => {
-            let user = o; // let tempUser = o;
-
-            if (!_.includes(o, '@')) {
-              user = `${o}@${_converse.api.settings.get("default_domain")}`;
-            } // if(_.includes(o, '@')) {
-            //     tempUser = tempUser.split('@')[0];
-            // }
-            // if(!_.includes(currentUSers, tempUser)) {
-            //     invitedUsers.push(tempUser)
-            //     setTimeout(function(){
-            //         _converse.api.roomviews.get(jid.toLowerCase()).model.directInvite(user, 'invite to the room');
-            //     },3000);
-            // }
-
-
-            setTimeout(function () {
-              _converse.api.roomviews.get(jid.toLowerCase()).model.directInvite(user, 'invite to the room');
-            }, 5000);
-          });
-        } //-------->
+        // if (data.users && data.users.length && data.users.length > 0 ) {
+        //     data.users.forEach(o => {
+        //         let user = o;
+        //         // let tempUser = o;
+        //         if (!_.includes(o, '@')) {
+        //             user = `${o}@${_converse.api.settings.get("default_domain")}`
+        //         }
+        //         // if(_.includes(o, '@')) {
+        //         //     tempUser = tempUser.split('@')[0];
+        //         // }
+        //         // if(!_.includes(currentUSers, tempUser)) {
+        //         //     invitedUsers.push(tempUser)
+        //         //     setTimeout(function(){
+        //         //         _converse.api.roomviews.get(jid.toLowerCase()).model.directInvite(user, 'invite to the room');
+        //         //     },3000);
+        //         // }
+        //         setTimeout(function(){
+        //             _converse.api.roomviews.get(jid.toLowerCase()).model.directInvite(user, 'invite to the room');
+        //         },5000);
+        //     })
+        // }
+        //-------->
 
 
         this.model.get('model').saveCustomConfiguration(data.roomconfig).then(() => this.model.get('model').refreshRoomFeatures());
@@ -54302,7 +54295,9 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
 
       disableChat() {
         if (this.model.get('role') === 'visitor') {
-          this.el.querySelector('.chat-textarea').disabled = true;
+          if (this.el.querySelector('.chat-textarea')) {
+            this.el.querySelector('.chat-textarea').disabled = true;
+          }
         }
       },
 
@@ -55013,7 +55008,6 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
 
         _.each(fields, field => {
           if (_converse.roomconfig_whitelist.length === 0 || _.includes(_converse.roomconfig_whitelist, field.getAttribute('var'))) {
-            console.log('field', field);
             fieldset_el.insertAdjacentHTML('beforeend', u.xForm2webForm(field, stanza));
           }
         }); // Render save/cancel buttons
@@ -55038,7 +55032,6 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
         const container_el = this.el.querySelector('.chatroom-body'); // _.each(container_el.querySelectorAll('.chatroom-form-container'), u.removeElement);
         // _.each(container_el.children, u.hideElement);
 
-        console.log();
         const fields = stanza.querySelectorAll('field');
         var roomConfiguration = {};
 
@@ -55798,7 +55791,6 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
         }
 
         const show = this.model.get('show');
-        console.log(this.model.toJSON().jid);
         const occupant_name = this.model.toJSON().jid.split('@')[0];
         return templates_occupant_html__WEBPACK_IMPORTED_MODULE_24___default()(_.extend({
           '_': _,
@@ -94023,11 +94015,11 @@ __e(o.__('Optional')) +
 __e(o.roomdesc) +
 '" />\n                          <span>' +
 __e(o.__("What's the channel about?")) +
-'</span>\n                  </div>\n                \n                  <div class="form-group channel-invite">\n                      <label for="users">' +
+'</span>\n                  </div>\n                \n                  <!-- <div class="form-group channel-invite">\n                      <label for="users">' +
 __e(o.__('Invite Users')) +
 '</label>\n                      <select class="form-control channel-users-invite-list" name="users" multiple="multiple"></select>\n                      <span>' +
 __e(o.__('Name must be a lowercase,without space, period, and shorter than 22 characters')) +
-'</span>\n                  </div> \n                  <input type="button" class="btn cancel-btn" data-dismiss="modal" aria-label="Close" name="cancel" value="' +
+'</span>\n                  </div>  -->\n                  <input type="button" class="btn cancel-btn" data-dismiss="modal" aria-label="Close" name="cancel" value="' +
 __e(o.__('Cancel')) +
 '"/>\n                  <input type="submit" class="btn create-btn" name="join" value="' +
 __e(o.__('Update')) +
@@ -95063,7 +95055,7 @@ __p += '\n    <label>\n        ' +
 __e(o.label) +
 '\n    </label>\n    ';
  } ;
-__p += '\n    <div class="input-group">\n        <!-- <div class="input-group-prepend"> -->\n            <input class="form-control" name="' +
+__p += '\n    <!-- <div class="input-group"> -->\n    <div class="form-group">\n        <!-- <div class="input-group-prepend"> -->\n            <input class="form-control" name="' +
 __e(o.name) +
 '" type="' +
 __e(o.type) +

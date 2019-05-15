@@ -437,11 +437,12 @@ converse.plugins.add('converse-muc-views', {
                  //<-----  Mdev
                 _converse.roster.each(o => {
                     let label = o.getDisplayName()
+                    const jid = o.get('jid');
                     if(_.includes(label, '@')) {
                         label = label.split('@')[0];
                     }
                     const user = document.createElement('option')
-                    user.setAttribute('value',o.getDisplayName())
+                    user.setAttribute('value',jid)
                     user.innerHTML = label
                     this.el.querySelector('.channel-users-invite-list').insertAdjacentElement('beforeend',user)
                 })
@@ -513,7 +514,7 @@ converse.plugins.add('converse-muc-views', {
                         }
                         setTimeout(function(){
                             _converse.api.roomviews.get(jid.toLowerCase()).model.directInvite(user, 'invite to the room');
-                        },5000);
+                        },10000);
                     })
                 }
                 //-------->
@@ -536,7 +537,6 @@ converse.plugins.add('converse-muc-views', {
             },
 
             toHTML () {
-                console.log('config',this.model.get('roomConfiguration').roomdesc)
                 let placeholder = `# e.g link solutions`;
                 if (!_converse.locked_muc_domain) {
                     const muc_domain = this.model.get('muc_domain') || _converse.muc_domain;
@@ -556,29 +556,29 @@ converse.plugins.add('converse-muc-views', {
                 //     this.el.querySelector('input[name="chatroom"]').focus();
                 // }, false);
                  //<-----  Mdev
-                 const currentUSers = [];
-                 this.model.get('model').occupants.each(o => {
-                    let user = o.get('jid')
-                    if(_.includes(user, '@')) {
-                        user = user.split('@')[0];
-                        currentUSers.push(user);
-                    }
-                 })
-                _converse.roster.each(o => {
-                    let label = o.getDisplayName()
-                    if(_.includes(label, '@')) {
-                        label = label.split('@')[0];
-                    }
-                    if(!_.includes(currentUSers, label)) {
-                        const user = document.createElement('option')
-                        user.setAttribute('value',o.getDisplayName())
-                        // user.setAttribute('selected',true)
-                        user.innerHTML = label
-                        this.el.querySelector('.channel-users-invite-list').insertAdjacentElement('beforeend',user)
-                    }
+                //  const currentUSers = [];
+                //  this.model.get('model').occupants.each(o => {
+                //     let user = o.get('jid')
+                //     if(_.includes(user, '@')) {
+                //         user = user.split('@')[0];
+                //         currentUSers.push(user);
+                //     }
+                //  })
+                // _converse.roster.each(o => {
+                //     let label = o.getDisplayName()
+                //     if(_.includes(label, '@')) {
+                //         label = label.split('@')[0];
+                //     }
+                //     if(!_.includes(currentUSers, label)) {
+                //         const user = document.createElement('option')
+                //         user.setAttribute('value',o.getDisplayName())
+                //         // user.setAttribute('selected',true)
+                //         user.innerHTML = label
+                //         this.el.querySelector('.channel-users-invite-list').insertAdjacentElement('beforeend',user)
+                //     }
                     
                     
-                })
+                // })
                  //-------->
             },
              //<-----  Mdev
@@ -646,28 +646,28 @@ converse.plugins.add('converse-muc-views', {
                 //    }
                 // })
                 // const invitedUsers = []
-                if (data.users && data.users.length && data.users.length > 0 ) {
-                    data.users.forEach(o => {
-                        let user = o;
-                        // let tempUser = o;
-                        if (!_.includes(o, '@')) {
-                            user = `${o}@${_converse.api.settings.get("default_domain")}`
-                        }
-                        // if(_.includes(o, '@')) {
-                        //     tempUser = tempUser.split('@')[0];
-                        // }
-                        // if(!_.includes(currentUSers, tempUser)) {
-                        //     invitedUsers.push(tempUser)
-                        //     setTimeout(function(){
-                        //         _converse.api.roomviews.get(jid.toLowerCase()).model.directInvite(user, 'invite to the room');
-                        //     },3000);
-                        // }
-                        setTimeout(function(){
-                            _converse.api.roomviews.get(jid.toLowerCase()).model.directInvite(user, 'invite to the room');
-                        },5000);
+                // if (data.users && data.users.length && data.users.length > 0 ) {
+                //     data.users.forEach(o => {
+                //         let user = o;
+                //         // let tempUser = o;
+                //         if (!_.includes(o, '@')) {
+                //             user = `${o}@${_converse.api.settings.get("default_domain")}`
+                //         }
+                //         // if(_.includes(o, '@')) {
+                //         //     tempUser = tempUser.split('@')[0];
+                //         // }
+                //         // if(!_.includes(currentUSers, tempUser)) {
+                //         //     invitedUsers.push(tempUser)
+                //         //     setTimeout(function(){
+                //         //         _converse.api.roomviews.get(jid.toLowerCase()).model.directInvite(user, 'invite to the room');
+                //         //     },3000);
+                //         // }
+                //         setTimeout(function(){
+                //             _converse.api.roomviews.get(jid.toLowerCase()).model.directInvite(user, 'invite to the room');
+                //         },5000);
                        
-                    })
-                }
+                //     })
+                // }
                 //-------->
                 this.model.get('model').saveCustomConfiguration(data.roomconfig).then(() => this.model.get('model').refreshRoomFeatures());
                 this.modal.hide();
@@ -798,7 +798,9 @@ converse.plugins.add('converse-muc-views', {
             },
             disableChat(){
                 if(this.model.get('role') === 'visitor'){
-                    this.el.querySelector('.chat-textarea').disabled = true;
+                    if( this.el.querySelector('.chat-textarea')){
+                        this.el.querySelector('.chat-textarea').disabled = true;
+                    }
                 }
             },
             render () {
@@ -1441,7 +1443,7 @@ converse.plugins.add('converse-muc-views', {
                 _.each(fields, field => {
                     if (_converse.roomconfig_whitelist.length === 0 ||
                             _.includes(_converse.roomconfig_whitelist, field.getAttribute('var'))) {
-                                console.log('field',field)
+                              
                         fieldset_el.insertAdjacentHTML('beforeend', u.xForm2webForm(field, stanza));
                     }
                 });
@@ -1475,7 +1477,6 @@ converse.plugins.add('converse-muc-views', {
                 const container_el = this.el.querySelector('.chatroom-body');
                 // _.each(container_el.querySelectorAll('.chatroom-form-container'), u.removeElement);
                 // _.each(container_el.children, u.hideElement);
-                console.log()
                 const fields = stanza.querySelectorAll('field')
                 var roomConfiguration = {};
                 _.each(fields, field => {
@@ -2185,7 +2186,6 @@ converse.plugins.add('converse-muc-views', {
                     }
                 }
                 const show = this.model.get('show');
-                console.log(this.model.toJSON().jid)
                 const occupant_name = this.model.toJSON().jid.split('@')[0]
                 return tpl_occupant(
                     _.extend(
