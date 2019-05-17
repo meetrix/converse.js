@@ -93846,7 +93846,7 @@ var __t, __p = '', __e = _.escape, __j = Array.prototype.join;
 function print() { __p += __j.call(arguments, '') }
 __p += '<!-- src/templates/chatbox_message_form.html -->\n<div class="message-form-container">\n<div class="new-msgs-indicator hidden">▼ ' +
 __e( o.unread_msgs ) +
-' ▼</div>\n<form class="sendXMPPMessage">\n    <div class="row">\n        <div class="col-sm-auto" >\n            <a href="#" class="add-message m-auto">\n                <i class="fa fa-plus fa-2x"></i>\n            </a>\n        </div>\n        <div class="col-sm-8 message-input-area">\n            <input type="text" placeholder="' +
+' ▼</div>\n<form class="sendXMPPMessage">\n    <div class="row">\n        <div class="col-auto plus-attachment" >\n            <a href="#" class="add-message m-auto">\n                <i class="fa fa-plus fa-2x"></i>\n            </a>\n        </div>\n        <div class="col message-input-area">\n            <input type="text" placeholder="' +
 ((__t = (o.label_spoiler_hint)) == null ? '' : __t) +
 '" value="' +
 ((__t = ( o.hint_value )) == null ? '' : __t) +
@@ -93872,7 +93872,7 @@ __p += '\n                    <button type="submit" class="pure-button send-butt
 __e( o.label_send ) +
 '</button>\n                ';
  } ;
-__p += '\n            </div>\n        </div>\n        <div class="col-sm-3 message-toolbar">\n            ';
+__p += '\n            </div>\n        </div>\n        <div class="col-auto message-toolbar">\n            ';
  if (o.show_toolbar) { ;
 __p += '\n                <ul class="chat-toolbar no-text-select"></ul>\n            ';
  } ;
