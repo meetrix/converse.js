@@ -40301,7 +40301,7 @@ _converse_core__WEBPACK_IMPORTED_MODULE_2__["default"].plugins.add('converse-cha
         if (this.get('type') === 'groupchat') {
           return this.get('nick');
         } else {
-          return this.vcard.get('fullname') || this.get('from');
+          return this.get('nickname') || this.vcard.get('nickname') || this.vcard.get('fullname') || this.get('from');
         }
       },
 

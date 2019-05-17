@@ -540,9 +540,13 @@ converse.plugins.add('converse-rosterview', {
                 {
                     dataUri = createAvatar(display_name);
                 }
+                let roster_displayname = display_name;
+                if(_.includes(display_name,'@')){
+                    roster_displayname = display_name.split('@')[0]
+                }
                 this.el.innerHTML = tpl_roster_item(
                     _.extend(item.toJSON(), {
-                        'display_name': display_name.split('@')[0],
+                        'display_name': roster_displayname,
                         'dataUri':dataUri,
                         'desc_status': STATUSES[show],
                         'status_icon': status_icon,

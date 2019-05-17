@@ -58286,7 +58286,7 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_4__["default"].plugins
         const chat_status = this.model.get('status') || 'offline';
         return templates_profile_view_html__WEBPACK_IMPORTED_MODULE_8___default()(_.extend(this.model.toJSON(), this.model.vcard.toJSON(), {
           '__': __,
-          'fullname': this.model.vcard.get('fullname') || _converse.bare_jid.split('@')[0],
+          'fullname': this.model.vcard.get('nickname') || this.model.vcard.get('fullname') || _converse.bare_jid.split('@')[0],
           'status_message': this.model.get('status_message') || __("I am %1$s", this.getPrettyStatus(chat_status)),
           'role': this.model.vcard.get('role') || '',
           'chat_status': chat_status,
@@ -60438,8 +60438,14 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_4__["default"].plugins
           dataUri = createAvatar(display_name);
         }
 
+        let roster_displayname = display_name;
+
+        if (_.includes(display_name, '@')) {
+          roster_displayname = display_name.split('@')[0];
+        }
+
         this.el.innerHTML = templates_roster_item_html__WEBPACK_IMPORTED_MODULE_11___default()(_.extend(item.toJSON(), {
-          'display_name': display_name.split('@')[0],
+          'display_name': roster_displayname,
           'dataUri': dataUri,
           'desc_status': STATUSES[show],
           'status_icon': status_icon,
@@ -62567,7 +62573,7 @@ _converse_core__WEBPACK_IMPORTED_MODULE_2__["default"].plugins.add('converse-cha
         if (this.get('type') === 'groupchat') {
           return this.get('nick');
         } else {
-          return this.vcard.get('fullname') || this.get('from');
+          return this.get('nickname') || this.vcard.get('nickname') || this.vcard.get('fullname') || this.get('from');
         }
       },
 

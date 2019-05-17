@@ -120,7 +120,7 @@ converse.plugins.add('converse-chatboxes', {
                 if (this.get('type') === 'groupchat') {
                     return this.get('nick');
                 } else {
-                    return this.vcard.get('fullname') || this.get('from');
+                    return this.get('nickname') || this.vcard.get('nickname') || this.vcard.get('fullname') || this.get('from');
                 }
             },
 
