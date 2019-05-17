@@ -60022,11 +60022,17 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_4__["default"].plugins
       },
 
       initXHRAutoComplete() {
+        const button = this.el.querySelector('.btn-primary');
+        button.disabled = true;
+
         if (!_converse.autocomplete_add_contact) {
           return this.initXHRFetch();
         }
 
         const el = this.el.querySelector('.suggestion-box__name').parentElement;
+        this.el.querySelector('.suggestion-box__input').addEventListener('keyup', function (e) {
+          button.disabled = true;
+        });
         this.name_auto_complete = new _converse.AutoComplete(el, {
           'auto_evaluate': false,
           'filter': _converse.FILTER_STARTSWITH,
@@ -60048,13 +60054,15 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_4__["default"].plugins
 
         const input_el = this.el.querySelector('input[name="name"]');
         input_el.addEventListener('input', _.debounce(() => {
+          this.el.querySelector('.btn-primary').disabled = true;
           xhr.open("GET", `${_converse.xhr_user_search_url}search=${input_el.value}`, true);
           xhr.setRequestHeader('Authorization', "Basic " + btoa(_converse.connection.jid.split('/')[0] + ":" + _converse.connection.pass));
           xhr.setRequestHeader('Content-Type', 'application/json');
           xhr.send();
         }, 300));
         this.name_auto_complete.on('suggestion-box-selectcomplete', ev => {
-          this.el.querySelector('input[name="name"]').value = ev.text.label; //<----MDEV
+          this.el.querySelector('input[name="name"]').value = ev.text.label;
+          this.el.querySelector('.btn-primary').disabled = false; //<----MDEV
           // this.el.querySelector('input[name="jid"]').value = ev.text.value;
           //---------
         });
