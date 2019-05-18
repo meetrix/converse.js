@@ -54483,7 +54483,7 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
         return templates_chatroom_head_html__WEBPACK_IMPORTED_MODULE_17___default()(_.extend(this.model.toJSON(), {
           '_converse': _converse,
           'Strophe': Strophe,
-          'info_close': __('Close and leave this groupchat'),
+          'info_close': __('Close this groupchat'),
           'info_configure': __('Configure this groupchat'),
           'info_details': __('Show more details about this groupchat'),
           'description': u.addHyperlinks(xss__WEBPACK_IMPORTED_MODULE_30___default.a.filterXSS(_.get(this.model.get('subject'), 'text'), {
@@ -54499,7 +54499,7 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
           '_converse': _converse,
           'Strophe': Strophe,
           'show_send_button': _converse.show_send_button,
-          'info_close': __('Close and leave this groupchat'),
+          'info_close': __('Close this groupchat'),
           'info_configure': __('Configure this groupchat'),
           'info_details': __('Show more details about this groupchat'),
           'occupants': this.model.occupants.length
