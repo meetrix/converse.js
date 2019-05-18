@@ -155,7 +155,6 @@ converse.plugins.add('converse-message-view', {
                 if(_.includes(username,'@')){
                     username = username.split('@')[0]
                 }
-                console.log('model',this.model)
                 const msg = u.stringToElement(tpl_message(
                     _.extend(
                         this.model.toJSON(), {

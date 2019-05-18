@@ -45617,7 +45617,6 @@ _converse_core__WEBPACK_IMPORTED_MODULE_3__["default"].plugins.add('converse-muc
             const configArray = [],
                   fields = stanza.querySelectorAll('field');
             let count = fields.length;
-            console.log('config1', config);
 
             _.each(fields, field => {
               let fieldname;
@@ -45649,7 +45648,6 @@ _converse_core__WEBPACK_IMPORTED_MODULE_3__["default"].plugins.add('converse-muc
               } //---------->MDEV
 
 
-              console.log('config', configArray);
               configArray.push(field);
 
               if (! --count) {
@@ -46471,8 +46469,6 @@ _converse_core__WEBPACK_IMPORTED_MODULE_3__["default"].plugins.add('converse-muc
 
       let contact = _converse.roster.get(from),
           result;
-
-      console.log('contact', contact);
 
       if (_converse.auto_join_on_invite) {
         result = true;

@@ -2388,7 +2388,6 @@ converse.plugins.add('converse-muc-views', {
                 // });
                 var that = this;
                 this.el.querySelector('.room-invite').addEventListener('click',function(ev){
-                    console.log('on foucs', _converse.roster)
                     list = _converse.roster.map(i => {
                         let label =  i.get('fullname') || i.get('jid');
                             if(_.includes(label, '@')) {

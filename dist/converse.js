@@ -51189,8 +51189,6 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
 
       initialize() {
         this.model.on("change", this.render, this); // this.render();
-
-        console.log('notificationmodel', this.model.models.length);
       },
 
       toHTML() {
@@ -51277,7 +51275,6 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
     });
 
     _converse.api.listen.on('chatBoxViewPortCaclulateWhenResize', () => {
-      console.log('resize');
       window.addEventListener('resize', () => {
         const vh = window.innerHeight * 0.01;
         document.documentElement.style.setProperty('--vh', `${vh}px`);
@@ -52457,7 +52454,6 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_1__["default"].plugins
           username = username.split('@')[0];
         }
 
-        console.log('model', this.model);
         const msg = _converse_headless_utils_emoji__WEBPACK_IMPORTED_MODULE_9__["default"].stringToElement(templates_message_html__WEBPACK_IMPORTED_MODULE_7___default()(_.extend(this.model.toJSON(), {
           '__': __,
           'is_me_message': is_me_message,
@@ -56008,7 +56004,6 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
 
         var that = this;
         this.el.querySelector('.room-invite').addEventListener('click', function (ev) {
-          console.log('on foucs', _converse.roster);
           list = _converse.roster.map(i => {
             let label = i.get('fullname') || i.get('jid');
 
@@ -58347,7 +58342,6 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_4__["default"].plugins
 
       showProfileModal(ev) {
         if (_.isUndefined(this.profile_modal)) {
-          console.log('profile', this.model.toJSON());
           this.profile_modal = new _converse.ProfileModal({
             model: this.model
           });
@@ -67932,7 +67926,6 @@ _converse_core__WEBPACK_IMPORTED_MODULE_3__["default"].plugins.add('converse-muc
             const configArray = [],
                   fields = stanza.querySelectorAll('field');
             let count = fields.length;
-            console.log('config1', config);
 
             _.each(fields, field => {
               let fieldname;
@@ -67964,7 +67957,6 @@ _converse_core__WEBPACK_IMPORTED_MODULE_3__["default"].plugins.add('converse-muc
               } //---------->MDEV
 
 
-              console.log('config', configArray);
               configArray.push(field);
 
               if (! --count) {
@@ -68786,8 +68778,6 @@ _converse_core__WEBPACK_IMPORTED_MODULE_3__["default"].plugins.add('converse-muc
 
       let contact = _converse.roster.get(from),
           result;
-
-      console.log('contact', contact);
 
       if (_converse.auto_join_on_invite) {
         result = true;

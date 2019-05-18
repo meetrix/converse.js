@@ -603,7 +603,6 @@ converse.plugins.add('converse-controlbox', {
             initialize () {
                 this.model.on("change", this.render, this);
                 // this.render();
-                console.log('notificationmodel',this.model.models.length)
             },
             toHTML () {
                 return tpl_notification({
@@ -675,7 +674,6 @@ converse.plugins.add('converse-controlbox', {
             document.documentElement.style.setProperty('--vh', `${vh}px`);
         });
         _converse.api.listen.on('chatBoxViewPortCaclulateWhenResize', () => {
-            console.log('resize')
             window.addEventListener('resize', () => {
                 const vh = window.innerHeight * 0.01;
                 document.documentElement.style.setProperty('--vh', `${vh}px`);
