@@ -55998,33 +55998,56 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
         }
 
         form.addEventListener('submit', this.inviteFormSubmitted.bind(this), false);
+        let list; // let list = _converse.roster.map(i => {
+        //     let label =  i.get('fullname') || i.get('jid');
+        //         if(_.includes(label, '@')) {
+        //             label = label.split('@')[0];
+        //         }
+        //     return {'label': label, 'value': i.get('jid')}
+        // });
 
-        const list = _converse.roster.map(i => {
-          let label = i.get('fullname') || i.get('jid');
+        var that = this;
+        this.el.querySelector('.room-invite').addEventListener('click', function (ev) {
+          console.log('on foucs', _converse.roster);
+          list = _converse.roster.map(i => {
+            let label = i.get('fullname') || i.get('jid');
 
-          if (_.includes(label, '@')) {
-            label = label.split('@')[0];
+            if (_.includes(label, '@')) {
+              label = label.split('@')[0];
+            }
+
+            return {
+              'label': label,
+              'value': i.get('jid')
+            };
+          });
+          const el = that.el.querySelector('.suggestion-box').parentElement;
+
+          if (that.invite_auto_complete) {
+            that.invite_auto_complete.destroy();
           }
 
-          return {
-            'label': label,
-            'value': i.get('jid')
-          };
-        });
+          that.invite_auto_complete = new _converse.AutoComplete(el, {
+            'min_chars': 1,
+            'list': list
+          }); //this.invite_auto_complete.on('suggestion-box-selectcomplete', ev => this.promptForInvite(ev)); MD
 
-        const el = this.el.querySelector('.suggestion-box').parentElement;
-
-        if (this.invite_auto_complete) {
-          this.invite_auto_complete.destroy();
-        }
-
-        this.invite_auto_complete = new _converse.AutoComplete(el, {
-          'min_chars': 1,
-          'list': list
-        }); //this.invite_auto_complete.on('suggestion-box-selectcomplete', ev => this.promptForInvite(ev)); MD
-
-        this.invite_auto_complete.on('suggestion-box-selectcomplete', ev => this.inviteRoom(ev.text.value));
-        this.invite_auto_complete.ul.setAttribute('style', `max-height: calc(${this.el.offsetHeight}px - 80px);`);
+          that.invite_auto_complete.on('suggestion-box-selectcomplete', ev => that.inviteRoom(ev.text.value));
+          that.invite_auto_complete.ul.setAttribute('style', `max-height: calc(${that.el.offsetHeight}px - 80px);`);
+        }); // const el = this.el.querySelector('.suggestion-box').parentElement;
+        // if (this.invite_auto_complete) {
+        //     this.invite_auto_complete.destroy();
+        // }
+        // this.invite_auto_complete = new _converse.AutoComplete(el, {
+        //     'min_chars': 1,
+        //     'list': list
+        // });
+        // //this.invite_auto_complete.on('suggestion-box-selectcomplete', ev => this.promptForInvite(ev)); MD
+        // this.invite_auto_complete.on('suggestion-box-selectcomplete', ev => this.inviteRoom(ev.text.value));
+        // this.invite_auto_complete.ul.setAttribute(
+        //     'style',
+        //     `max-height: calc(${this.el.offsetHeight}px - 80px);`
+        // );
       }
 
     });
