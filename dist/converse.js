@@ -48735,7 +48735,21 @@ const AvatarMixin = {
     el = el || this.el;
     const canvas_el = el.querySelector('canvas');
 
-    if (_.isNull(canvas_el)) {
+    if (!_.isNull(el.querySelector('.show-profile'))) {
+      if (this.model.vcard) {
+        const data = {
+          'classes': 'avatar align-self-center',
+          'width': 40,
+          'height': 40
+        };
+        const image_type = this.model.vcard.get('image_type'),
+              image = this.model.vcard.get('image');
+        data['image'] = "data:" + image_type + ";base64," + image;
+        el.querySelector('.show-profile').innerHTML = templates_avatar_svg__WEBPACK_IMPORTED_MODULE_4___default()(data);
+      }
+
+      return;
+    } else if (_.isNull(canvas_el)) {
       return;
     }
 
@@ -48753,6 +48767,7 @@ const AvatarMixin = {
     var dataUri = "data:" + image_type + ";base64," + image;
 
     if (!image || display_name && defaultAvatar == image) {
+      // eslint-disable-next-line no-undef
       dataUri = createAvatar(display_name);
     } // else {
     //     setAvatar(display_name, dataUri);
@@ -52292,6 +52307,7 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
+ // eslint-disable-next-line sort-imports
 
 
 const _converse$env = _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_1__["default"].env,
@@ -52441,6 +52457,7 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_1__["default"].plugins
           username = username.split('@')[0];
         }
 
+        console.log('model', this.model);
         const msg = _converse_headless_utils_emoji__WEBPACK_IMPORTED_MODULE_9__["default"].stringToElement(templates_message_html__WEBPACK_IMPORTED_MODULE_7___default()(_.extend(this.model.toJSON(), {
           '__': __,
           'is_me_message': is_me_message,
@@ -55780,6 +55797,7 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
         var image = "data:" + _converse.DEFAULT_IMAGE_TYPE + ";base64," + _converse.DEFAULT_IMAGE; // BAO
 
         if (this.model.get('nick') || this.model.get('jid')) {
+          // eslint-disable-next-line no-undef
           image = createAvatar(this.model.get('nick') || this.model.get('jid'));
           const rosterJid = this.model.get('jid');
 
@@ -58119,7 +58137,8 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_4__["default"].plugins
         var dataUri = "data:" + this.model.vcard.toJSON().image_type + ";base64," + this.model.vcard.toJSON().image;
 
         if (this.model.vcard.toJSON().image === _converse.DEFAULT_IMAGE) {
-          var dataUri = createAvatar(this.model.vcard.toJSON().jid);
+          // eslint-disable-next-line no-undef
+          dataUri = createAvatar(this.model.vcard.toJSON().jid);
         }
 
         return templates_profile_modal_html__WEBPACK_IMPORTED_MODULE_7___default()(_.extend(this.model.toJSON(), this.model.vcard.toJSON(), {
@@ -60435,6 +60454,7 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_4__["default"].plugins
         var dataUri = "data:" + item.vcard.attributes.image_type + ";base64," + item.vcard.attributes.image;
 
         if (display_name && _converse.DEFAULT_IMAGE === item.vcard.attributes.image) {
+          // eslint-disable-next-line no-undef
           dataUri = createAvatar(display_name);
         }
 

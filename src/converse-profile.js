@@ -60,7 +60,8 @@ converse.plugins.add('converse-profile', {
             toHTML () {
                 var dataUri = "data:" + this.model.vcard.toJSON().image_type + ";base64," + this.model.vcard.toJSON().image;
                 if(this.model.vcard.toJSON().image === _converse.DEFAULT_IMAGE){
-                    var dataUri = createAvatar(this.model.vcard.toJSON().jid)
+                    // eslint-disable-next-line no-undef
+                    dataUri = createAvatar(this.model.vcard.toJSON().jid)
                 }
                 return tpl_profile_modal(_.extend(
                     this.model.toJSON(),

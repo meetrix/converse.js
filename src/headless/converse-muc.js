@@ -288,6 +288,7 @@ converse.plugins.add('converse-muc', {
             },
 
             getDisplayName () {
+                
                 return this.get('name') || this.get('jid');
             },
 

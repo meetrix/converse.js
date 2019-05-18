@@ -2176,6 +2176,7 @@ converse.plugins.add('converse-muc-views', {
 
                 if ((this.model.get('nick') || this.model.get('jid')))
                 {
+                    // eslint-disable-next-line no-undef
                     image = createAvatar(this.model.get('nick') || this.model.get('jid'));
                     const rosterJid = this.model.get('jid');
 

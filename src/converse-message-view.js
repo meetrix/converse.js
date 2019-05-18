@@ -15,6 +15,7 @@ import tpl_message from "templates/message.html";
 import tpl_message_versions_modal from "templates/message_versions_modal.html";
 import u from "@converse/headless/utils/emoji";
 import xss from "xss";
+// eslint-disable-next-line sort-imports
 import { localeData } from "moment";
 
 const { Backbone, _, moment } = converse.env;
@@ -154,6 +155,7 @@ converse.plugins.add('converse-message-view', {
                 if(_.includes(username,'@')){
                     username = username.split('@')[0]
                 }
+                console.log('model',this.model)
                 const msg = u.stringToElement(tpl_message(
                     _.extend(
                         this.model.toJSON(), {

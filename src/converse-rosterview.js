@@ -538,6 +538,7 @@ converse.plugins.add('converse-rosterview', {
 
                 if (display_name && _converse.DEFAULT_IMAGE === item.vcard.attributes.image)
                 {
+                    // eslint-disable-next-line no-undef
                     dataUri = createAvatar(display_name);
                 }
                 let roster_displayname = display_name;
