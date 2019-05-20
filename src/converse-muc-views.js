@@ -2336,10 +2336,15 @@ converse.plugins.add('converse-muc-views', {
 
             inviteFormSubmitted (evt) {
                 evt.preventDefault();
-                const el = evt.target.querySelector('input.invited-contact'),
-                      jid = el.value;
+                const el = evt.target.querySelector('input.invited-contact');
+                let  jid = el.value;
+                if(!_.includes(jid,'@')){
+                    jid = jid+'@'+_converse.api.settings.get("default_domain")
+                }      
                 if (!jid || _.compact(jid.split('@')).length < 2) {
                     evt.target.outerHTML = tpl_chatroom_invite({
+                        '_': _,
+                        '__': __,
                         'error_message': __('Please enter a valid UserName address'),
                         'label_invitation': __('Invite'),
                     });
@@ -2347,6 +2352,7 @@ converse.plugins.add('converse-muc-views', {
                     return;
                 }
                 this.inviteRoom(jid)
+
                 // this.promptForInvite({
                 //     'target': el,
                 //     'text': {
@@ -2387,14 +2393,25 @@ converse.plugins.add('converse-muc-views', {
                 //     return {'label': label, 'value': i.get('jid')}
                 // });
                 var that = this;
-                this.el.querySelector('.room-invite').addEventListener('click',function(ev){
+
+                this.el.querySelector('.invited-contact').addEventListener('click',function(ev){
+                    const exitstUsers = that.model.models.map(i => i.get('jid'))
+                    console.log('exitstUsers',exitstUsers)
                     list = _converse.roster.map(i => {
+                        if(_.includes(exitstUsers,i.get('jid'))){
+                            return null
+                        }
                         let label =  i.get('fullname') || i.get('jid');
                             if(_.includes(label, '@')) {
                                 label = label.split('@')[0];
                             }
                         return {'label': label, 'value': i.get('jid')}
                     });
+                    console.log('list',list)
+                    list = list.filter(function (el) {
+                        return el !== null;
+                    });
+                    console.log('list',list)
                     const el = that.el.querySelector('.suggestion-box').parentElement;
 
                     if (that.invite_auto_complete) {
@@ -2405,7 +2422,9 @@ converse.plugins.add('converse-muc-views', {
                         'list': list
                     });
                     //this.invite_auto_complete.on('suggestion-box-selectcomplete', ev => this.promptForInvite(ev)); MD
-                    that.invite_auto_complete.on('suggestion-box-selectcomplete', ev => that.inviteRoom(ev.text.value));
+                    that.invite_auto_complete.on('suggestion-box-selectcomplete', ev => {
+                        that.el.querySelector('.invited-contact').value = ev.text.label
+                    });
                     that.invite_auto_complete.ul.setAttribute(
                         'style',
                         `max-height: calc(${that.el.offsetHeight}px - 80px);`

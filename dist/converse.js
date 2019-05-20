@@ -47670,12 +47670,16 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_0__["default"].plugins
       }
 
       insertValue(suggestion) {
-        let value;
+        let value = suggestion.value;
+
+        if (_.includes(value, '@')) {
+          value = value.split('@')[0];
+        }
 
         if (this.match_current_word) {
-          u.replaceCurrentWord(this.input, suggestion.value);
+          u.replaceCurrentWord(this.input, value);
         } else {
-          this.input.value = suggestion.value;
+          this.input.value = value;
         }
       }
 
@@ -55949,11 +55953,17 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
 
       inviteFormSubmitted(evt) {
         evt.preventDefault();
-        const el = evt.target.querySelector('input.invited-contact'),
-              jid = el.value;
+        const el = evt.target.querySelector('input.invited-contact');
+        let jid = el.value;
+
+        if (!_.includes(jid, '@')) {
+          jid = jid + '@' + _converse.api.settings.get("default_domain");
+        }
 
         if (!jid || _.compact(jid.split('@')).length < 2) {
           evt.target.outerHTML = templates_chatroom_invite_html__WEBPACK_IMPORTED_MODULE_18___default()({
+            '_': _,
+            '__': __,
             'error_message': __('Please enter a valid UserName address'),
             'label_invitation': __('Invite')
           });
@@ -56003,8 +56013,14 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
         // });
 
         var that = this;
-        this.el.querySelector('.room-invite').addEventListener('click', function (ev) {
+        this.el.querySelector('.invited-contact').addEventListener('click', function (ev) {
+          const exitstUsers = that.model.models.map(i => i.get('jid'));
+          console.log('exitstUsers', exitstUsers);
           list = _converse.roster.map(i => {
+            if (_.includes(exitstUsers, i.get('jid'))) {
+              return null;
+            }
+
             let label = i.get('fullname') || i.get('jid');
 
             if (_.includes(label, '@')) {
@@ -56016,6 +56032,11 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
               'value': i.get('jid')
             };
           });
+          console.log('list', list);
+          list = list.filter(function (el) {
+            return el !== null;
+          });
+          console.log('list', list);
           const el = that.el.querySelector('.suggestion-box').parentElement;
 
           if (that.invite_auto_complete) {
@@ -56027,7 +56048,9 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
             'list': list
           }); //this.invite_auto_complete.on('suggestion-box-selectcomplete', ev => this.promptForInvite(ev)); MD
 
-          that.invite_auto_complete.on('suggestion-box-selectcomplete', ev => that.inviteRoom(ev.text.value));
+          that.invite_auto_complete.on('suggestion-box-selectcomplete', ev => {
+            that.el.querySelector('.invited-contact').value = ev.text.label;
+          });
           that.invite_auto_complete.ul.setAttribute('style', `max-height: calc(${that.el.offsetHeight}px - 80px);`);
         }); // const el = this.el.querySelector('.suggestion-box').parentElement;
         // if (this.invite_auto_complete) {
@@ -94516,7 +94539,9 @@ __e(o.error_message) +
  } ;
 __p += '\n        <div class="form-group">\n            <input class="form-control invited-contact suggestion-box__input"\n                   placeholder="' +
 __e(o.label_invitation) +
-'"\n                   type="text"/>\n            <span class="suggestion-box__additions visually-hidden" role="status" aria-live="assertive" aria-relevant="additions"></span>\n        </div>\n    </form>\n    <ul class="suggestion-box__results suggestion-box__results--below" hidden=""></ul>\n</div>\n';
+'"\n                   type="text"/>\n            <!-- <button type="submit" class="room-invite-submit">' +
+__e(o.__('invite')) +
+'</button>        -->\n            <span class="suggestion-box__additions visually-hidden" role="status" aria-live="assertive" aria-relevant="additions"></span>\n        </div>\n    </form>\n    <ul class="suggestion-box__results suggestion-box__results--below" hidden=""></ul>\n</div>\n';
 return __p
 };
 
