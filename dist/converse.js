@@ -93503,7 +93503,7 @@ __e(o.__('Names must be lowercase without spaces or period, and shorter than 22 
 __e(o.__('Purpose')) +
 '&nbsp;(' +
 __e(o.__('Optional')) +
-')</label>\n                            <input type="text" required="required" name="purpose" class="form-control" />\n                            <span>' +
+')</label>\n                            <input type="text" name="purpose" class="form-control" />\n                            <span>' +
 __e(o.__("What's the channel about?")) +
 '</span>\n                    </div>\n                    <div class="form-group channel-invite">\n                        <label for="users">' +
 __e(o.__('Invite Users')) +
