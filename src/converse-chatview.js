@@ -305,6 +305,7 @@ converse.plugins.add('converse-chatview', {
             events: {
                 'change input.fileupload': 'onFileSelection',
                 'click .chat-msg__action-edit': 'onMessageEditButtonClicked',
+                'click .chat-msg__action-delete': 'onMessageDeleteButtonClicked',
                 'click .chatbox-navback': 'showControlBox',
                 'click .close-chatbox-button': 'close',
                 'click .new-msgs-indicator': 'viewUnreadMessages',
@@ -1029,6 +1030,29 @@ converse.plugins.add('converse-chatview', {
                     message.save('correcting', false);
                     this.insertIntoTextArea('', true, false);
                 }
+            },
+            async onMessageDeleteButtonClicked (ev) {
+                ev.preventDefault();
+                // const idx = this.model.messages.findLastIndex('correcting'),
+                //       currently_correcting = idx >=0 ? this.model.messages.at(idx) : null,
+                    const    message_el = u.ancestor(ev.target, '.chat-msg');
+                    const  message = this.model.messages.findWhere({'msgid': message_el.getAttribute('data-msgid')});
+                    message.save('deleting', true);
+                    const spoiler_hint = {};
+                    if (await this.model.sendMessage('This message was deleted', {})) {
+                        _converse.api.trigger('messageSend', 'This message was deleted');
+                    }
+                    this.setChatState(_converse.ACTIVE, {'silent': true});
+                // if (currently_correcting !== message) {
+                //     if (!_.isNil(currently_correcting)) {
+                //         currently_correcting.save('correcting', false);
+                //     }
+                //     message.save('correcting', true);
+                //     this.insertIntoTextArea(u.prefixMentions(message), true, true);
+                // } else {
+                //     message.save('correcting', false);
+                //     this.insertIntoTextArea('', true, false);
+                // }
             },
 
             editLaterMessage () {

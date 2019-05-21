@@ -543,7 +543,22 @@ converse.plugins.add('converse-chatboxes', {
                         'references': attrs.references
                     });
                 } else {
-                    message = this.messages.create(attrs);
+                    message = this.messages.findWhere('deleting')
+                    if(message){
+                        const older_versions = message.get('older_versions') || [];
+                        older_versions.push(message.get('message'));
+                        message.save({
+                            'deleting': false,
+                            'deleted': moment().format(),
+                            'message':  attrs.message,
+                            'older_versions': older_versions,
+                            'references': attrs.references
+                        });
+                    }
+                    else {
+                        message = this.messages.create(attrs);
+                    }
+                    
                 }
                 _converse.api.send(this.createMessageStanza(message));
                 return true;

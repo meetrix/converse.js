@@ -79,7 +79,8 @@ converse.plugins.add('converse-message-view', {
 
         _converse.MessageView = _converse.ViewWithAvatar.extend({
             events: {
-                'click .chat-msg__edit-modal': 'showMessageVersionsModal'
+                'click .chat-msg__edit-modal': 'showMessageVersionsModal',
+                'click .toggle-chat-msg-actions': 'toggleChatMsgActions'
             },
 
             initialize () {
@@ -88,6 +89,7 @@ converse.plugins.add('converse-message-view', {
                 }
                 this.model.on('change', this.onChanged, this);
                 this.model.on('destroy', this.remove, this);
+                this.model.set({'hidden_chat_actions':true })
             },
 
             async render () {
@@ -118,6 +120,7 @@ converse.plugins.add('converse-message-view', {
                 // attr gets removed when this.render() gets called further
                 // down.
                 const edited = item.changed.edited;
+                const deleted = item.changed.deleted;
                 if (this.model.changed.progress) {
                     return this.renderFileUploadProgresBar();
                 }
@@ -128,9 +131,36 @@ converse.plugins.add('converse-message-view', {
                 if (edited) {
                     this.onMessageEdited();
                 }
+                if(deleted){
+                    this.onMessageDeleted();
+                }
             },
+            //------MDEV
+            toggleChatMsgActions(ev){
+                var actiosnel= this.el.querySelector('.chat-msg-actions');
 
+                this.model.set({'hidden_chat_actions': !this.model.get('hidden_chat_actions')})
+                u.addClass('hidden', actiosnel);
+                if (this.model.get('hidden_chat_actions')){
+                    u.addClass('hidden', actiosnel);
+                }else{
+                    u.removeClass('hidden', actiosnel);
+                }
+                // if(actiosnelstyle === 'none'){
+                //     actiosnelstyle = 'block'
+                // }
+                // else{
+                //     actiosnelstyle = 'none'
+                // }
+                
+            },
+            onMessageDeleted(){
+                this.model.set({'hidden_chat_actions': !this.model.get('hidden_chat_actions')})
+         
+            },
+            //-------
             onMessageEdited () {
+                this.model.set({'hidden_chat_actions': !this.model.get('hidden_chat_actions')})
                 if (this.model.get('is_archived')) {
                     return;
                 }
@@ -155,6 +185,7 @@ converse.plugins.add('converse-message-view', {
                 if(_.includes(username,'@')){
                     username = username.split('@')[0]
                 }
+           
                 const msg = u.stringToElement(tpl_message(
                     _.extend(
                         this.model.toJSON(), {

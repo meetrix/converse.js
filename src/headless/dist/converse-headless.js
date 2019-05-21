@@ -40802,7 +40802,21 @@ _converse_core__WEBPACK_IMPORTED_MODULE_2__["default"].plugins.add('converse-cha
             'references': attrs.references
           });
         } else {
-          message = this.messages.create(attrs);
+          message = this.messages.findWhere('deleting');
+
+          if (message) {
+            const older_versions = message.get('older_versions') || [];
+            older_versions.push(message.get('message'));
+            message.save({
+              'deleting': false,
+              'deleted': moment().format(),
+              'message': attrs.message,
+              'older_versions': older_versions,
+              'references': attrs.references
+            });
+          } else {
+            message = this.messages.create(attrs);
+          }
         }
 
         _converse.api.send(this.createMessageStanza(message));
@@ -45349,6 +45363,7 @@ _converse_core__WEBPACK_IMPORTED_MODULE_3__["default"].plugins.add('converse-muc
       },
 
       getOutgoingMessageAttributes(text, spoiler_hint) {
+        console.log('text', text);
         const is_spoiler = this.get('composing_spoiler');
         var references;
 

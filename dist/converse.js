@@ -49305,6 +49305,7 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
       events: {
         'change input.fileupload': 'onFileSelection',
         'click .chat-msg__action-edit': 'onMessageEditButtonClicked',
+        'click .chat-msg__action-delete': 'onMessageDeleteButtonClicked',
         'click .chatbox-navback': 'showControlBox',
         'click .close-chatbox-button': 'close',
         'click .new-msgs-indicator': 'viewUnreadMessages',
@@ -50046,6 +50047,35 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
           message.save('correcting', false);
           this.insertIntoTextArea('', true, false);
         }
+      },
+
+      async onMessageDeleteButtonClicked(ev) {
+        ev.preventDefault(); // const idx = this.model.messages.findLastIndex('correcting'),
+        //       currently_correcting = idx >=0 ? this.model.messages.at(idx) : null,
+
+        const message_el = _converse_headless_utils_emoji__WEBPACK_IMPORTED_MODULE_21__["default"].ancestor(ev.target, '.chat-msg');
+        const message = this.model.messages.findWhere({
+          'msgid': message_el.getAttribute('data-msgid')
+        });
+        message.save('deleting', true);
+        const spoiler_hint = {};
+
+        if (await this.model.sendMessage('This message was deleted', {})) {
+          _converse.api.trigger('messageSend', 'This message was deleted');
+        }
+
+        this.setChatState(_converse.ACTIVE, {
+          'silent': true
+        }); // if (currently_correcting !== message) {
+        //     if (!_.isNil(currently_correcting)) {
+        //         currently_correcting.save('correcting', false);
+        //     }
+        //     message.save('correcting', true);
+        //     this.insertIntoTextArea(u.prefixMentions(message), true, true);
+        // } else {
+        //     message.save('correcting', false);
+        //     this.insertIntoTextArea('', true, false);
+        // }
       },
 
       editLaterMessage() {
@@ -52371,7 +52401,8 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_1__["default"].plugins
     });
     _converse.MessageView = _converse.ViewWithAvatar.extend({
       events: {
-        'click .chat-msg__edit-modal': 'showMessageVersionsModal'
+        'click .chat-msg__edit-modal': 'showMessageVersionsModal',
+        'click .toggle-chat-msg-actions': 'toggleChatMsgActions'
       },
 
       initialize() {
@@ -52381,6 +52412,9 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_1__["default"].plugins
 
         this.model.on('change', this.onChanged, this);
         this.model.on('destroy', this.remove, this);
+        this.model.set({
+          'hidden_chat_actions': true
+        });
       },
 
       async render() {
@@ -52415,6 +52449,7 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_1__["default"].plugins
         // attr gets removed when this.render() gets called further
         // down.
         const edited = item.changed.edited;
+        const deleted = item.changed.deleted;
 
         if (this.model.changed.progress) {
           return this.renderFileUploadProgresBar();
@@ -52427,9 +52462,45 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_1__["default"].plugins
         if (edited) {
           this.onMessageEdited();
         }
+
+        if (deleted) {
+          this.onMessageDeleted();
+        }
       },
 
+      //------MDEV
+      toggleChatMsgActions(ev) {
+        var actiosnel = this.el.querySelector('.chat-msg-actions');
+        this.model.set({
+          'hidden_chat_actions': !this.model.get('hidden_chat_actions')
+        });
+        _converse_headless_utils_emoji__WEBPACK_IMPORTED_MODULE_9__["default"].addClass('hidden', actiosnel);
+
+        if (this.model.get('hidden_chat_actions')) {
+          _converse_headless_utils_emoji__WEBPACK_IMPORTED_MODULE_9__["default"].addClass('hidden', actiosnel);
+        } else {
+          _converse_headless_utils_emoji__WEBPACK_IMPORTED_MODULE_9__["default"].removeClass('hidden', actiosnel);
+        } // if(actiosnelstyle === 'none'){
+        //     actiosnelstyle = 'block'
+        // }
+        // else{
+        //     actiosnelstyle = 'none'
+        // }
+
+      },
+
+      onMessageDeleted() {
+        this.model.set({
+          'hidden_chat_actions': !this.model.get('hidden_chat_actions')
+        });
+      },
+
+      //-------
       onMessageEdited() {
+        this.model.set({
+          'hidden_chat_actions': !this.model.get('hidden_chat_actions')
+        });
+
         if (this.model.get('is_archived')) {
           return;
         }
@@ -54225,6 +54296,7 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
       events: {
         'change input.fileupload': 'onFileSelection',
         'click .chat-msg__action-edit': 'onMessageEditButtonClicked',
+        'click .chat-msg__action-delete': 'onMessageDeleteButtonClicked',
         'click .chatbox-navback': 'showControlBox',
         'click .close-chatbox-button': 'close',
         'click .configure-chatroom-button': 'getAndRenderConfigurationForm',
@@ -63134,7 +63206,21 @@ _converse_core__WEBPACK_IMPORTED_MODULE_2__["default"].plugins.add('converse-cha
             'references': attrs.references
           });
         } else {
-          message = this.messages.create(attrs);
+          message = this.messages.findWhere('deleting');
+
+          if (message) {
+            const older_versions = message.get('older_versions') || [];
+            older_versions.push(message.get('message'));
+            message.save({
+              'deleting': false,
+              'deleted': moment().format(),
+              'message': attrs.message,
+              'older_versions': older_versions,
+              'references': attrs.references
+            });
+          } else {
+            message = this.messages.create(attrs);
+          }
         }
 
         _converse.api.send(this.createMessageStanza(message));
@@ -67681,6 +67767,7 @@ _converse_core__WEBPACK_IMPORTED_MODULE_3__["default"].plugins.add('converse-muc
       },
 
       getOutgoingMessageAttributes(text, spoiler_hint) {
+        console.log('text', text);
         const is_spoiler = this.get('composing_spoiler');
         var references;
 
@@ -93554,7 +93641,7 @@ __e(o.jid) +
 __e(o.contact_placeholder) +
 '"/>\n                            <span class="suggestion-box__additions visually-hidden" role="status" aria-live="assertive" aria-relevant="additions"></span>\n                        </div>\n                    </div> -->\n                    <div class="form-group add-xmpp-contact__name">\n                        <label class="clearfix" for="name">' +
 __e(o.label_nickname) +
-':</label>\n                        <div class="suggestion-box suggestion-box__name">\n                            <ul class="suggestion-box__results suggestion-box__results--above" hidden=""></ul>\n                            <input type="text" name="name" value="' +
+':</label>\n                        <div class="suggestion-box suggestion-box__name">\n                            <ul class="suggestion-box__results suggestion-box__results--above" hidden=""></ul>\n                            <input type="text" autocomplete="false" name="name" value="' +
 __e(o.nickname) +
 '"\n                                   class="form-control suggestion-box__input"\n                                   placeholder="' +
 __e(o.nickname_placeholder) +
@@ -95498,10 +95585,16 @@ __p += '\n            ';
 __p += ' <span class="fa fa-check chat-msg__receipt"></span> ';
  } ;
 __p += '\n            ';
- if (o.edited) { ;
+ if (o.edited && !o.deleted) { ;
 __p += ' <i title="' +
 __e(o.__('This message has been edited')) +
 '" class="fa fa-edit chat-msg__edit-modal"></i> ';
+ } ;
+__p += '\n            ';
+ if (o.deleted) { ;
+__p += ' <i title="' +
+__e(o.__('This message has been edited')) +
+'" class="far fa-trash-alt"></i> ';
  } ;
 __p += '\n            ';
  if (!o.is_me_message) { ;
@@ -95534,10 +95627,20 @@ __p += '"><!-- message gets added here via renderMessage --></div>\n            
 __p += '</div>';
  } ;
 __p += '\n            ';
- if (o.type !== 'headline' && !o.is_me_message && o.sender === 'me') { ;
-__p += '\n            <div class="chat-msg__actions">\n                <button class="chat-msg__action chat-msg__action-edit fa fa-pencil-alt" title="' +
+ if (o.type !== 'headline' && !o.is_me_message && o.sender === 'me' && !o.deleted) { ;
+__p += '\n            <!-- <div class="chat-msg__actions">\n                \n                <button class="chat-msg__action chat-msg__action-edit fa fa-pencil-alt" title="' +
 __e(o.__('Edit this message')) +
-'"></button>\n            </div>\n            ';
+'"></button>\n                <button class="chat-msg__action chat-msg__action-delete fa fa-flag" title="' +
+__e(o.__('Delete this message')) +
+'"></button>\n            </div> -->\n            <button class="toggle-chat-msg-actions">...</button>\n            <ul class="chat-msg-actions hidden">\n                    <li class="chat-msg__action chat-msg__action-edit fa fa-pencil-alt" title="' +
+__e(o.__('Edit this message')) +
+'">' +
+__e(o.__('Edit message')) +
+'</li>\n                    <li class="chat-msg__action chat-msg__action-delete fa fa-flag" title="' +
+__e(o.__('Delete this message')) +
+'">' +
+__e(o.__('Delete message')) +
+'</li>\n            </ul>\n            ';
  } ;
 __p += '\n\n        ';
  if (!o.is_me_message) { ;
