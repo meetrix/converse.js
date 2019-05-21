@@ -192,11 +192,14 @@ converse.plugins.add("converse-autocomplete", {
             }
 
             insertValue (suggestion) {
-                let value;
+                let value = suggestion.value;
+                if(_.includes(value,'@')){
+                    value = value.split('@')[0]
+                }
                 if (this.match_current_word) {
-                    u.replaceCurrentWord(this.input, suggestion.value);
+                    u.replaceCurrentWord(this.input, value);
                 } else {
-                    this.input.value = suggestion.value;
+                    this.input.value = value;
                 }
             }
 

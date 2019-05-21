@@ -288,6 +288,7 @@ converse.plugins.add('converse-muc', {
             },
 
             getDisplayName () {
+                
                 return this.get('name') || this.get('jid');
             },
 
@@ -642,7 +643,6 @@ converse.plugins.add('converse-muc', {
                         const configArray = [],
                             fields = stanza.querySelectorAll('field');
                         let count = fields.length;
-                        console.log('config1',config)
                         _.each(fields, (field) => {
                             let fieldname;
                             const type = field.getAttribute('type');
@@ -670,7 +670,6 @@ converse.plugins.add('converse-muc', {
                                 ),'')
                             }
                             //---------->MDEV
-                            console.log('config',configArray)
                             configArray.push(field);
                             if (!--count) {
                                 this.sendConfiguration(configArray, resolve, reject);
@@ -1391,7 +1390,6 @@ converse.plugins.add('converse-muc', {
 
             let contact = _converse.roster.get(from),
                 result;
-            console.log('contact',contact)
             if (_converse.auto_join_on_invite) {
                 result = true;
             } else {

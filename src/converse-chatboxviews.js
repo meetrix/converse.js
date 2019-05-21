@@ -20,7 +20,23 @@ const AvatarMixin = {
     renderAvatar (el) {
         el = el || this.el;
         const canvas_el = el.querySelector('canvas');
-        if (_.isNull(canvas_el)) {
+        if(!_.isNull(el.querySelector('.show-profile'))){
+            if (this.model.vcard) {
+                const data = {
+                    'classes': 'avatar align-self-center',
+                    'width': 40,
+                    'height': 40,
+                }
+                const image_type = this.model.vcard.get('image_type'),
+                      image = this.model.vcard.get('image');
+                      
+                data['image'] = "data:" + image_type + ";base64," + image;
+                el.querySelector('.show-profile').innerHTML = tpl_avatar(data);
+                
+            }
+            return;
+        }
+        else if (_.isNull(canvas_el)) {
             return;
         }
         const defaultAvatar = "PD94bWwgdmVyc2lvbj0iMS4wIj8+CjxzdmcgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB3aWR0aD0iMTI4IiBoZWlnaHQ9IjEyOCI+CiA8cmVjdCB3aWR0aD0iMTI4IiBoZWlnaHQ9IjEyOCIgZmlsbD0iIzU1NSIvPgogPGNpcmNsZSBjeD0iNjQiIGN5PSI0MSIgcj0iMjQiIGZpbGw9IiNmZmYiLz4KIDxwYXRoIGQ9Im0yOC41IDExMiB2LTEyIGMwLTEyIDEwLTI0IDI0LTI0IGgyMyBjMTQgMCAyNCAxMiAyNCAyNCB2MTIiIGZpbGw9IiNmZmYiLz4KPC9zdmc+Cg==";
@@ -39,6 +55,7 @@ const AvatarMixin = {
 
         if (!image || (display_name && defaultAvatar == image))
         {
+            // eslint-disable-next-line no-undef
             dataUri = createAvatar(display_name);
         }
   

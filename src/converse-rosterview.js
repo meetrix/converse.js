@@ -182,7 +182,7 @@ converse.plugins.add('converse-rosterview', {
                 const input_el = this.el.querySelector('input[name="name"]');
                 input_el.addEventListener('input', _.debounce(() => {
                     this.el.querySelector('.btn-primary').disabled = true;
-                    xhr.open("GET", `${_converse.xhr_user_search_url}search=${input_el.value}`, true);
+                    xhr.open("GET", `${_converse.xhr_user_search_url}search=${input_el.value.toLowerCase()}`, true);
                     xhr.setRequestHeader('Authorization',"Basic " + btoa(_converse.connection.jid.split('/')[0] + ":" + _converse.connection.pass));
                     xhr.setRequestHeader( 'Content-Type',   'application/json' );
                     xhr.send()
@@ -538,6 +538,7 @@ converse.plugins.add('converse-rosterview', {
 
                 if (display_name && _converse.DEFAULT_IMAGE === item.vcard.attributes.image)
                 {
+                    // eslint-disable-next-line no-undef
                     dataUri = createAvatar(display_name);
                 }
                 let roster_displayname = display_name;

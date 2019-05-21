@@ -946,7 +946,7 @@ converse.plugins.add('converse-muc-views', {
                     _.extend(this.model.toJSON(), {
                         '_converse': _converse,
                         'Strophe': Strophe,
-                        'info_close': __('Close and leave this groupchat'),
+                        'info_close': __('Close this groupchat'),
                         'info_configure': __('Configure this groupchat'),
                         'info_details': __('Show more details about this groupchat'),
                         'description': u.addHyperlinks(xss.filterXSS(_.get(this.model.get('subject'), 'text'), {'whiteList': {}})),
@@ -959,7 +959,7 @@ converse.plugins.add('converse-muc-views', {
                     '_converse': _converse,
                     'Strophe': Strophe,
                     'show_send_button': _converse.show_send_button,
-                    'info_close': __('Close and leave this groupchat'),
+                    'info_close': __('Close this groupchat'),
                     'info_configure': __('Configure this groupchat'),
                     'info_details': __('Show more details about this groupchat'),
                     'occupants':this.model.occupants.length
@@ -2176,6 +2176,7 @@ converse.plugins.add('converse-muc-views', {
 
                 if ((this.model.get('nick') || this.model.get('jid')))
                 {
+                    // eslint-disable-next-line no-undef
                     image = createAvatar(this.model.get('nick') || this.model.get('jid'));
                     const rosterJid = this.model.get('jid');
 
@@ -2261,6 +2262,7 @@ converse.plugins.add('converse-muc-views', {
             renderInviteWidget () {
                 this.renderUserDetail();
                 const widget = this.el.querySelector('.room-invite');
+                
                 if (this.shouldInviteWidgetBeShown()) {
                     if (_.isNull(widget)) {
                         const heading = this.el.querySelector('.occupants-heading');
@@ -2334,10 +2336,15 @@ converse.plugins.add('converse-muc-views', {
 
             inviteFormSubmitted (evt) {
                 evt.preventDefault();
-                const el = evt.target.querySelector('input.invited-contact'),
-                      jid = el.value;
+                const el = evt.target.querySelector('input.invited-contact');
+                let  jid = el.value;
+                if(!_.includes(jid,'@')){
+                    jid = jid+'@'+_converse.api.settings.get("default_domain")
+                }      
                 if (!jid || _.compact(jid.split('@')).length < 2) {
                     evt.target.outerHTML = tpl_chatroom_invite({
+                        '_': _,
+                        '__': __,
                         'error_message': __('Please enter a valid UserName address'),
                         'label_invitation': __('Invite'),
                     });
@@ -2345,6 +2352,7 @@ converse.plugins.add('converse-muc-views', {
                     return;
                 }
                 this.inviteRoom(jid)
+
                 // this.promptForInvite({
                 //     'target': el,
                 //     'text': {
@@ -2376,28 +2384,67 @@ converse.plugins.add('converse-muc-views', {
                     return;
                 }
                 form.addEventListener('submit', this.inviteFormSubmitted.bind(this), false);
-                const list = _converse.roster.map(i => {
-                    let label =  i.get('fullname') || i.get('jid');
-                        if(_.includes(label, '@')) {
-                            label = label.split('@')[0];
-                        }
-                    return {'label': label, 'value': i.get('jid')}
-                });
-                const el = this.el.querySelector('.suggestion-box').parentElement;
+                let list;
+                // let list = _converse.roster.map(i => {
+                //     let label =  i.get('fullname') || i.get('jid');
+                //         if(_.includes(label, '@')) {
+                //             label = label.split('@')[0];
+                //         }
+                //     return {'label': label, 'value': i.get('jid')}
+                // });
+                var that = this;
 
-                if (this.invite_auto_complete) {
-                    this.invite_auto_complete.destroy();
-                }
-                this.invite_auto_complete = new _converse.AutoComplete(el, {
-                    'min_chars': 1,
-                    'list': list
-                });
-                //this.invite_auto_complete.on('suggestion-box-selectcomplete', ev => this.promptForInvite(ev)); MD
-                this.invite_auto_complete.on('suggestion-box-selectcomplete', ev => this.inviteRoom(ev.text.value));
-                this.invite_auto_complete.ul.setAttribute(
-                    'style',
-                    `max-height: calc(${this.el.offsetHeight}px - 80px);`
-                );
+                this.el.querySelector('.invited-contact').addEventListener('click',function(ev){
+                    const exitstUsers = that.model.models.map(i => i.get('jid'))
+                    console.log('exitstUsers',exitstUsers)
+                    list = _converse.roster.map(i => {
+                        if(_.includes(exitstUsers,i.get('jid'))){
+                            return null
+                        }
+                        let label =  i.get('fullname') || i.get('jid');
+                            if(_.includes(label, '@')) {
+                                label = label.split('@')[0];
+                            }
+                        return {'label': label, 'value': i.get('jid')}
+                    });
+                    console.log('list',list)
+                    list = list.filter(function (el) {
+                        return el !== null;
+                    });
+                    console.log('list',list)
+                    const el = that.el.querySelector('.suggestion-box').parentElement;
+
+                    if (that.invite_auto_complete) {
+                        that.invite_auto_complete.destroy();
+                    }
+                    that.invite_auto_complete = new _converse.AutoComplete(el, {
+                        'min_chars': 1,
+                        'list': list
+                    });
+                    //this.invite_auto_complete.on('suggestion-box-selectcomplete', ev => this.promptForInvite(ev)); MD
+                    that.invite_auto_complete.on('suggestion-box-selectcomplete', ev => {
+                        that.el.querySelector('.invited-contact').value = ev.text.label
+                    });
+                    that.invite_auto_complete.ul.setAttribute(
+                        'style',
+                        `max-height: calc(${that.el.offsetHeight}px - 80px);`
+                    );
+                })
+                // const el = this.el.querySelector('.suggestion-box').parentElement;
+
+                // if (this.invite_auto_complete) {
+                //     this.invite_auto_complete.destroy();
+                // }
+                // this.invite_auto_complete = new _converse.AutoComplete(el, {
+                //     'min_chars': 1,
+                //     'list': list
+                // });
+                // //this.invite_auto_complete.on('suggestion-box-selectcomplete', ev => this.promptForInvite(ev)); MD
+                // this.invite_auto_complete.on('suggestion-box-selectcomplete', ev => this.inviteRoom(ev.text.value));
+                // this.invite_auto_complete.ul.setAttribute(
+                //     'style',
+                //     `max-height: calc(${this.el.offsetHeight}px - 80px);`
+                // );
             }
         });
 
