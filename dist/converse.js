@@ -52471,6 +52471,7 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_1__["default"].plugins
 
       //------MDEV
       toggleChatMsgActions(ev) {
+        ev.stopPropagation();
         var actiosnel = this.el.querySelector('.chat-msg-actions');
         this.model.set({
           'hidden_chat_actions': !this.model.get('hidden_chat_actions')
@@ -52479,6 +52480,9 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_1__["default"].plugins
         if (this.model.get('hidden_chat_actions')) {
           _converse_headless_utils_emoji__WEBPACK_IMPORTED_MODULE_9__["default"].addClass('hidden', actiosnel);
         } else {
+          var buttonPosition = this.el.querySelector('.toggle-chat-msg-actions').getBoundingClientRect();
+          var buttontop = buttonPosition.top - 80;
+          actiosnel.setAttribute("style", "top:" + buttontop);
           _converse_headless_utils_emoji__WEBPACK_IMPORTED_MODULE_9__["default"].removeClass('hidden', actiosnel);
         } // if(actiosnelstyle === 'none'){
         //     actiosnelstyle = 'block'
@@ -52490,7 +52494,6 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_1__["default"].plugins
       },
 
       hideChatMsgActions(ev) {
-        console.log('mouse leave');
         ev.stopPropagation();
         this.model.set({
           'hidden_chat_actions': true

@@ -138,12 +138,16 @@ converse.plugins.add('converse-message-view', {
             },
             //------MDEV
             toggleChatMsgActions(ev){
+                ev.stopPropagation();
                 var actiosnel= this.el.querySelector('.chat-msg-actions');
 
                 this.model.set({'hidden_chat_actions': !this.model.get('hidden_chat_actions')})
                 if (this.model.get('hidden_chat_actions')){
                     u.addClass('hidden', actiosnel);
                 }else{
+                    var buttonPosition = this.el.querySelector('.toggle-chat-msg-actions').getBoundingClientRect()
+                    var buttontop = buttonPosition.top - 80;
+                    actiosnel.setAttribute("style", "top:"+buttontop);
                     u.removeClass('hidden', actiosnel);
                 }
                 // if(actiosnelstyle === 'none'){
@@ -155,7 +159,6 @@ converse.plugins.add('converse-message-view', {
                 
             },
             hideChatMsgActions(ev){
-                console.log('mouse leave')
                 ev.stopPropagation();
                 this.model.set({'hidden_chat_actions': true})
                 var actiosnel= this.el.querySelector('.chat-msg-actions');
