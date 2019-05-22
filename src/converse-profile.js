@@ -178,7 +178,7 @@ converse.plugins.add('converse-profile', {
 
             afterRender () {
                 this.el.addEventListener('shown.bs.modal', () => {
-                    this.el.querySelector('input[name="status_message"]').focus();
+                    // this.el.querySelector('input[name="status_message"]').focus();
                 }, false);
             },
 
@@ -243,6 +243,7 @@ converse.plugins.add('converse-profile', {
 
             toHTML () {
                 const chat_status = this.model.get('status') || 'offline';
+                console.log('chat_status',chat_status)
                 return tpl_profile_view(_.extend(
                     this.model.toJSON(),
                     this.model.vcard.toJSON(), {

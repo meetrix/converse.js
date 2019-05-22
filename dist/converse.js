@@ -48737,23 +48737,23 @@ const u = utils;
 const AvatarMixin = {
   renderAvatar(el) {
     el = el || this.el;
-    const canvas_el = el.querySelector('canvas');
+    const canvas_el = el.querySelector('canvas'); // if(!_.isNull(el.querySelector('.show-profile'))){
+    //     if (this.model.vcard) {
+    //         const data = {
+    //             'classes': 'avatar align-self-center',
+    //             'width': 40,
+    //             'height': 40,
+    //         }
+    //         const image_type = this.model.vcard.get('image_type'),
+    //               image = this.model.vcard.get('image');
+    //         data['image'] = "data:" + image_type + ";base64," + image;
+    //         el.querySelector('.show-profile').innerHTML = tpl_avatar(data);
+    //     }
+    //     return;
+    // }
+    // else 
 
-    if (!_.isNull(el.querySelector('.show-profile'))) {
-      if (this.model.vcard) {
-        const data = {
-          'classes': 'avatar align-self-center',
-          'width': 40,
-          'height': 40
-        };
-        const image_type = this.model.vcard.get('image_type'),
-              image = this.model.vcard.get('image');
-        data['image'] = "data:" + image_type + ";base64," + image;
-        el.querySelector('.show-profile').innerHTML = templates_avatar_svg__WEBPACK_IMPORTED_MODULE_4___default()(data);
-      }
-
-      return;
-    } else if (_.isNull(canvas_el)) {
+    if (_.isNull(canvas_el)) {
       return;
     }
 
@@ -58382,8 +58382,7 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_4__["default"].plugins
       },
 
       afterRender() {
-        this.el.addEventListener('shown.bs.modal', () => {
-          this.el.querySelector('input[name="status_message"]').focus();
+        this.el.addEventListener('shown.bs.modal', () => {// this.el.querySelector('input[name="status_message"]').focus();
         }, false);
       },
 
@@ -58436,6 +58435,7 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_4__["default"].plugins
 
       toHTML() {
         const chat_status = this.model.get('status') || 'offline';
+        console.log('chat_status', chat_status);
         return templates_profile_view_html__WEBPACK_IMPORTED_MODULE_8___default()(_.extend(this.model.toJSON(), this.model.vcard.toJSON(), {
           '__': __,
           'fullname': this.model.vcard.get('nickname') || this.model.vcard.get('fullname') || _converse.bare_jid.split('@')[0],
@@ -93897,7 +93897,7 @@ __p += ' checked="checked" ';
  } ;
 __p += '\n                                   type="radio" id="radio-xa" value="xa" name="chat_status" class="custom-control-input"/>\n                            <label class="custom-control-label" for="radio-xa">\n                                <span class="fa fa-circle chat-status chat-status--xa"></span>' +
 __e(o.label_xa) +
-'</label>\n                        </div>\n                    </div>\n                    <div class="form-group">\n                        <div class="btn-group w-100">\n                            <input name="status_message" type="text" class="form-control" \n                                value="' +
+'</label>\n                        </div>\n                    </div>\n                    <!-- <div class="form-group">\n                        <div class="btn-group w-100">\n                            <input name="status_message" type="text" class="form-control" \n                                value="' +
 __e(o.status_message) +
 '" placeholder="' +
 __e(o.placeholder_status_message) +
@@ -93905,7 +93905,7 @@ __e(o.placeholder_status_message) +
  if (!o.status_message) { ;
 __p += ' hidden ';
  } ;
-__p += '"></span>\n                        </div>\n                    </div>\n                    <button type="submit" class="btn btn-primary">' +
+__p += '"></span>\n                        </div>\n                    </div> -->\n                    <button type="submit" class="btn btn-primary">' +
 __e(o.label_save) +
 '</button>\n                </form>\n            </div>\n        </div>\n    </div>\n</div>\n';
 return __p
