@@ -80,7 +80,8 @@ converse.plugins.add('converse-message-view', {
         _converse.MessageView = _converse.ViewWithAvatar.extend({
             events: {
                 'click .chat-msg__edit-modal': 'showMessageVersionsModal',
-                'click .toggle-chat-msg-actions': 'toggleChatMsgActions'
+                'click .toggle-chat-msg-actions': 'toggleChatMsgActions',
+                'mouseout .chat-msg__content':'hideChatMsgActions'
             },
 
             initialize () {
@@ -140,7 +141,6 @@ converse.plugins.add('converse-message-view', {
                 var actiosnel= this.el.querySelector('.chat-msg-actions');
 
                 this.model.set({'hidden_chat_actions': !this.model.get('hidden_chat_actions')})
-                u.addClass('hidden', actiosnel);
                 if (this.model.get('hidden_chat_actions')){
                     u.addClass('hidden', actiosnel);
                 }else{
@@ -153,6 +153,13 @@ converse.plugins.add('converse-message-view', {
                 //     actiosnelstyle = 'none'
                 // }
                 
+            },
+            hideChatMsgActions(ev){
+                console.log('mouse leave')
+                ev.stopPropagation();
+                this.model.set({'hidden_chat_actions': true})
+                var actiosnel= this.el.querySelector('.chat-msg-actions');
+                u.addClass('hidden', actiosnel);
             },
             onMessageDeleted(){
                 this.model.set({'hidden_chat_actions': !this.model.get('hidden_chat_actions')})

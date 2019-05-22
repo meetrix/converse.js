@@ -52402,7 +52402,8 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_1__["default"].plugins
     _converse.MessageView = _converse.ViewWithAvatar.extend({
       events: {
         'click .chat-msg__edit-modal': 'showMessageVersionsModal',
-        'click .toggle-chat-msg-actions': 'toggleChatMsgActions'
+        'click .toggle-chat-msg-actions': 'toggleChatMsgActions',
+        'mouseout .chat-msg__content': 'hideChatMsgActions'
       },
 
       initialize() {
@@ -52474,7 +52475,6 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_1__["default"].plugins
         this.model.set({
           'hidden_chat_actions': !this.model.get('hidden_chat_actions')
         });
-        _converse_headless_utils_emoji__WEBPACK_IMPORTED_MODULE_9__["default"].addClass('hidden', actiosnel);
 
         if (this.model.get('hidden_chat_actions')) {
           _converse_headless_utils_emoji__WEBPACK_IMPORTED_MODULE_9__["default"].addClass('hidden', actiosnel);
@@ -52487,6 +52487,16 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_1__["default"].plugins
         //     actiosnelstyle = 'none'
         // }
 
+      },
+
+      hideChatMsgActions(ev) {
+        console.log('mouse leave');
+        ev.stopPropagation();
+        this.model.set({
+          'hidden_chat_actions': true
+        });
+        var actiosnel = this.el.querySelector('.chat-msg-actions');
+        _converse_headless_utils_emoji__WEBPACK_IMPORTED_MODULE_9__["default"].addClass('hidden', actiosnel);
       },
 
       onMessageDeleted() {
@@ -95632,15 +95642,11 @@ __p += '\n            <!-- <div class="chat-msg__actions">\n                \n  
 __e(o.__('Edit this message')) +
 '"></button>\n                <button class="chat-msg__action chat-msg__action-delete fa fa-flag" title="' +
 __e(o.__('Delete this message')) +
-'"></button>\n            </div> -->\n            <div class="dropdown-actions">\n            <ul class="chat-msg-actions hidden">\n                <li class="chat-msg__action chat-msg__action-edit fa fa-pencil-alt" title="' +
-__e(o.__('Edit this message')) +
-'">' +
+'"></button>\n            </div> -->\n            <div class="dropdown-actions">\n            <ul class="chat-msg-actions hidden">\n                <li class="chat-msg__action chat-msg__action-edit fa fa-pencil-alt" >' +
 __e(o.__('Edit message')) +
-'</li>\n                <li class="chat-msg__action chat-msg__action-delete fa fa-flag" title="' +
-__e(o.__('Delete this message')) +
-'">' +
+'</li>\n                <li class="chat-msg__action chat-msg__action-delete fa fa-flag" >' +
 __e(o.__('Delete message')) +
-'</li>\n            </ul>\n            <button class="toggle-chat-msg-actions"><i class="fas fa-ellipsis-h"></i></button>\n            </div>\n            ';
+'</li>\n            </ul>\n            <button class="toggle-chat-msg-actions">...</i></button>\n            </div>\n            ';
  } ;
 __p += '\n\n        ';
  if (!o.is_me_message) { ;
