@@ -52403,7 +52403,7 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_1__["default"].plugins
       events: {
         'click .chat-msg__edit-modal': 'showMessageVersionsModal',
         'click .toggle-chat-msg-actions': 'toggleChatMsgActions',
-        'mouseout .chat-msg__content': 'hideChatMsgActions'
+        'mouseout .chat-msg-actions': 'hideChatMsgActions'
       },
 
       initialize() {
@@ -52471,6 +52471,7 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_1__["default"].plugins
 
       //------MDEV
       toggleChatMsgActions(ev) {
+        ev.preventDefault();
         ev.stopPropagation();
         var actiosnel = this.el.querySelector('.chat-msg-actions');
         this.model.set({
@@ -52495,6 +52496,12 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_1__["default"].plugins
 
       hideChatMsgActions(ev) {
         ev.stopPropagation();
+        console.log(ev.target.className);
+
+        if (ev.target.className !== 'chat-msg-actionsr') {
+          return;
+        }
+
         this.model.set({
           'hidden_chat_actions': true
         });
@@ -54659,21 +54666,20 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
         if (this.model.get('hidden_occupants')) {
           u.removeClass('fa-angle-double-right', icon_el);
           u.addClass('fa-angle-double-left', icon_el);
-          const chat_area = this.el.querySelector('.chat-area');
-          u.removeClass('col-md-9', chat_area);
-          u.removeClass('col-8', chat_area);
-          u.addClass('full', chat_area);
-          u.addClass('col-12', chat_area);
+          const chat_area = this.el.querySelector('.chat-area'); // u.removeClass('col-md-9', chat_area);
+          // u.removeClass('col-8', chat_area);
+          // u.addClass('full', chat_area);
+          // u.addClass('col-12', chat_area);
+
           u.hideElement(this.el.querySelector('.occupants'));
         } else {
           const chat_area = this.el.querySelector('.chat-area');
           u.addClass('fa-angle-double-right', icon_el);
           u.removeClass('fa-angle-double-left', icon_el);
-          u.removeClass('hidden', this.el.querySelector('.occupants'));
-          u.removeClass('full', chat_area);
-          u.removeClass('col-12', chat_area);
-          u.addClass('col-md-9', chat_area);
-          u.addClass('col-8', chat_area);
+          u.removeClass('hidden', this.el.querySelector('.occupants')); // u.removeClass('full', chat_area);
+          // u.removeClass('col-12', chat_area);
+          // u.addClass('col-md-9', chat_area);
+          // u.addClass('col-8', chat_area);
 
           if (this.el.querySelector('.searched-message')) {
             u.hideElement(this.el.querySelector('.searched-message'));
@@ -55921,7 +55927,8 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
     });
     _converse.ChatRoomOccupantsView = Backbone.OrderedListView.extend({
       tagName: 'div',
-      className: 'occupants col-md-3 col-4',
+      // className: 'occupants col-md-3 col-4',
+      className: 'occupants col-auto',
       listItems: 'model',
       sortEvent: 'change:role',
       listSelector: '.occupant-list',
@@ -93917,7 +93924,7 @@ var _ = {escape:__webpack_require__(/*! ./node_modules/lodash/escape.js */ "./no
 module.exports = function(o) {
 var __t, __p = '', __j = Array.prototype.join;
 function print() { __p += __j.call(arguments, '') }
-__p += '<!-- src/templates/chatarea.html -->\n<div class="chat-area col-md-9 col-8">\n    <!-- <div class="chat-upper-toolbar"></div> -->\n    <div class="chat-content ';
+__p += '<!-- src/templates/chatarea.html -->\n<div class="chat-area col">\n    <!-- <div class="chat-upper-toolbar"></div> -->\n    <div class="chat-content ';
  if (o.show_send_button) { ;
 __p += 'chat-content-sendbutton';
  } ;
@@ -95649,7 +95656,7 @@ __e(o.__('Delete this message')) +
 __e(o.__('Edit message')) +
 '</li>\n                <li class="chat-msg__action chat-msg__action-delete fa fa-flag" >' +
 __e(o.__('Delete message')) +
-'</li>\n            </ul>\n            <button class="toggle-chat-msg-actions">...</i></button>\n            </div>\n            ';
+'</li>\n               \n            </ul>\n            <button class="toggle-chat-msg-actions">...</i></button>\n            </div>\n            ';
  } ;
 __p += '\n\n        ';
  if (!o.is_me_message) { ;

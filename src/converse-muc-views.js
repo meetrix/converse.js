@@ -1033,20 +1033,20 @@ converse.plugins.add('converse-muc-views', {
                     u.removeClass('fa-angle-double-right', icon_el);
                     u.addClass('fa-angle-double-left', icon_el);
                     const chat_area = this.el.querySelector('.chat-area');
-                    u.removeClass('col-md-9', chat_area);
-                    u.removeClass('col-8', chat_area);
-                    u.addClass('full', chat_area);
-                    u.addClass('col-12', chat_area);
+                    // u.removeClass('col-md-9', chat_area);
+                    // u.removeClass('col-8', chat_area);
+                    // u.addClass('full', chat_area);
+                    // u.addClass('col-12', chat_area);
                     u.hideElement(this.el.querySelector('.occupants'));
                 } else {
                     const chat_area = this.el.querySelector('.chat-area');
                     u.addClass('fa-angle-double-right', icon_el);
                     u.removeClass('fa-angle-double-left', icon_el);
                     u.removeClass('hidden', this.el.querySelector('.occupants'));
-                    u.removeClass('full', chat_area);
-                    u.removeClass('col-12', chat_area);
-                    u.addClass('col-md-9', chat_area);
-                    u.addClass('col-8', chat_area);
+                    // u.removeClass('full', chat_area);
+                    // u.removeClass('col-12', chat_area);
+                    // u.addClass('col-md-9', chat_area);
+                    // u.addClass('col-8', chat_area);
                     if(this.el.querySelector('.searched-message')){
                         u.hideElement(this.el.querySelector('.searched-message'));
                     }
@@ -2216,7 +2216,8 @@ converse.plugins.add('converse-muc-views', {
         });
         _converse.ChatRoomOccupantsView = Backbone.OrderedListView.extend({
             tagName: 'div',
-            className: 'occupants col-md-3 col-4',
+            // className: 'occupants col-md-3 col-4',
+            className: 'occupants col-auto',
             listItems: 'model',
             sortEvent: 'change:role',
             listSelector: '.occupant-list',
