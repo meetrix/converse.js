@@ -80,6 +80,7 @@ converse.plugins.add('converse-message-view', {
         _converse.MessageView = _converse.ViewWithAvatar.extend({
             events: {
                 'click .chat-msg__edit-modal': 'showMessageVersionsModal',
+                'click .cancel-chat-msg-actions': 'toggleChatMsgActions',
                 'click .toggle-chat-msg-actions': 'toggleChatMsgActions',
                 'mouseout .chat-msg-actions':'hideChatMsgActions'
             },
@@ -146,8 +147,9 @@ converse.plugins.add('converse-message-view', {
                 if (this.model.get('hidden_chat_actions')){
                     u.addClass('hidden', actiosnel);
                 }else{
-                    var buttonPosition = this.el.querySelector('.toggle-chat-msg-actions').getBoundingClientRect()
-                    var buttontop = buttonPosition.top - 80;
+                    var buttonPosition = this.el.querySelector('.toggle-chat-msg-actions').getBoundingClientRect();
+                    var targetPosition = buttonPosition.top + buttonPosition.bottom;
+                    var buttontop = targetPosition/2 - 80;
                     actiosnel.setAttribute("style", "top:"+buttontop);
                     u.removeClass('hidden', actiosnel);
                 }
