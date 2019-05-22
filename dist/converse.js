@@ -95632,15 +95632,15 @@ __p += '\n            <!-- <div class="chat-msg__actions">\n                \n  
 __e(o.__('Edit this message')) +
 '"></button>\n                <button class="chat-msg__action chat-msg__action-delete fa fa-flag" title="' +
 __e(o.__('Delete this message')) +
-'"></button>\n            </div> -->\n            <div class="dropdown-actions">\n            <button class="toggle-chat-msg-actions"><i class="fas fa-ellipsis-h"></i></button>\n            <ul class="chat-msg-actions hidden">\n                    <li class="chat-msg__action chat-msg__action-edit fa fa-pencil-alt" title="' +
+'"></button>\n            </div> -->\n            <div class="dropdown-actions">\n            <ul class="chat-msg-actions hidden">\n                <li class="chat-msg__action chat-msg__action-edit fa fa-pencil-alt" title="' +
 __e(o.__('Edit this message')) +
 '">' +
 __e(o.__('Edit message')) +
-'</li>\n                    <li class="chat-msg__action chat-msg__action-delete fa fa-flag" title="' +
+'</li>\n                <li class="chat-msg__action chat-msg__action-delete fa fa-flag" title="' +
 __e(o.__('Delete this message')) +
 '">' +
 __e(o.__('Delete message')) +
-'</li>\n            </ul>\n            </div>\n            ';
+'</li>\n            </ul>\n            <button class="toggle-chat-msg-actions"><i class="fas fa-ellipsis-h"></i></button>\n            </div>\n            ';
  } ;
 __p += '\n\n        ';
  if (!o.is_me_message) { ;
