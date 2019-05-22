@@ -1014,6 +1014,7 @@ converse.plugins.add('converse-chatview', {
             },
 
             onMessageEditButtonClicked (ev) {
+                
                 ev.preventDefault();
                 const idx = this.model.messages.findLastIndex('correcting'),
                       currently_correcting = idx >=0 ? this.model.messages.at(idx) : null,

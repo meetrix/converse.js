@@ -38,11 +38,13 @@
                 <button class="chat-msg__action chat-msg__action-edit fa fa-pencil-alt" title="{{{o.__('Edit this message')}}}"></button>
                 <button class="chat-msg__action chat-msg__action-delete fa fa-flag" title="{{{o.__('Delete this message')}}}"></button>
             </div> -->
+            <div class="dropdown-actions">
+            <button class="toggle-chat-msg-actions"><i class="fas fa-ellipsis-h"></i></button>
             <ul class="chat-msg-actions hidden">
                     <li class="chat-msg__action chat-msg__action-edit fa fa-pencil-alt" title="{{{o.__('Edit this message')}}}">{{{o.__('Edit message')}}}</li>
                     <li class="chat-msg__action chat-msg__action-delete fa fa-flag" title="{{{o.__('Delete this message')}}}">{{{o.__('Delete message')}}}</li>
             </ul>
-            <button class="toggle-chat-msg-actions"><i class="fas fa-ellipsis-h"></i></button>
+            </div>
             {[ } ]}
 
         {[ if (!o.is_me_message) { ]}</div>{[ } ]}
