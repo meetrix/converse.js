@@ -48737,23 +48737,24 @@ const u = utils;
 const AvatarMixin = {
   renderAvatar(el) {
     el = el || this.el;
-    const canvas_el = el.querySelector('canvas'); // if(!_.isNull(el.querySelector('.show-profile'))){
-    //     if (this.model.vcard) {
-    //         const data = {
-    //             'classes': 'avatar align-self-center',
-    //             'width': 40,
-    //             'height': 40,
-    //         }
-    //         const image_type = this.model.vcard.get('image_type'),
-    //               image = this.model.vcard.get('image');
-    //         data['image'] = "data:" + image_type + ";base64," + image;
-    //         el.querySelector('.show-profile').innerHTML = tpl_avatar(data);
-    //     }
-    //     return;
-    // }
-    // else 
+    const canvas_el = el.querySelector('canvas');
 
-    if (_.isNull(canvas_el)) {
+    if (!_.isNull(el.querySelector('image'))) {
+      if (this.model.vcard) {
+        const data = {
+          'classes': 'avatar align-self-center',
+          'width': 40,
+          'height': 40
+        };
+        const image_type = this.model.vcard.get('image_type'),
+              image = this.model.vcard.get('image');
+        data['image'] = "data:" + image_type + ";base64," + image; // el.querySelector('.show-profile').innerHTML = tpl_avatar(data);
+
+        el.querySelector('image').setAttribute('xlink:href', data['image']);
+      }
+
+      return;
+    } else if (_.isNull(canvas_el)) {
       return;
     }
 
@@ -58435,7 +58436,6 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_4__["default"].plugins
 
       toHTML() {
         const chat_status = this.model.get('status') || 'offline';
-        console.log('chat_status', chat_status);
         return templates_profile_view_html__WEBPACK_IMPORTED_MODULE_8___default()(_.extend(this.model.toJSON(), this.model.vcard.toJSON(), {
           '__': __,
           'fullname': this.model.vcard.get('nickname') || this.model.vcard.get('fullname') || _converse.bare_jid.split('@')[0],

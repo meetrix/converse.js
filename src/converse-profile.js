@@ -243,7 +243,6 @@ converse.plugins.add('converse-profile', {
 
             toHTML () {
                 const chat_status = this.model.get('status') || 'offline';
-                console.log('chat_status',chat_status)
                 return tpl_profile_view(_.extend(
                     this.model.toJSON(),
                     this.model.vcard.toJSON(), {
