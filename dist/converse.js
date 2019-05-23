@@ -93746,7 +93746,7 @@ __e(o.jid) +
 __e(o.contact_placeholder) +
 '"/>\n                            <span class="suggestion-box__additions visually-hidden" role="status" aria-live="assertive" aria-relevant="additions"></span>\n                        </div>\n                    </div> -->\n                    <div class="form-group add-xmpp-contact__name">\n                        <label class="clearfix" for="name">' +
 __e(o.label_nickname) +
-':</label>\n                        <div class="suggestion-box suggestion-box__name">\n                            <ul class="suggestion-box__results suggestion-box__results--above" hidden=""></ul>\n                            <input type="text" autocomplete="false" name="name" value="' +
+':</label>\n                        <div class="suggestion-box suggestion-box__name">\n                            <ul class="suggestion-box__results suggestion-box__results--below" hidden=""></ul>\n                            <input type="text" autocomplete="false" name="name" value="' +
 __e(o.nickname) +
 '"\n                                   class="form-control suggestion-box__input"\n                                   placeholder="' +
 __e(o.nickname_placeholder) +
