@@ -52403,6 +52403,7 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_1__["default"].plugins
     _converse.MessageView = _converse.ViewWithAvatar.extend({
       events: {
         'click .chat-msg__edit-modal': 'showMessageVersionsModal',
+        'click .cancel-chat-msg-actions': 'toggleChatMsgActions',
         'click .toggle-chat-msg-actions': 'toggleChatMsgActions',
         'mouseout .chat-msg-actions': 'hideChatMsgActions'
       },
@@ -52483,7 +52484,8 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_1__["default"].plugins
           _converse_headless_utils_emoji__WEBPACK_IMPORTED_MODULE_9__["default"].addClass('hidden', actiosnel);
         } else {
           var buttonPosition = this.el.querySelector('.toggle-chat-msg-actions').getBoundingClientRect();
-          var buttontop = buttonPosition.top - 80;
+          var targetPosition = buttonPosition.top + buttonPosition.bottom;
+          var buttontop = targetPosition / 2 - 80;
           actiosnel.setAttribute("style", "top:" + buttontop);
           _converse_headless_utils_emoji__WEBPACK_IMPORTED_MODULE_9__["default"].removeClass('hidden', actiosnel);
         } // if(actiosnelstyle === 'none'){
@@ -95667,10 +95669,12 @@ __p += '\n            <!-- <div class="chat-msg__actions">\n                \n  
 __e(o.__('Edit this message')) +
 '"></button>\n                <button class="chat-msg__action chat-msg__action-delete fa fa-flag" title="' +
 __e(o.__('Delete this message')) +
-'"></button>\n            </div> -->\n            <div class="dropdown-actions">\n            <ul class="chat-msg-actions hidden">\n                <li class="chat-msg__action chat-msg__action-edit fa fa-pencil-alt" >' +
+'"></button>\n            </div> -->\n            <div class="dropdown-actions">\n            <ul class="chat-msg-actions hidden">\n                <li class="chat-msg__action chat-msg__action-edit"><i class="fa fa-pencil-alt"></i>' +
 __e(o.__('Edit message')) +
-'</li>\n                <li class="chat-msg__action chat-msg__action-delete fa fa-flag" >' +
+'</li>\n                <li class="chat-msg__action chat-msg__action-delete"><i class="fa fa-flag"></i>' +
 __e(o.__('Delete message')) +
+'</li>\n                <li class="chat-msg__action cancel-chat-msg-actions"><i class="fa fa-times"></i>' +
+__e(o.__('Cancel')) +
 '</li>\n               \n            </ul>\n            <button class="toggle-chat-msg-actions">...</i></button>\n            </div>\n            ';
  } ;
 __p += '\n\n        ';
