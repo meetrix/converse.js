@@ -54072,8 +54072,30 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
         };
       },
 
+      validationChatRoomForm(form) {
+        const chatroom = form.querySelector('input[name=chatroom]').value;
+        const chatroomReg = new RegExp('^[a-z]+$');
+
+        if (!(chatroomReg.test(chatroom) && chatroom.length <= 22)) {
+          this.showValidationError(__('Names must be lowercase without spaces or period, and shorter than 22 characters'));
+          return false;
+        }
+
+        return true;
+      },
+
+      showValidationError(error) {
+        const flash = this.el.querySelector('.chatroom-tip');
+        flash.setAttribute('style', "color:red"); // u.removeClass('hidden', flash);
+      },
+
       openChatRoom(ev) {
         ev.preventDefault();
+
+        if (!this.validationChatRoomForm(ev.target)) {
+          return;
+        }
+
         const data = this.parseRoomDataFromEvent(ev.target);
 
         if (data.nick === "") {
@@ -54221,8 +54243,30 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
         };
       },
 
+      validationChatRoomForm(form) {
+        const chatroom = form.querySelector('input[name=chatroom]').value;
+        const chatroomReg = new RegExp('^[a-z]+$');
+
+        if (!(chatroomReg.test(chatroom) && chatroom.length <= 22)) {
+          this.showValidationError(__('Names must be lowercase without spaces or period, and shorter than 22 characters'));
+          return false;
+        }
+
+        return true;
+      },
+
+      showValidationError(error) {
+        const flash = this.el.querySelector('.chatroom-tip');
+        flash.setAttribute('style', "color:red");
+      },
+
       saveChatRoom(ev) {
         ev.preventDefault();
+
+        if (!this.validationChatRoomForm(ev.target)) {
+          return;
+        }
+
         const data = this.parseRoomDataFromEvent(ev.target);
 
         if (data.nick === "") {
@@ -93633,7 +93677,7 @@ __p += '<!-- src/templates/add_chatroom_modal.html -->\n<div class="modal fade" 
 __e(o.__('Create New Channel')) +
 '\n                </div>\n                <button type="button" class="close" data-dismiss="modal" aria-label="Close">\n                    <i class="fas fa-times"></i>\n                </button>\n            </div>\n            <div class="modal-body">\n                <div class="modal-title" id="add-chatroom-modal-sublabel">\n                    ' +
 __e(o.__('Channels are where your members communicate. They are best when organized around a topic - #lead, for example')) +
-'\n                </div>\n                <form class="converse-form add-chatroom">\n                    <div class="form-group private-public">\n                        <div>\n                            <label class="switch">\n                                <input id="private-channel" type="checkbox" name="privatechannel" checked>\n                                <span class="slider round"></span>\n                            </label>\n                            <label for="privatechannel" class="form-check-label" >' +
+'\n                </div>\n                <div class="form-errors hidden"></div>\n                <form class="converse-form add-chatroom">\n                    <div class="form-group private-public">\n                        <div>\n                            <label class="switch">\n                                <input id="private-channel" type="checkbox" name="privatechannel" checked>\n                                <span class="slider round"></span>\n                            </label>\n                            <label for="privatechannel" class="form-check-label" >' +
 __e(o.__('Private Channel')) +
 '</label>\n                        </div>\n                        <span>' +
 __e(o.__('Just invited people can access this channel')) +
@@ -93645,7 +93689,7 @@ __e(o.__('Only the admin can write messages')) +
 __e(o.label_room_address) +
 '</label>\n                            <input type="text" required="required" name="chatroom" class="form-control" placeholder="' +
 __e(o.chatroom_placeholder) +
-'"/>\n                            <span>' +
+'"/>\n                            <span class="chatroom-tip">' +
 __e(o.__('Names must be lowercase without spaces or period, and shorter than 22 characters')) +
 '</span>\n                    </div>\n                    <div class="form-group channel-about">\n                            <label for="purpose">' +
 __e(o.__('Purpose')) +
@@ -94205,7 +94249,7 @@ __p += '<!-- src/templates/chatroom_configuration_modal.html -->\n<div class="mo
 __e(o.__('Channel Configuration')) +
 '\n              </div>\n              <button type="button" class="close" data-dismiss="modal" aria-label="Close">\n                  <i class="fas fa-times"></i>\n              </button>\n          </div>\n          <div class="modal-body">\n              <div class="modal-title" id="add-chatroom-modal-sublabel">\n                  ' +
 __e(o.__('Channels are where your members communicate. They are best when organized around a topic - #lead, for example')) +
-'\n              </div>\n              <form class="converse-form add-chatroom">\n                  <div class="form-group private-public">\n                      <div>\n                          <label class="switch">\n                              <input id="private-channel" type="checkbox" name="privatechannel" checked="' +
+'\n              </div>\n              <div class="form-errors hidden"></div>\n              <form class="converse-form add-chatroom">\n                  <div class="form-group private-public">\n                      <div>\n                          <label class="switch">\n                              <input id="private-channel" type="checkbox" name="privatechannel" checked="' +
 __e(o.publicroom !== '1'?'checked':'') +
 '">\n                              <span class="slider round"></span>\n                          </label>\n                          <label for="privatechannel" class="form-check-label" >' +
 __e(o.__('Private Channel')) +
@@ -94223,7 +94267,7 @@ __e(o.label_room_address) +
 __e(o.chatroom_placeholder) +
 '" value=' +
 __e(o.roomname) +
-' />\n                          <span>' +
+' />\n                          <span class="chatroom-tip">' +
 __e(o.__('Names must be lowercase without spaces or period, and shorter than 22 characters')) +
 '</span>\n                  </div>\n                  <div class="form-group channel-about">\n                          <label for="purpose">' +
 __e(o.__('Purpose')) +

@@ -489,9 +489,26 @@ converse.plugins.add('converse-muc-views', {
                 }
                  //-------->
             },
+            validationChatRoomForm(form){
+                const chatroom = form.querySelector('input[name=chatroom]').value;
+                const chatroomReg =  new RegExp('^[a-z]+$');
+                if(!(chatroomReg.test(chatroom) && chatroom.length <= 22)){
+                    this.showValidationError(__('Names must be lowercase without spaces or period, and shorter than 22 characters'));
+                    return false;
+                }
+                return true;
+            },
+            showValidationError(error){
+                const flash = this.el.querySelector('.chatroom-tip')
+                flash.setAttribute('style',"color:red")
+                // u.removeClass('hidden', flash);
+            },
 
             openChatRoom (ev) {
                 ev.preventDefault();
+                if(!this.validationChatRoomForm(ev.target)){
+                    return;
+                }
                 const data = this.parseRoomDataFromEvent(ev.target);
                 if (data.nick === "") {
                     // Make sure defaults apply if no nick is provided.
@@ -590,6 +607,7 @@ converse.plugins.add('converse-muc-views', {
                 const data = new FormData(form);
                 const jid = data.get('chatroom');
                 let nick;
+                
                 if (_converse.locked_muc_nickname) {
                     nick = _converse.getDefaultMUCNickname();
                     if (!nick) {
@@ -620,9 +638,25 @@ converse.plugins.add('converse-muc-views', {
                 }
                  //-------->
             },
+            validationChatRoomForm(form){
+                const chatroom = form.querySelector('input[name=chatroom]').value;
+                const chatroomReg =  new RegExp('^[a-z]+$');
+                if(!(chatroomReg.test(chatroom) && chatroom.length <= 22)){
+                    this.showValidationError(__('Names must be lowercase without spaces or period, and shorter than 22 characters'));
+                    return false;
+                }
+                return true;
+            },
+            showValidationError(error){
+                const flash = this.el.querySelector('.chatroom-tip')
+                flash.setAttribute('style',"color:red")
+            },
 
             saveChatRoom (ev) {
                 ev.preventDefault();
+                if(!this.validationChatRoomForm(ev.target)){
+                    return;
+                }
                 const data = this.parseRoomDataFromEvent(ev.target);
                 if (data.nick === "") {
                     // Make sure defaults apply if no nick is provided.

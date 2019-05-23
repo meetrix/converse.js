@@ -13,6 +13,7 @@
                 <div class="modal-title" id="add-chatroom-modal-sublabel">
                     {{{o.__('Channels are where your members communicate. They are best when organized around a topic - #lead, for example')}}}
                 </div>
+                <div class="form-errors hidden"></div>
                 <form class="converse-form add-chatroom">
                     <div class="form-group private-public">
                         <div>
@@ -37,7 +38,7 @@
                     <div class="form-group channel-name">
                             <label for="chatroom">{{{o.label_room_address}}}</label>
                             <input type="text" required="required" name="chatroom" class="form-control" placeholder="{{{o.chatroom_placeholder}}}"/>
-                            <span>{{{o.__('Names must be lowercase without spaces or period, and shorter than 22 characters')}}}</span>
+                            <span class="chatroom-tip">{{{o.__('Names must be lowercase without spaces or period, and shorter than 22 characters')}}}</span>
                     </div>
                     <div class="form-group channel-about">
                             <label for="purpose">{{{o.__('Purpose')}}}&nbsp;({{{o.__('Optional')}}})</label>
