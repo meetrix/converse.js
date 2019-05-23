@@ -233,6 +233,8 @@ converse.plugins.add('converse-profile', {
                 "click a.change-status": "showStatusChangeModal",
                 "click .show-client-info": "showClientInfoModal",
                 "click .logout": "logOut",
+                // "click .profile-menu":"toggleDropDown",
+                "click .dropdown-item":"hideDropDown"
             },
 
             initialize () {
@@ -266,7 +268,26 @@ converse.plugins.add('converse-profile', {
                
                
             },
-            
+            toggleDropDown(ev){
+                console.log('dropdown')
+                const listEl = this.el.querySelector('.dropdown-menu')
+                if(listEl.classList.contains('hidden')){
+                    u.showElement(listEl);
+                    u.removeClass('hidden', listEl);
+                   
+                }else {
+                    u.removeClass('show', listEl);
+                    u.hideElement(listEl)
+                }
+            },
+            hideDropDown(ev){
+                console.log('hide')
+                const listEl = this.el.querySelector('.dropdown-menu')
+                const profilemenu = this.el.querySelector('.profile-menu')
+                profilemenu.setAttribute('aria-expanded',false);
+                u.removeClass('show', listEl);
+                // u.hideElement(listEl)
+            },
 
             showProfileModal (ev) {
                 if (_.isUndefined(this.profile_modal)) {

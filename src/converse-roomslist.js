@@ -126,6 +126,7 @@ converse.plugins.add('converse-roomslist', {
                         'info_title': __('Show more information on this groupchat'),
                         'name': this.getRoomsListElementName(),
                         'open_title': __('Click to open this groupchat'),
+                        // eslint-disable-next-line no-undef
                         'dataUri': createAvatar(this.getRoomsListElementName())
                     }));
             },

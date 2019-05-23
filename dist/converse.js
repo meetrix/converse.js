@@ -58443,7 +58443,9 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_4__["default"].plugins
         "click a.show-profile": "showProfileModal",
         "click a.change-status": "showStatusChangeModal",
         "click .show-client-info": "showClientInfoModal",
-        "click .logout": "logOut"
+        "click .logout": "logOut",
+        // "click .profile-menu":"toggleDropDown",
+        "click .dropdown-item": "hideDropDown"
       },
 
       initialize() {
@@ -58470,6 +58472,27 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_4__["default"].plugins
 
       afterRender() {
         this.renderAvatar();
+      },
+
+      toggleDropDown(ev) {
+        console.log('dropdown');
+        const listEl = this.el.querySelector('.dropdown-menu');
+
+        if (listEl.classList.contains('hidden')) {
+          u.showElement(listEl);
+          u.removeClass('hidden', listEl);
+        } else {
+          u.removeClass('show', listEl);
+          u.hideElement(listEl);
+        }
+      },
+
+      hideDropDown(ev) {
+        console.log('hide');
+        const listEl = this.el.querySelector('.dropdown-menu');
+        const profilemenu = this.el.querySelector('.profile-menu');
+        profilemenu.setAttribute('aria-expanded', false);
+        u.removeClass('show', listEl); // u.hideElement(listEl)
       },
 
       showProfileModal(ev) {
@@ -59701,6 +59724,7 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_0__["default"].plugins
           'info_title': __('Show more information on this groupchat'),
           'name': this.getRoomsListElementName(),
           'open_title': __('Click to open this groupchat'),
+          // eslint-disable-next-line no-undef
           'dataUri': createAvatar(this.getRoomsListElementName())
         }));
       },
@@ -96026,11 +96050,11 @@ __e(o.status_message) +
 __e(o.status_message) +
 '</span> -->\n                <!-- <a class="controlbox-heading__btn change-status fa fa-pencil-alt" title="' +
 __e(o.title_change_status) +
-'" data-toggle="modal" data-target="#changeStatusModal"></a> -->\n            </div>\n    </a>\n    <div class="media-body dropdown">\n        <a href="#" data-toggle="dropdown" class="profile-menu media-title dropdown-toggle font-weight-semibold" aria-expanded="false">' +
+'" data-toggle="modal" data-target="#changeStatusModal"></a> -->\n            </div>\n    </a>\n\n    <div class="media-body dropdown">\n        <a href="#" data-toggle="dropdown" class="profile-menu media-title dropdown-toggle font-weight-semibold" aria-expanded="false">' +
 __e(o.fullname) +
-'</a>\n        <div class="dropdown-menu animate slideIn">\n            <a href="javascript:void(0);" class="dropdown-item show-profile">Profile &amp; Account</a>\n            <!-- <a href="javascript:void(0);" class="dropdown-item">Preferences</a> -->\n            <!-- <a href="javascript:void(0);" class="dropdown-item">Help &amp; feedback</a> -->\n            <a class="controlbox-heading__btn change-status" title="' +
+'</a>\n        <ul class="dropdown-menu animate slideIn">\n            <li><a href="#" class="dropdown-item show-profile">Profile &amp; Account</a></li>\n            <!-- <a href="javascript:void(0);" class="dropdown-item">Preferences</a> -->\n            <!-- <a href="javascript:void(0);" class="dropdown-item">Help &amp; feedback</a> -->\n            <li><a href="#" class="dropdown-item controlbox-heading__btn change-status" title="' +
 __e(o.title_change_status) +
-'" data-toggle="modal" data-target="#changeStatusModal">Change Status</a>\n            <a href="javascript:void(0);" class="dropdown-item logout align-self-center">Log out</a>\n            <a href="#" data-toggle="dropdown" class="dropdown-item cancel align-self-center"aria-expanded="false">Cancel</a>\n        </div>\n        <div class="user-role font-size-xs opacity-75">\n                ' +
+'" data-toggle="modal" data-target="#changeStatusModal">Change Status</a></li>\n            <li><a href="#" class="dropdown-item logout align-self-center">Log out</a></li>\n            <li><a href="#" class="dropdown-item cancel align-self-center">Cancel</a></li>\n        </ul>\n        <div class="user-role font-size-xs opacity-75">\n                ' +
 __e(o.role) +
 '\n        </div>\n        \n    </div>\n    <div>\n        <i class="fas fa-bell"></i>\n    </div>\n    <!-- <span class="username w-100 align-self-center">' +
 __e(o.fullname) +
