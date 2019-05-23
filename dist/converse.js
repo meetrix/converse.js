@@ -95635,11 +95635,11 @@ __e( o.subject ) +
 '</div>\n                ';
  } ;
 __p += '\n                <div class="chat-msg__text\n                    ';
- if (o.is_single_emoji) { ;
+ if (o.is_single_emoji &&  !o.deleted ) { ;
 __p += ' chat-msg__text--larger';
  } ;
 __p += '\n                    ';
- if (o.is_spoiler) { ;
+ if (o.is_spoiler &&  !o.deleted) { ;
 __p += ' spoiler collapsed';
  } ;
 __p += '"><!-- message gets added here via renderMessage --></div>\n                <div class="chat-msg__media"></div>\n            ';
