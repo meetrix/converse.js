@@ -96030,7 +96030,7 @@ __e(o.title_change_status) +
 __e(o.fullname) +
 '</a>\n        <div class="dropdown-menu animate slideIn">\n            <a href="javascript:void(0);" class="dropdown-item show-profile">Profile &amp; Account</a>\n            <!-- <a href="javascript:void(0);" class="dropdown-item">Preferences</a> -->\n            <!-- <a href="javascript:void(0);" class="dropdown-item">Help &amp; feedback</a> -->\n            <a class="controlbox-heading__btn change-status" title="' +
 __e(o.title_change_status) +
-'" data-toggle="modal" data-target="#changeStatusModal">Change Status</a>\n            <a href="javascript:void(0);" class="dropdown-item logout align-self-center">Log out</a>\n        </div>\n        <div class="user-role font-size-xs opacity-75">\n                ' +
+'" data-toggle="modal" data-target="#changeStatusModal">Change Status</a>\n            <a href="javascript:void(0);" class="dropdown-item logout align-self-center">Log out</a>\n            <a href="#" data-toggle="dropdown" class="dropdown-item cancel align-self-center"aria-expanded="false">Cancel</a>\n        </div>\n        <div class="user-role font-size-xs opacity-75">\n                ' +
 __e(o.role) +
 '\n        </div>\n        \n    </div>\n    <div>\n        <i class="fas fa-bell"></i>\n    </div>\n    <!-- <span class="username w-100 align-self-center">' +
 __e(o.fullname) +
