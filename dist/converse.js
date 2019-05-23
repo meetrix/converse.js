@@ -94799,13 +94799,13 @@ __p += '<!-- src/templates/chatroom_sidebar.html -->\n<!-- <div class="occupants
 __e(o.__('ABOUT#')) +
 '</strong> ' +
 __e(o.name) +
-'</p>\n    <p class="occupants-heading">' +
+'</p>\n    <!-- <p class="occupants-heading">' +
 __e(o.label_occupants) +
-'</p>\n</div>\n<div>\n<i class="fa fa-users"></i>\n<div>\n    <span class="numberofonline">0</span>/<span class="numberofoccupants">0</span>\n</div>\n<p class="room-info"><strong>' +
+'</p> -->\n</div>\n<div>\n    <i class="fa fa-users"></i>\n    <div>\n        <span class="numberofonline">0</span>/<span class="numberofoccupants">0</span>\n    </div>\n    <span>' +
+__e(o.__('Members')) +
+'</span>\n    <!-- <p class="room-info"><strong>' +
 __e(o.__('Online users')) +
-'</strong>: ' +
-__e(o.num_occupants) +
-'</p>\n</div>\n<ul class="occupant-list"></ul>\n<div class="chatroom-features"></div>\n<!-- </div> -->\n';
+'</strong></p> -->\n</div>\n<div>\n    <p class="occupants-heading"></p>\n</div>\n<ul class="occupant-list"></ul>\n<div class="chatroom-features"></div>\n<!-- </div> -->\n';
 return __p
 };
 
