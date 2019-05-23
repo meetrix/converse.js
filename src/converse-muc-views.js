@@ -1087,8 +1087,19 @@ converse.plugins.add('converse-muc-views', {
                 }
                 this.setOccupantsVisibility();
                 this.scrollDown();
+                this.hideOtherAllFeature()
             },
-
+            hideOtherAllFeature(){
+                if(this.el.querySelector('.plugin-contentbox')){
+                    u.hideElement(this.el.querySelector('.plugin-contentbox'));
+                }
+                if(this.el.querySelector('.searched-message')){
+                    u.hideElement(this.el.querySelector('.searched-message'));
+                }
+                if(this.el.querySelector('.conference')){
+                    u.hideElement(this.el.querySelector('.conference'));
+                }
+            },
             onOccupantClicked (ev) {
                 /* When an occupant is clicked, insert their nickname into
                  * the chat textarea input.

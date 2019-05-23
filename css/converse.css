@@ -11811,7 +11811,7 @@ body.converse-fullscreen {
 
 @media (min-width: 768px) {
   .chatroom .box-flyout .occupants .occupants-header .hide-occupants {
-    display: none; } }
+    display: block; } }
 
 #conversejs .chatbox.headlines .chat-head.chat-head-chatbox {
   background-color: var(--headline-head-color); }

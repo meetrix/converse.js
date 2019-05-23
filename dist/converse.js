@@ -54731,6 +54731,21 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
 
         this.setOccupantsVisibility();
         this.scrollDown();
+        this.hideOtherAllFeature();
+      },
+
+      hideOtherAllFeature() {
+        if (this.el.querySelector('.plugin-contentbox')) {
+          u.hideElement(this.el.querySelector('.plugin-contentbox'));
+        }
+
+        if (this.el.querySelector('.searched-message')) {
+          u.hideElement(this.el.querySelector('.searched-message'));
+        }
+
+        if (this.el.querySelector('.conference')) {
+          u.hideElement(this.el.querySelector('.conference'));
+        }
       },
 
       onOccupantClicked(ev) {
@@ -94710,11 +94725,11 @@ return __p
 var _ = {escape:__webpack_require__(/*! ./node_modules/lodash/escape.js */ "./node_modules/lodash/escape.js")};
 module.exports = function(o) {
 var __t, __p = '', __e = _.escape;
-__p += '<!-- src/templates/chatroom_sidebar.html -->\n<!-- <div class="occupants"> -->\n<div class="occupants-header">\n    <p class="room-info"><strong>' +
+__p += '<!-- src/templates/chatroom_sidebar.html -->\n<!-- <div class="occupants"> -->\n<div class="occupants-header">\n    <i class="hide-occupants fa fa-times"></i>\n    <p class="room-info"><strong>' +
 __e(o.__('ABOUT#')) +
 '</strong> ' +
 __e(o.name) +
-'</p>\n    <i class="hide-occupants fa fa-times"></i>\n    <p class="occupants-heading">' +
+'</p>\n    <p class="occupants-heading">' +
 __e(o.label_occupants) +
 '</p>\n</div>\n<div>\n<i class="fa fa-users"></i>\n<div>\n    <span class="numberofonline">0</span>/<span class="numberofoccupants">0</span>\n</div>\n<p class="room-info"><strong>' +
 __e(o.__('Online users')) +
