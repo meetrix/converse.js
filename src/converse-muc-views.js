@@ -1216,6 +1216,7 @@ converse.plugins.add('converse-muc-views', {
             },
 
             parseMessageForCommands (text) {
+  
                 if (_converse.muc_disable_moderator_commands &&
                         !_.isArray(_converse.muc_disable_moderator_commands)) {
                     return _converse.ChatBoxView.prototype.parseMessageForCommands.apply(this, arguments);
@@ -2233,7 +2234,7 @@ converse.plugins.add('converse-muc-views', {
                     }
                 }
                 const show = this.model.get('show');
-                const occupant_name = this.model.toJSON().jid.split('@')[0]
+                const occupant_name = this.model.toJSON().jid && this.model.toJSON().jid.split('@')[0]
                 return tpl_occupant(
                     _.extend(
                         { '_': _,

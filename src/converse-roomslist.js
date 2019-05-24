@@ -124,6 +124,7 @@ converse.plugins.add('converse-roomslist', {
                         'info_remove_bookmark': __('Unbookmark this groupchat'),
                         'info_add_bookmark': __('Bookmark this groupchat'),
                         'info_title': __('Show more information on this groupchat'),
+                        'delete_room': __('Delete Channel'),
                         'name': this.getRoomsListElementName(),
                         'open_title': __('Click to open this groupchat'),
                         // eslint-disable-next-line no-undef
@@ -221,6 +222,7 @@ converse.plugins.add('converse-roomslist', {
                 'click .list-toggle': 'toggleRoomsList',
                 'click .remove-bookmark': 'removeBookmark',
                 'click .open-room': 'openRoom',
+                'click .delete-room': 'deleteRoom',
             },
             listSelector: '.rooms-list',
             ItemView: _converse.RoomsListElementView,
@@ -257,7 +259,12 @@ converse.plugins.add('converse-roomslist', {
                 
                 return this;
             },
-
+            deleteRoom(ev){
+                ev.preventDefault();
+                const name = ev.target.getAttribute('data-room-name');
+                const jid = ev.target.getAttribute('data-room-jid');
+                _converse.chatboxviews.get(jid).parseMessageForCommands('/destroy'); 
+            },
             insertIntoControlBox () {
                 const controlboxview = _converse.chatboxviews.get('controlbox');
                 if (!_.isUndefined(controlboxview) && !u.rootContains(_converse.root, this.el)) {

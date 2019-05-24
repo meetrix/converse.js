@@ -55961,7 +55961,7 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
         }
 
         const show = this.model.get('show');
-        const occupant_name = this.model.toJSON().jid.split('@')[0];
+        const occupant_name = this.model.toJSON().jid && this.model.toJSON().jid.split('@')[0];
         return templates_occupant_html__WEBPACK_IMPORTED_MODULE_24___default()(_.extend({
           '_': _,
           'jid': '',
@@ -59765,6 +59765,7 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_0__["default"].plugins
           'info_remove_bookmark': __('Unbookmark this groupchat'),
           'info_add_bookmark': __('Bookmark this groupchat'),
           'info_title': __('Show more information on this groupchat'),
+          'delete_room': __('Delete Channel'),
           'name': this.getRoomsListElementName(),
           'open_title': __('Click to open this groupchat'),
           // eslint-disable-next-line no-undef
@@ -59873,7 +59874,8 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_0__["default"].plugins
         'click .close-room': 'closeRoom',
         'click .list-toggle': 'toggleRoomsList',
         'click .remove-bookmark': 'removeBookmark',
-        'click .open-room': 'openRoom'
+        'click .open-room': 'openRoom',
+        'click .delete-room': 'deleteRoom'
       },
       listSelector: '.rooms-list',
       ItemView: _converse.RoomsListElementView,
@@ -59911,6 +59913,14 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_0__["default"].plugins
         this.showOrHide();
         this.insertIntoControlBox();
         return this;
+      },
+
+      deleteRoom(ev) {
+        ev.preventDefault();
+        const name = ev.target.getAttribute('data-room-name');
+        const jid = ev.target.getAttribute('data-room-jid');
+
+        _converse.chatboxviews.get(jid).parseMessageForCommands('/destroy');
       },
 
       insertIntoControlBox() {
@@ -96548,7 +96558,17 @@ __e(o.jid) +
 __e(o.name || o.jid) +
 '"\n   title="' +
 __e(o.info_leave_room) +
-'" href="#"></a>\n\n</div>\n';
+'" href="#"></a>\n   \n';
+ if (o.affiliation==='owner') { ;
+__p += '\n<a class="list-item-action far fa-trash-alt delete-room"\n   data-room-jid="' +
+__e(o.jid) +
+'"\n   data-room-name="' +
+__e(o.name || o.jid) +
+'"\n   title="' +
+__e(o.delete_room) +
+'" href="#"></a>   \n';
+ } ;
+__p += '\n</div>\n';
 return __p
 };
 
