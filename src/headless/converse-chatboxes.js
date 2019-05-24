@@ -552,7 +552,10 @@ converse.plugins.add('converse-chatboxes', {
                             'deleted': moment().format(),
                             'message':  attrs.message,
                             'older_versions': older_versions,
-                            'references': attrs.references
+                            'references': attrs.references,
+                            oob_desc:'',
+                            oob_url:""
+
                         });
                     }
                     else {
@@ -560,6 +563,7 @@ converse.plugins.add('converse-chatboxes', {
                     }
                     
                 }
+        
                 _converse.api.send(this.createMessageStanza(message));
                 return true;
             },

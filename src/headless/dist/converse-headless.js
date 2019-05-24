@@ -40812,7 +40812,9 @@ _converse_core__WEBPACK_IMPORTED_MODULE_2__["default"].plugins.add('converse-cha
               'deleted': moment().format(),
               'message': attrs.message,
               'older_versions': older_versions,
-              'references': attrs.references
+              'references': attrs.references,
+              oob_desc: '',
+              oob_url: ""
             });
           } else {
             message = this.messages.create(attrs);
@@ -45363,7 +45365,6 @@ _converse_core__WEBPACK_IMPORTED_MODULE_3__["default"].plugins.add('converse-muc
       },
 
       getOutgoingMessageAttributes(text, spoiler_hint) {
-        console.log('text', text);
         const is_spoiler = this.get('composing_spoiler');
         var references;
 

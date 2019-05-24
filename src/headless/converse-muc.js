@@ -418,7 +418,6 @@ converse.plugins.add('converse-muc', {
             },
 
             getOutgoingMessageAttributes (text, spoiler_hint) {
-                console.log('text',text)
                 const is_spoiler = this.get('composing_spoiler');
                 var references;
                 [text, references] = this.parseTextForReferences(text);

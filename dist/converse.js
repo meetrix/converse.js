@@ -52425,7 +52425,7 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_1__["default"].plugins
 
         if (this.model.isOnlyChatStateNotification()) {
           this.renderChatStateNotification();
-        } else if (this.model.get('file') && !this.model.get('oob_url')) {
+        } else if (this.model.get('file') && !this.model.get('oob_url') && !this.model.get('deleted')) {
           if (!this.model.file) {
             _converse.log("Attempted to render a file upload message with no file data");
 
@@ -52458,7 +52458,7 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_1__["default"].plugins
           return this.renderFileUploadProgresBar();
         }
 
-        if (_.filter(['correcting', 'message', 'type', 'upload', 'received'], prop => Object.prototype.hasOwnProperty.call(this.model.changed, prop)).length) {
+        if (_.filter(['correcting', 'message', 'type', 'upload', 'received', 'deleting'], prop => Object.prototype.hasOwnProperty.call(this.model.changed, prop)).length) {
           await this.render();
         }
 
@@ -52499,7 +52499,6 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_1__["default"].plugins
 
       hideChatMsgActions(ev) {
         ev.stopPropagation();
-        console.log(ev.target.className);
 
         if (ev.target.className !== 'chat-msg-actionsr') {
           return;
@@ -63321,7 +63320,9 @@ _converse_core__WEBPACK_IMPORTED_MODULE_2__["default"].plugins.add('converse-cha
               'deleted': moment().format(),
               'message': attrs.message,
               'older_versions': older_versions,
-              'references': attrs.references
+              'references': attrs.references,
+              oob_desc: '',
+              oob_url: ""
             });
           } else {
             message = this.messages.create(attrs);
@@ -67872,7 +67873,6 @@ _converse_core__WEBPACK_IMPORTED_MODULE_3__["default"].plugins.add('converse-muc
       },
 
       getOutgoingMessageAttributes(text, spoiler_hint) {
-        console.log('text', text);
         const is_spoiler = this.get('composing_spoiler');
         var references;
 
@@ -95727,7 +95727,11 @@ __p += '\n                    ';
  if (o.is_spoiler &&  !o.deleted) { ;
 __p += ' spoiler collapsed';
  } ;
-__p += '"><!-- message gets added here via renderMessage --></div>\n                <div class="chat-msg__media"></div>\n            ';
+__p += '"><!-- message gets added here via renderMessage --></div>\n                    ';
+ if (!o.deleted) { ;
+__p += '\n                    <div class="chat-msg__media"></div>\n                    ';
+ } ;
+__p += '   \n            ';
  if (!o.is_me_message) { ;
 __p += '</div>';
  } ;

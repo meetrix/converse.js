@@ -98,7 +98,7 @@ converse.plugins.add('converse-message-view', {
                 const is_followup = u.hasClass('chat-msg--followup', this.el);
                 if (this.model.isOnlyChatStateNotification()) {
                     this.renderChatStateNotification()
-                } else if (this.model.get('file') && !this.model.get('oob_url')) {
+                } else if (this.model.get('file') && !this.model.get('oob_url') && !this.model.get('deleted')) {
                     if (!this.model.file) {
                         _converse.log("Attempted to render a file upload message with no file data");
                         return this.el;
@@ -126,7 +126,7 @@ converse.plugins.add('converse-message-view', {
                 if (this.model.changed.progress) {
                     return this.renderFileUploadProgresBar();
                 }
-                if (_.filter(['correcting', 'message', 'type', 'upload', 'received'],
+                if (_.filter(['correcting', 'message', 'type', 'upload', 'received','deleting'],
                              prop => Object.prototype.hasOwnProperty.call(this.model.changed, prop)).length) {
                     await this.render();
                 }
@@ -163,7 +163,6 @@ converse.plugins.add('converse-message-view', {
             },
             hideChatMsgActions(ev){
                 ev.stopPropagation();
-                console.log(ev.target.className)
                 if(ev.target.className !== 'chat-msg-actionsr'){
                     return;
                 }
