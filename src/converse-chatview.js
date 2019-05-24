@@ -372,13 +372,11 @@ converse.plugins.add('converse-chatview', {
                 if (!_converse.show_toolbar) {
                     return this;
                 }
-                
                 toolbar = toolbar || tpl_toolbar;
                 options = _.assign(
                     this.model.toJSON(),
                     this.getToolbarOptions(options || {})
                 );
-                
                 this.el.querySelector('.chat-toolbar').innerHTML = toolbar(options);
                 this.addSpoilerButton(options);
                 this.addFileUploadButton();
@@ -1160,7 +1158,7 @@ converse.plugins.add('converse-chatview', {
             },
 
             toggleEmojiMenu (ev) {
-                if (_.isUndefined(this.emoji_dropdown)) {
+                if (_.isUndefined(this.emoji_dropdown) ) {
                     ev.stopPropagation();
                     this.createEmojiPicker();
                     this.insertEmojiPicker();
@@ -1171,6 +1169,7 @@ converse.plugins.add('converse-chatview', {
                     this.emoji_dropdown.el = dropdown_el;
                     this.emoji_dropdown.toggle();
                 }
+                
             },
 
             toggleCall (ev) {
@@ -1191,6 +1190,7 @@ converse.plugins.add('converse-chatview', {
 
             toggleComposeSpoilerMessage () {
                 this.model.set('composing_spoiler', !this.model.get('composing_spoiler'));
+                this.emoji_dropdown = undefined;
                 this.renderMessageForm();
                 this.focus();
             },

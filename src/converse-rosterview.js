@@ -179,7 +179,7 @@ converse.plugins.add('converse-rosterview', {
                         this.name_auto_complete.evaluate();
                     }
                 };
-                const input_el = this.el.querySelector('input[name="name"]');
+                const input_el = this.el.querySelector('input[name="contact"]');
                 input_el.addEventListener('input', _.debounce(() => {
                     this.el.querySelector('.btn-primary').disabled = true;
                     xhr.open("GET", `${_converse.xhr_user_search_url}search=${input_el.value.toLowerCase()}`, true);
@@ -188,7 +188,7 @@ converse.plugins.add('converse-rosterview', {
                     xhr.send()
                 } , 300));
                 this.name_auto_complete.on('suggestion-box-selectcomplete', ev => {
-                    this.el.querySelector('input[name="name"]').value = ev.text.label;
+                    this.el.querySelector('input[name="contact"]').value = ev.text.label;
                     this.el.querySelector('.btn-primary').disabled = false;
                     //<----MDEV
                     // this.el.querySelector('input[name="jid"]').value = ev.text.value;
@@ -242,7 +242,7 @@ converse.plugins.add('converse-rosterview', {
                 this.model.clear();
                 //<-----MDEV
                 //const input_el = this.el.querySelector('input[name="jid"]');
-                const input_el = this.el.querySelector('input[name="name"]');
+                const input_el = this.el.querySelector('input[name="contact"]');
                 //------>
                 input_el.value = '';
                 this.modal.hide();
@@ -252,7 +252,7 @@ converse.plugins.add('converse-rosterview', {
                 ev.preventDefault();
                 const data = new FormData(ev.target)
                 //<------MDEV
-                let jid = data.get('name');
+                let jid = data.get('contact');
                 if(_.compact(jid.split('@')).length < 2){
                     jid = _.compact(jid.split('@'))[0]+'@'+_converse.api.settings.get("default_domain");
                 }
@@ -262,13 +262,13 @@ converse.plugins.add('converse-rosterview', {
                 // }
                 //------>
                 if (!jid && _converse.xhr_user_search_url && _.isString(_converse.xhr_user_search_url)) {
-                    const input_el = this.el.querySelector('input[name="name"]');
+                    const input_el = this.el.querySelector('input[name="contact"]');
                     this.xhr.open("GET", `${_converse.xhr_user_search_url}q=${input_el.value}`, true);
                     this.xhr.send()
                     return;
                 }
                 if (this.validateSubmission(jid)) {
-                    this.afterSubmission(ev.target, jid, data.get('name'));
+                    this.afterSubmission(ev.target, jid, data.get('contact'));
                 }
             }
         });

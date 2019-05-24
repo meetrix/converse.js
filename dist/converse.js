@@ -50243,6 +50243,7 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
 
       toggleComposeSpoilerMessage() {
         this.model.set('composing_spoiler', !this.model.get('composing_spoiler'));
+        this.emoji_dropdown = undefined;
         this.renderMessageForm();
         this.focus();
       },
@@ -60297,7 +60298,7 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_4__["default"].plugins
           }
         };
 
-        const input_el = this.el.querySelector('input[name="name"]');
+        const input_el = this.el.querySelector('input[name="contact"]');
         input_el.addEventListener('input', _.debounce(() => {
           this.el.querySelector('.btn-primary').disabled = true;
           xhr.open("GET", `${_converse.xhr_user_search_url}search=${input_el.value.toLowerCase()}`, true);
@@ -60306,7 +60307,7 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_4__["default"].plugins
           xhr.send();
         }, 300));
         this.name_auto_complete.on('suggestion-box-selectcomplete', ev => {
-          this.el.querySelector('input[name="name"]').value = ev.text.label;
+          this.el.querySelector('input[name="contact"]').value = ev.text.label;
           this.el.querySelector('.btn-primary').disabled = false; //<----MDEV
           // this.el.querySelector('input[name="jid"]').value = ev.text.value;
           //---------
@@ -60369,7 +60370,7 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_4__["default"].plugins
         this.model.clear(); //<-----MDEV
         //const input_el = this.el.querySelector('input[name="jid"]');
 
-        const input_el = this.el.querySelector('input[name="name"]'); //------>
+        const input_el = this.el.querySelector('input[name="contact"]'); //------>
 
         input_el.value = '';
         this.modal.hide();
@@ -60379,7 +60380,7 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_4__["default"].plugins
         ev.preventDefault();
         const data = new FormData(ev.target); //<------MDEV
 
-        let jid = data.get('name');
+        let jid = data.get('contact');
 
         if (_.compact(jid.split('@')).length < 2) {
           jid = _.compact(jid.split('@'))[0] + '@' + _converse.api.settings.get("default_domain");
@@ -60391,14 +60392,14 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_4__["default"].plugins
 
 
         if (!jid && _converse.xhr_user_search_url && _.isString(_converse.xhr_user_search_url)) {
-          const input_el = this.el.querySelector('input[name="name"]');
+          const input_el = this.el.querySelector('input[name="contact"]');
           this.xhr.open("GET", `${_converse.xhr_user_search_url}q=${input_el.value}`, true);
           this.xhr.send();
           return;
         }
 
         if (this.validateSubmission(jid)) {
-          this.afterSubmission(ev.target, jid, data.get('name'));
+          this.afterSubmission(ev.target, jid, data.get('contact'));
         }
       }
 
@@ -93756,7 +93757,7 @@ __e(o.jid) +
 __e(o.contact_placeholder) +
 '"/>\n                            <span class="suggestion-box__additions visually-hidden" role="status" aria-live="assertive" aria-relevant="additions"></span>\n                        </div>\n                    </div> -->\n                    <div class="form-group add-xmpp-contact__name">\n                        <label class="clearfix" for="name">' +
 __e(o.label_nickname) +
-':</label>\n                        <div class="suggestion-box suggestion-box__name">\n                            <ul class="suggestion-box__results suggestion-box__results--below" hidden=""></ul>\n                            <input type="text" autocomplete="false" name="name" value="' +
+':</label>\n                        <div class="suggestion-box suggestion-box__name">\n                            <ul class="suggestion-box__results suggestion-box__results--below" hidden=""></ul>\n                            <input type="text" autocomplete="false" name="contact" value="' +
 __e(o.nickname) +
 '"\n                                   class="form-control suggestion-box__input"\n                                   placeholder="' +
 __e(o.nickname_placeholder) +
