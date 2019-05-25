@@ -63261,6 +63261,13 @@ _converse_core__WEBPACK_IMPORTED_MODULE_2__["default"].plugins.add('converse-cha
           }).root();
         }
 
+        if (message.get('deleted')) {
+          stanza.c('replace', {
+            'xmlns': Strophe.NS.MESSAGE_CORRECT,
+            'id': message.get('msgid')
+          }).root();
+        }
+
         if (message.get('origin_id')) {
           stanza.c('origin-id', {
             'xmlns': Strophe.NS.SID,
@@ -63694,6 +63701,7 @@ _converse_core__WEBPACK_IMPORTED_MODULE_2__["default"].plugins.add('converse-cha
        * @param { XMLElement } stanza - The incoming message stanza
        */
       async onMessage(stanza) {
+        console.log('directchagt', stanza);
         let to_jid = stanza.getAttribute('to');
         const to_resource = Strophe.getResourceFromJid(to_jid);
 
@@ -68675,6 +68683,7 @@ _converse_core__WEBPACK_IMPORTED_MODULE_3__["default"].plugins.add('converse-muc
        * @param { XMLElement } stanza - The message stanza.
        */
       async onMessage(stanza) {
+        console.log('muc', stanza);
         this.fetchFeaturesIfConfigurationChanged(stanza);
         const original_stanza = stanza,
               forwarded = sizzle(`forwarded[xmlns="${Strophe.NS.FORWARD}"]`, stanza).pop();

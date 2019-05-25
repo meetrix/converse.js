@@ -489,6 +489,12 @@ converse.plugins.add('converse-chatboxes', {
                         'id': message.get('msgid')
                     }).root();
                 }
+                if (message.get('deleted')) {
+                    stanza.c('replace', {
+                        'xmlns': Strophe.NS.MESSAGE_CORRECT,
+                        'id': message.get('msgid')
+                    }).root();
+                }
                 if (message.get('origin_id')) {
                     stanza.c('origin-id', {'xmlns': Strophe.NS.SID, 'id': message.get('origin_id')}).root();
                 }
@@ -889,6 +895,7 @@ converse.plugins.add('converse-chatboxes', {
              * @param { XMLElement } stanza - The incoming message stanza
              */
             async onMessage (stanza) {
+                console.log('directchagt',stanza)
                 let to_jid = stanza.getAttribute('to');
                 const to_resource = Strophe.getResourceFromJid(to_jid);
 
