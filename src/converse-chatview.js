@@ -4,10 +4,13 @@
 // Copyright (c) 2013-2019, the Converse.js developers
 // Licensed under the Mozilla Public License (MPLv2)
 
+import "backbone.nativeview";
 import "converse-chatboxviews";
 import "converse-message-view";
 import "converse-modal";
 import * as twemoji from "twemoji";
+import BrowserStorage from "backbone.browserStorage";
+import { Overview } from "backbone.overview";
 import bootstrap from "bootstrap.native";
 import converse from "@converse/headless/converse-core";
 import tpl_alert from "templates/alert.html";
@@ -26,9 +29,9 @@ import tpl_toolbar from "templates/toolbar.html";
 import tpl_toolbar_fileupload from "templates/toolbar_fileupload.html";
 import tpl_user_details_modal from "templates/user_details_modal.html";
 import u from "@converse/headless/utils/emoji";
-import xss from "xss";
+import xss from "xss/dist/xss";
 
-const { $msg, Backbone, Promise, Strophe, _, b64_sha1, f, sizzle, moment } = converse.env;
+const { $msg, Backbone, Promise, Strophe, _, b64_sha1, sizzle, dayjs } = converse.env;
 
 
 converse.plugins.add('converse-chatview', {
@@ -69,7 +72,7 @@ converse.plugins.add('converse-chatview', {
 
         function onWindowStateChanged (data) {
             if (_converse.chatboxviews) {
-                _converse.chatboxviews.each(view => {
+                _converse.chatboxviews.forEach(view => {
                     if (view.model.get('id') !== 'controlbox') {
                         view.onWindowStateChanged(data.state);
                     }
@@ -309,7 +312,7 @@ converse.plugins.add('converse-chatview', {
          * @namespace _converse.ChatBoxView
          * @memberOf _converse
          */
-        _converse.ChatBoxView = Backbone.NativeView.extend({
+        _converse.ChatBoxView = Overview.extend({
             length: 200,
             className: 'chatbox hidden',
             is_chatroom: false,  // Leaky abstraction from MUC
@@ -337,9 +340,12 @@ converse.plugins.add('converse-chatview', {
 
             initialize () {
                 this.initDebounced();
-
                 this.model.messages.on('add', this.onMessageAdded, this);
                 this.model.messages.on('rendered', this.scrollDown, this);
+                this.model.messages.on('reset', () => {
+                    this.content.innerHTML = '';
+                    this.removeAll();
+                });
 
                 this.model.on('show', this.show, this);
                 this.model.on('destroy', this.remove, this);
@@ -347,9 +353,7 @@ converse.plugins.add('converse-chatview', {
                 this.model.presence.on('change:show', this.onPresenceChanged, this);
                 this.model.on('showHelpMessages', this.showHelpMessages, this);
                 this.render();
-
-                this.fetchMessages();
-                _converse.api.trigger('chatBoxOpened', this); // TODO: remove
+                this.updateAfterMessagesFetched();
                 /**
                  * Triggered once the _converse.ChatBoxView has been initialized
                  * @event _converse#chatBoxInitialized
@@ -360,19 +364,18 @@ converse.plugins.add('converse-chatview', {
             },
 
             initDebounced () {
-                this.scrollDown = _.debounce(this._scrollDown, 250);
+                this.scrollDown = _.debounce(this._scrollDown, 100);
                 this.markScrolled = _.debounce(this._markScrolled, 100);
                 this.show = _.debounce(this._show, 250, {'leading': true});
             },
 
             render () {
-                // XXX: Is this still needed?
-                this.el.setAttribute('id', this.model.get('box_id'));
                 this.el.innerHTML = tpl_chatbox(
-                    Object.assign(this.model.toJSON(), {
-                            'unread_msgs': __('You have unread messages')
-                        }
-                    ));
+                    Object.assign(
+                        this.model.toJSON(),
+                        {'unread_msgs': __('You have unread messages')}
+                    )
+                );
                 this.content = this.el.querySelector('.chat-content');
                 this.renderMessageForm();
                 this.insertHeading();
@@ -402,17 +405,11 @@ converse.plugins.add('converse-chatview', {
             },
 
             renderMessageForm () {
-                let placeholder;
-                if (this.model.get('composing_spoiler')) {
-                    placeholder = __('Hidden message');
-                } else {
-                    placeholder = __('Message');
-                }
                 const form_container = this.el.querySelector('.bottom-panel');
                 form_container.innerHTML = tpl_chatbox_message_form(
                     Object.assign(this.model.toJSON(), {
                         'hint_value': _.get(this.el.querySelector('.spoiler-hint'), 'value'),
-                        'label_message': placeholder,
+                        'label_message': this.model.get('composing_spoiler') ? __('Hidden message') : __('Message'),
                         'label_send': __('Send'),
                         'label_spoiler_hint': __('Optional hint'),
                         'message_value': _.get(this.el.querySelector('.chat-textarea'), 'value'),
@@ -420,6 +417,17 @@ converse.plugins.add('converse-chatview', {
                         'show_toolbar': _converse.show_toolbar,
                         'unread_msgs': __('You have unread messages')
                     }));
+                const textarea_el = this.el.querySelector('.chat-textarea');
+                textarea_el.addEventListener('focus', () => this.emitFocused());
+                textarea_el.addEventListener('blur', () => {
+                    /**
+                     * Triggered when the focus has been removed from a particular chat.
+                     * @event _converse#chatBoxBlurred
+                     * @type { _converse.ChatBoxView | _converse.ChatRoomView }
+                     * @example _converse.api.listen.on('chatBoxBlurred', view => { ... });
+                     */
+                    _converse.api.trigger('chatBoxBlurred', this);
+                });
                 this.renderToolbar();
             },
 
@@ -461,8 +469,7 @@ converse.plugins.add('converse-chatview', {
             },
 
             async addFileUploadButton (options) {
-                const result = await _converse.api.disco.supports(Strophe.NS.HTTPUPLOAD, _converse.domain);
-                if (result.length) {
+                if (await _converse.api.disco.supports(Strophe.NS.HTTPUPLOAD, _converse.domain)) {
                     this.el.querySelector('.chat-toolbar').insertAdjacentHTML(
                         'beforeend',
                         tpl_toolbar_fileupload({'tooltip_upload_file': __('Choose a file to send')}));
@@ -483,10 +490,11 @@ converse.plugins.add('converse-chatview', {
                 }
                 const results = await Promise.all(
                     this.model.presence.resources.map(
-                        res => _converse.api.disco.supports(Strophe.NS.SPOILER, `${contact_jid}/${res.get('name')}`)
+                        r => _converse.api.disco.supports(Strophe.NS.SPOILER, `${contact_jid}/${r.get('name')}`)
                     )
                 );
-                if (_.filter(results, 'length').length) {
+                const all_resources_support_spolers = results.reduce((acc, val) => (acc && val), true);
+                if (all_resources_support_spolers) {
                     const html = tpl_spoiler_button(this.model.toJSON());
                     if (_converse.visible_toolbar_buttons.emoji) {
                         this.el.querySelector('.toggle-smiley').insertAdjacentHTML('afterEnd', html);
@@ -527,27 +535,12 @@ converse.plugins.add('converse-chatview', {
                 });
             },
 
-            afterMessagesFetched () {
+            async updateAfterMessagesFetched () {
+                await this.model.messages.fetched;
+                await Promise.all(this.model.messages.map(m => this.onMessageAdded(m)));
                 this.insertIntoDOM();
                 this.scrollDown();
                 this.content.addEventListener('scroll', this.markScrolled.bind(this));
-                /**
-                 * Triggered whenever a `_converse.ChatBox` instance has fetched its messages from
-                 * `sessionStorage` but **NOT** from the server.
-                 * @event _converse#afterMessagesFetched 
-                 * @type {_converse.ChatBoxView | _converse.ChatRoomView}
-                 * @example _converse.api.listen.on('afterMessagesFetched', view => { ... });
-                 */
-                _converse.api.trigger('afterMessagesFetched', this);
-            },
-
-            fetchMessages () {
-                this.model.messages.fetch({
-                    'add': true,
-                    'success': this.afterMessagesFetched.bind(this),
-                    'error': this.afterMessagesFetched.bind(this),
-                });
-                return this;
             },
 
             insertIntoDOM () {
@@ -560,7 +553,7 @@ converse.plugins.add('converse-chatview', {
             },
 
             showChatEvent (message) {
-                const isodate = moment().format();
+                const isodate = (new Date()).toISOString();
                 this.content.insertAdjacentHTML(
                     'beforeend',
                     tpl_info({
@@ -576,7 +569,7 @@ converse.plugins.add('converse-chatview', {
             showErrorMessage (message) {
                 this.content.insertAdjacentHTML(
                     'beforeend',
-                    tpl_error_message({'message': message, 'isodate': moment().format() })
+                    tpl_error_message({'message': message, 'isodate': (new Date()).toISOString() })
                 );
                 this.scrollDown();
             },
@@ -593,10 +586,7 @@ converse.plugins.add('converse-chatview', {
             },
 
             clearSpinner () {
-                _.each(
-                    this.content.querySelectorAll('span.spinner'),
-                    (el) => el.parentNode.removeChild(el)
-                );
+                this.content.querySelectorAll('.spinner').forEach(u.removeElement);
             },
 
             /**
@@ -618,11 +608,11 @@ converse.plugins.add('converse-chatview', {
                 if (_.isNull(prev_msg_date) && _.isNull(next_msg_date)) {
                     return;
                 }
-                if (_.isNull(prev_msg_date) || moment(next_msg_date).isAfter(prev_msg_date, 'day')) {
-                    const day_date = moment(next_msg_date).startOf('day');
+                if (_.isNull(prev_msg_date) || dayjs(next_msg_date).isAfter(prev_msg_date, 'day')) {
+                    const day_date = dayjs(next_msg_date).startOf('day');
                     next_msg_el.insertAdjacentHTML('beforeBegin',
                         tpl_new_day({
-                            'isodate': day_date.format(),
+                            'isodate': day_date.toISOString(),
                             'datestring': day_date.format("dddd MMM Do YYYY")
                         })
                     );
@@ -633,19 +623,23 @@ converse.plugins.add('converse-chatview', {
              * Return the ISO8601 format date of the latest message.
              * @private
              * @method _converse.ChatBoxView#getLastMessageDate
-             * @param { object } cutoff - Moment Date cutoff date. The last
+             * @param { Date } cutoff - Moment Date cutoff date. The last
              *      message received cutoff this date will be returned.
+             * @returns { Date }
              */
             getLastMessageDate (cutoff) {
-                const first_msg = u.getFirstChildElement(this.content, '.message:not(.chat-state-notification)'),
-                      oldest_date = first_msg ? first_msg.getAttribute('data-isodate') : null;
-                if (!_.isNull(oldest_date) && moment(oldest_date).isAfter(cutoff)) {
+                const first_msg = u.getFirstChildElement(this.content, '.message:not(.chat-state-notification)');
+                const oldest_date = first_msg ? first_msg.getAttribute('data-isodate') : null;
+                if (!_.isNull(oldest_date) && dayjs(oldest_date).isAfter(cutoff)) {
                     return null;
                 }
-                const last_msg = u.getLastChildElement(this.content, '.message:not(.chat-state-notification)'),
-                      most_recent_date = last_msg ? last_msg.getAttribute('data-isodate') : null;
-                if (_.isNull(most_recent_date) || moment(most_recent_date).isBefore(cutoff)) {
-                    return most_recent_date;
+                const last_msg = u.getLastChildElement(this.content, '.message:not(.chat-state-notification)');
+                const most_recent_date = last_msg ? last_msg.getAttribute('data-isodate') : null;
+                if (_.isNull(most_recent_date)) {
+                    return null;
+                }
+                if (dayjs(most_recent_date).isBefore(cutoff)) {
+                    return dayjs(most_recent_date).toDate();
                 }
                 /* XXX: We avoid .chat-state-notification messages, since they are
                  * temporary and get removed once a new element is
@@ -656,17 +650,15 @@ converse.plugins.add('converse-chatview', {
                 const msg_dates = _.invokeMap(
                     sizzle('.message:not(.chat-state-notification)', this.content),
                     Element.prototype.getAttribute, 'data-isodate'
-                )
-                if (_.isObject(cutoff)) {
-                    cutoff = cutoff.format();
-                }
-                msg_dates.push(cutoff);
+                );
+                const cutoff_iso = cutoff.toISOString();
+                msg_dates.push(cutoff_iso);
                 msg_dates.sort();
-                const idx = msg_dates.lastIndexOf(cutoff);
+                const idx = msg_dates.lastIndexOf(cutoff_iso);
                 if (idx === 0) {
                     return null;
                 } else {
-                    return msg_dates[idx-1];
+                    return dayjs(msg_dates[idx-1]).toDate();
                 }
             },
 
@@ -694,11 +686,11 @@ converse.plugins.add('converse-chatview', {
             },
 
             showHelpMessages (msgs, type, spinner) {
-                _.each(msgs, (msg) => {
+                msgs.forEach(msg => {
                     this.content.insertAdjacentHTML(
                         'beforeend',
                         tpl_help_message({
-                            'isodate': moment().format(),
+                            'isodate': (new Date()).toISOString(),
                             'type': type,
                             'message': xss.filterXSS(msg, {'whiteList': {'strong': []}})
                         })
@@ -710,17 +702,6 @@ converse.plugins.add('converse-chatview', {
                     this.clearSpinner();
                 }
                 return this.scrollDown();
-            },
-
-            clearChatStateNotification (message, isodate) {
-                if (isodate) {
-                    _.each(
-                        sizzle(`.chat-state-notification[data-csn="${message.get('from')}"][data-isodate="${isodate}"]`, this.content),
-                        u.removeElement
-                    );
-                } else {
-                    _.each(sizzle(`.chat-state-notification[data-csn="${message.get('from')}"]`, this.content), u.removeElement);
-                }
             },
 
             shouldShowOnTextMessage () {
@@ -742,13 +723,13 @@ converse.plugins.add('converse-chatview', {
                         return this.trigger('messageInserted', view.el);
                     }
                 }
-                const current_msg_date = moment(view.model.get('time')) || moment,
+                const current_msg_date = dayjs(view.model.get('time')).toDate() || new Date(),
                       previous_msg_date = this.getLastMessageDate(current_msg_date);
 
                 if (_.isNull(previous_msg_date)) {
                     this.content.insertAdjacentElement('afterbegin', view.el);
                 } else {
-                    const previous_msg_el = sizzle(`[data-isodate="${previous_msg_date}"]:last`, this.content).pop();
+                    const previous_msg_el = sizzle(`[data-isodate="${previous_msg_date.toISOString()}"]:last`, this.content).pop();
                     if (view.model.get('type') === 'error' &&
                             u.hasClass('chat-error', previous_msg_el) &&
                             previous_msg_el.textContent === view.model.get('message')) {
@@ -779,12 +760,12 @@ converse.plugins.add('converse-chatview', {
             markFollowups (el) {
                 const from = el.getAttribute('data-from'),
                       previous_el = el.previousElementSibling,
-                      date = moment(el.getAttribute('data-isodate')),
+                      date = dayjs(el.getAttribute('data-isodate')),
                       next_el = el.nextElementSibling;
 
                 if (!u.hasClass('chat-msg--action', el) && !u.hasClass('chat-msg--action', previous_el) &&
                         previous_el.getAttribute('data-from') === from &&
-                        date.isBefore(moment(previous_el.getAttribute('data-isodate')).add(10, 'minutes')) &&
+                        date.isBefore(dayjs(previous_el.getAttribute('data-isodate')).add(10, 'minutes')) &&
                         el.getAttribute('data-encrypted') === previous_el.getAttribute('data-encrypted')) {
                     u.addClass('chat-msg--followup', el);
                 }
@@ -792,7 +773,7 @@ converse.plugins.add('converse-chatview', {
 
                 if (!u.hasClass('chat-msg--action', 'el') &&
                         next_el.getAttribute('data-from') === from &&
-                        moment(next_el.getAttribute('data-isodate')).isBefore(date.add(10, 'minutes')) &&
+                        dayjs(next_el.getAttribute('data-isodate')).isBefore(date.add(10, 'minutes')) &&
                         el.getAttribute('data-encrypted') === next_el.getAttribute('data-encrypted')) {
                     u.addClass('chat-msg--followup', next_el);
                 } else {
@@ -813,9 +794,12 @@ converse.plugins.add('converse-chatview', {
                     // text to show.
                     return message.destroy();
                 }
-                const view = new _converse.MessageView({'model': message});
+                const view = this.add(message.get('id'), new _converse.MessageView({'model': message}));
                 await view.render();
-                this.clearChatStateNotification(message);
+
+                // Clear chat state notifications
+                sizzle(`.chat-state-notification[data-csn="${message.get('from')}"]`, this.content).forEach(u.removeElement);
+
                 this.insertMessage(view);
                 this.insertDayIndicator(view.el);
                 this.setScrollPosition(view.el);
@@ -844,8 +828,13 @@ converse.plugins.add('converse-chatview', {
              * @method _converse.ChatBoxView#onMessageAdded
              * @param { object } message - The message Backbone object that was added.
              */
-            onMessageAdded (message) {
-                this.showMessage(message);
+            async onMessageAdded (message) {
+                const id = message.get('id');
+                if (id && this.get(id)) {
+                    // We already have a view for this message
+                    return;
+                }
+                await this.showMessage(message);
                 if (message.get('correcting')) {
                     this.insertIntoTextArea(message.get('message'), true, true);
                 }
@@ -1002,7 +991,7 @@ converse.plugins.add('converse-chatview', {
             },
 
             getOwnMessages () {
-                return f(this.model.messages.filter({'sender': 'me'}));
+                return this.model.messages.filter({'sender': 'me'});
             },
 
             onEscapePressed (ev) {
@@ -1071,7 +1060,7 @@ converse.plugins.add('converse-chatview', {
                         }
                     }
                 }
-                message = message || this.getOwnMessages().findLast((msg) => msg.get('message'));
+                message = message || _.findLast(this.getOwnMessages(), msg => msg.get('message'));
                 if (message) {
                     this.insertIntoTextArea(message.get('message'), true, true);
                     message.save('correcting', true);
@@ -1090,9 +1079,7 @@ converse.plugins.add('converse-chatview', {
                 if (ev && ev.preventDefault) { ev.preventDefault(); }
                 const result = confirm(__("Are you sure you want to clear the messages from this conversation?"));
                 if (result === true) {
-                    this.content.innerHTML = '';
-                    this.model.messages.reset();
-                    this.model.messages.browserStorage._clear();
+                    this.model.clearMessages();
                 }
                 return this;
             },
@@ -1123,7 +1110,7 @@ converse.plugins.add('converse-chatview', {
                     const storage = _converse.config.get('storage'),
                           id = `converse.emoji-${_converse.bare_jid}`;
                     _converse.emojipicker = new _converse.EmojiPicker({'id': id});
-                    _converse.emojipicker.browserStorage = new Backbone.BrowserStorage[storage](id);
+                    _converse.emojipicker.browserStorage = new BrowserStorage[storage](id);
                     _converse.emojipicker.fetch();
                 }
                 this.emoji_picker_view = new _converse.EmojiPickerView({
@@ -1219,7 +1206,7 @@ converse.plugins.add('converse-chatview', {
                             'beforeend',
                             tpl_status_message({
                                 'message': text,
-                                'isodate': moment().format(),
+                                'isodate': (new Date()).toISOString(),
                             }));
                         this.scrollDown();
                     }
@@ -1237,11 +1224,7 @@ converse.plugins.add('converse-chatview', {
                     this.setChatState(_converse.INACTIVE);
                     this.model.sendChatState();
                 }
-                try {
-                    this.model.destroy();
-                } catch (e) {
-                    _converse.log(e, Strophe.LogLevel.ERROR);
-                }
+                this.model.close();
                 this.remove();
                 /**
                  * Triggered once a chatbox has been closed.
@@ -1265,17 +1248,21 @@ converse.plugins.add('converse-chatview', {
                 }
             },
 
+            emitFocused: _.debounce(() => {
+                /**
+                 * Triggered when the focus has been moved to a particular chat.
+                 * @event _converse#chatBoxFocused
+                 * @type { _converse.ChatBoxView | _converse.ChatRoomView }
+                 * @example _converse.api.listen.on('chatBoxFocused', view => { ... });
+                 */
+                _converse.api.trigger('chatBoxFocused', this);
+            }, 25, {'leading': true}),
+
             focus () {
                 const textarea_el = this.el.querySelector('.chat-textarea');
                 if (!_.isNull(textarea_el)) {
                     textarea_el.focus();
-                    /**
-                     * Triggered when the focus has been moved to a particular chat.
-                     * @event _converse#chatBoxFocused
-                     * @type { _converse.ChatBoxView | _converse.ChatRoomView }
-                     * @example _converse.api.listen.on('chatBoxFocused', view => { ... });
-                     */
-                    _converse.api.trigger('chatBoxFocused', this);
+                    this.emitFocused();
                 }
                 return this;
             },

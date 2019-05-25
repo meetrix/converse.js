@@ -9,15 +9,17 @@ import Backbone from "backbone";
 import BrowserStorage from "backbone.browserStorage";
 import Promise from "es6-promise/dist/es6-promise.auto";
 import _ from "./lodash.noconflict";
-import f from "./lodash.fp";
+import advancedFormat from 'dayjs/plugin/advancedFormat';
+import dayjs from "dayjs";
 import i18n from "./i18n";
-import moment from "moment";
-import pluggable from "pluggable.js/dist/pluggable";
+import pluggable from "pluggable.js/src/pluggable";
 import polyfill from "./polyfill";
 import sizzle from "sizzle";
 import u from "@converse/headless/utils/core";
 
 Backbone = Backbone.noConflict();
+
+dayjs.extend(advancedFormat);
 
 // Strophe globals
 const b64_sha1 = SHA1.b64_sha1;
@@ -84,6 +86,7 @@ pluggable.enable(_converse, '_converse', 'pluggable');
 // These are just the @converse/headless plugins, for the full converse,
 // the other plugins are whitelisted in src/converse.js
 _converse.core_plugins = [
+    'converse-bookmarks',
     'converse-caps',
     'converse-chatboxes',
     'converse-disco',
@@ -185,7 +188,6 @@ _converse.CONTROLBOX_TYPE = 'controlbox';
 // ----------------------------
 _converse.default_settings = {
     allow_non_roster_messaging: false,
-    animate: true,
     authentication: 'login', // Available values are "login", "prebind", "anonymous" and "external".
     auto_away: 0, // Seconds after which user status is set to 'away'
     auto_login: false, // Currently only used in connection with anonymous login
@@ -219,6 +221,7 @@ _converse.default_settings = {
     rid: undefined,
     root: window.document,
     sid: undefined,
+    singleton: false,
     strict_plugin_dependencies: false,
     trusted: true,
     view_mode: 'overlayed', // Choices are 'overlayed', 'fullscreen', 'mobile'
@@ -249,7 +252,7 @@ _converse.log = function (message, level, style='') {
         message = message.outerHTML;
     }
     const prefix = style ? '%c' : '';
-    const logger = _.assign({
+    const logger = Object.assign({
             'debug': _.get(console, 'log') ? console.log.bind(console) : _.noop,
             'error': _.get(console, 'log') ? console.log.bind(console) : _.noop,
             'info': _.get(console, 'log') ? console.log.bind(console) : _.noop,
@@ -259,15 +262,15 @@ _converse.log = function (message, level, style='') {
         logger.error(`${prefix} ERROR: ${message}`, style);
     } else if (level === Strophe.LogLevel.WARN) {
         if (_converse.debug) {
-            logger.warn(`${prefix} ${moment().format()} WARNING: ${message}`, style);
+            logger.warn(`${prefix} ${(new Date()).toISOString()} WARNING: ${message}`, style);
         }
     } else if (level === Strophe.LogLevel.FATAL) {
         logger.error(`${prefix} FATAL: ${message}`, style);
     } else if (_converse.debug) {
         if (level === Strophe.LogLevel.DEBUG) {
-            logger.debug(`${prefix} ${moment().format()} DEBUG: ${message}`, style);
+            logger.debug(`${prefix} ${(new Date()).toISOString()} DEBUG: ${message}`, style);
         } else {
-            logger.info(`${prefix} ${moment().format()} INFO: ${message}`, style);
+            logger.info(`${prefix} ${(new Date()).toISOString()} INFO: ${message}`, style);
         }
     }
 };
@@ -335,7 +338,7 @@ function initPlugins() {
     const whitelist = _converse.core_plugins.concat(
         _converse.whitelisted_plugins);
 
-    if (_converse.view_mode === 'embedded') {
+    if (_converse.singleton) {
         _.forEach([ // eslint-disable-line lodash/prefer-map
             "converse-bookmarks",
             "converse-controlbox",
@@ -350,7 +353,7 @@ function initPlugins() {
         {'_converse': _converse},
         whitelist, _converse.blacklisted_plugins
     );
-    
+
     /**
      * Triggered once all plugins have been initialized. This is a useful event if you want to
      * register event handlers but would like your own handlers to be overridable by
@@ -381,7 +384,7 @@ function initClientConfig () {
         'trusted': _converse.trusted && true || false,
         'storage': _converse.trusted ? 'local' : 'session'
     });
-    _converse.config.browserStorage = new Backbone.BrowserStorage.session(id);
+    _converse.config.browserStorage = new BrowserStorage.session(id);
     _converse.config.fetch();
     /**
      * Triggered once the XMPP-client configuration has been initialized.
@@ -427,7 +430,7 @@ _converse.initConnection = function () {
 async function initSession () {
    const id = 'converse.bosh-session';
    _converse.session = new Backbone.Model({id});
-   _converse.session.browserStorage = new Backbone.BrowserStorage.session(id);
+   _converse.session.browserStorage = new BrowserStorage.session(id);
    try {
       await new Promise((success, error) => _converse.session.fetch({success, error}));
       if (_converse.jid && _converse.session.get('jid') !== _converse.jid) {
@@ -545,7 +548,7 @@ function cleanup () {
 _converse.initialize = async function (settings, callback) {
     settings = !_.isUndefined(settings) ? settings : {};
     const init_promise = u.getResolveablePromise();
-    _.each(PROMISES, addPromise);
+    PROMISES.forEach(addPromise);
     if (!_.isUndefined(_converse.connection)) {
         cleanup();
     }
@@ -721,18 +724,40 @@ _converse.initialize = async function (settings, callback) {
         _converse.api.send(pres);
     };
 
-    this.reconnect = _.debounce(function () {
-        _converse.log('RECONNECTING');
-        _converse.log('The connection has dropped, attempting to reconnect.');
+
+    /**
+     * Called once the XMPP connection has dropped and we want to attempt
+     * reconnection.
+     * @method reconnect
+     * @private
+     * @memberOf _converse
+     */
+    this.reconnect = _.debounce(() => {
+        _converse.log('RECONNECTING: the connection has dropped, attempting to reconnect.');
         _converse.setConnectionStatus(
             Strophe.Status.RECONNECTING,
             __('The connection has dropped, attempting to reconnect.')
         );
+        /**
+         * Triggered when the connection has dropped, but Converse will attempt
+         * to reconnect again.
+         *
+         * @event _converse#will-reconnect
+         */
+        _converse.api.trigger('will-reconnect');
+
         _converse.connection.reconnecting = true;
         _converse.tearDown();
         _converse.logIn(null, true);
-    }, 2000, {'leading': true});
+    }, 2000);
 
+
+    /**
+     * Properly tear down the session so that it's possible to manually connect again.
+     * @method finishDisconnection
+     * @private
+     * @memberOf _converse
+     */
     this.finishDisconnection = function () {
         _converse.log('DISCONNECTED');
         delete _converse.connection.reconnecting;
@@ -748,19 +773,22 @@ _converse.initialize = async function (settings, callback) {
         _converse.api.trigger('disconnected');
     };
 
-    this.onDisconnected = function () {
-        /* Gets called once strophe's status reaches Strophe.Status.DISCONNECTED.
-         * Will either start a teardown process for converse.js or attempt
-         * to reconnect.
-         */
-        const reason = _converse.disconnection_reason;
 
+    /**
+     * Gets called once strophe's status reaches Strophe.Status.DISCONNECTED.
+     * Will either start a teardown process for converse.js or attempt
+     * to reconnect.
+     * @method onDisconnected
+     * @private
+     * @memberOf _converse
+     */
+    this.onDisconnected = function () {
+        const reason = _converse.disconnection_reason;
         if (_converse.disconnection_cause === Strophe.Status.AUTHFAIL) {
             if (_converse.credentials_url && _converse.auto_reconnect) {
                 /* In this case, we reconnect, because we might be receiving
                  * expirable tokens from the credentials_url.
                  */
-                _converse.api.trigger('will-reconnect');
                 return _converse.reconnect();
             } else {
                 return _converse.finishDisconnection();
@@ -772,15 +800,9 @@ _converse.initialize = async function (settings, callback) {
                 !_converse.auto_reconnect) {
             return _converse.finishDisconnection();
         }
-        /**
-         * Triggered when the connection has dropped, but Converse will attempt
-         * to reconnect again.
-         *
-         * @event _converse#will-reconnect
-         */
-        _converse.api.trigger('will-reconnect');
         _converse.reconnect();
     };
+
 
     this.setDisconnectionCause = function (cause, reason, override) {
         /* Used to keep track of why we got disconnected, so that we can
@@ -886,7 +908,7 @@ _converse.initialize = async function (settings, callback) {
         } else {
             const id = `converse.xmppstatus-${_converse.bare_jid}`;
             _converse.xmppstatus = new this.XMPPStatus({'id': id});
-            _converse.xmppstatus.browserStorage = new Backbone.BrowserStorage.session(id);
+            _converse.xmppstatus.browserStorage = new BrowserStorage.session(id);
             _converse.xmppstatus.fetch({
                 'success': _.partial(_converse.onStatusInitialized, reconnecting),
                 'error': _.partial(_converse.onStatusInitialized, reconnecting)
@@ -919,7 +941,7 @@ _converse.initialize = async function (settings, callback) {
             _converse.tearDown();
         }
         // Recreate all the promises
-        _.each(Object.keys(_converse.promises), addPromise);
+        Object.keys(_converse.promises).forEach(addPromise);
         /**
          * Triggered once the user has logged out.
          * @event _converse#logout
@@ -1652,8 +1674,8 @@ _converse.api = {
          * @example _converse.api.promises.add('foo-completed');
          */
         'add' (promises) {
-            promises = _.isArray(promises) ? promises : [promises]
-            _.each(promises, addPromise);
+            promises = Array.isArray(promises) ? promises : [promises]
+            promises.forEach(addPromise);
         }
     },
 
@@ -1789,11 +1811,11 @@ _converse.api = {
             _converse.connection.send(
                $msg({
                   'to': _converse.bare_jid,
-                  'type': this.get('message_type'),
+                  'type': stanza.getAttribute('type'),
                }).c('forwarded', {'xmlns': Strophe.NS.FORWARD})
                      .c('delay', {
-                           'xmns': Strophe.NS.DELAY,
-                           'stamp': moment().format()
+                        'xmns': Strophe.NS.DELAY,
+                        'stamp': (new Date()).toISOString()
                      }).up()
                   .cnode(stanza.tree())
             );
@@ -1905,8 +1927,7 @@ const converse = {
      * @property {function} converse.env.Strophe   - The [Strophe](http://strophe.im/strophejs) XMPP library used by Converse.
      * @property {object} converse.env._           - The instance of [lodash](http://lodash.com) used by Converse.
      * @property {function} converse.env.f         - And instance of Lodash with its methods wrapped to produce immutable auto-curried iteratee-first data-last methods.
-     * @property {function} converse.env.b64_sha1  - Utility method from Strophe for creating base64 encoded sha1 hashes.
-     * @property {object} converse.env.moment      - [Moment](https://momentjs.com) date manipulation library.
+     * @property {object} converse.env.dayjs       - [DayJS](https://github.com/iamkun/dayjs) date manipulation library.
      * @property {function} converse.env.sizzle    - [Sizzle](https://sizzlejs.com) CSS selector engine.
      * @property {object} converse.env.utils       - Module containing common utility methods used by Converse.
      */
@@ -1919,9 +1940,8 @@ const converse = {
         'Promise': Promise,
         'Strophe': Strophe,
         '_': _,
-        'f': f,
         'b64_sha1':  b64_sha1,
-        'moment': moment,
+        'dayjs': dayjs,
         'sizzle': sizzle,
         'utils': u
     }

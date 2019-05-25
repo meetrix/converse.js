@@ -19,14 +19,14 @@
         const iq = await utils.waitUntil(() => {
             return _.filter(
                 _converse.connection.IQ_stanzas,
-                (iq) => sizzle(`iq[to="${entity_jid}"] query[xmlns="http://jabber.org/protocol/disco#${type}"]`, iq.nodeTree).length
+                (iq) => sizzle(`iq[to="${entity_jid}"] query[xmlns="http://jabber.org/protocol/disco#${type}"]`, iq).length
             ).pop();
         }, 300);
         const stanza = $iq({
             'type': 'result',
             'from': entity_jid,
             'to': 'dummy@localhost/resource',
-            'id': iq.nodeTree.getAttribute('id'),
+            'id': iq.getAttribute('id'),
         }).c('query', {'xmlns': 'http://jabber.org/protocol/disco#'+type});
 
         _.forEach(identities, function (identity) {
@@ -114,20 +114,18 @@
         return _converse.chatboxviews.get(jid);
     };
 
-    utils.openChatRoom = function (_converse, room, server, nick) {
+    utils.openChatRoom = function (_converse, room, server) {
         return _converse.api.rooms.open(`${room}@${server}`);
     };
 
-    utils.openAndEnterChatRoom = async function (_converse, room, server, nick, features=[]) {
+    utils.getRoomFeatures = async function (_converse, room, server, features=[]) {
         const room_jid = `${room}@${server}`.toLowerCase();
         const stanzas = _converse.connection.IQ_stanzas;
-        await _converse.api.rooms.open(room_jid);
-        const view = _converse.chatboxviews.get(room_jid);
-        let stanza = await utils.waitUntil(() => _.get(_.filter(
+        const stanza = await utils.waitUntil(() => _.filter(
             stanzas,
-            iq => iq.nodeTree.querySelector(
+            iq => iq.querySelector(
                 `iq[to="${room_jid}"] query[xmlns="http://jabber.org/protocol/disco#info"]`
-            )).pop(), 'nodeTree'));
+            )).pop());
 
         const features_stanza = $iq({
             'from': room_jid,
@@ -161,18 +159,26 @@
             .c('field', {'type':'text-single', 'var':'muc#roominfo_occupants', 'label':'Number of occupants'})
                 .c('value').t(0);
         _converse.connection._dataRecv(utils.createRequest(features_stanza));
+    };
+
+    utils.openAndEnterChatRoom = async function (_converse, room, server, nick, features=[]) {
+        const room_jid = `${room}@${server}`.toLowerCase();
+        const stanzas = _converse.connection.IQ_stanzas;
+        await _converse.api.rooms.open(room_jid);
+        await utils.getRoomFeatures(_converse, room, server, features);
 
         const iq = await utils.waitUntil(() => _.filter(
             stanzas,
-            s => sizzle(`iq[to="${room_jid}"] query[node="x-roomuser-item"]`, s.nodeTree).length
+            s => sizzle(`iq[to="${room_jid}"] query[node="x-roomuser-item"]`, s).length
         ).pop());
 
         // We remove the stanza, otherwise we might get stale stanzas returned in our filter above.
         stanzas.splice(stanzas.indexOf(iq), 1)
 
         // The XMPP server returns the reserved nick for this user.
-        const IQ_id = iq.nodeTree.getAttribute('id');
-        stanza = $iq({
+        const view = _converse.chatboxviews.get(room_jid);
+        const IQ_id = iq.getAttribute('id');
+        const stanza = $iq({
             'type': 'result',
             'id': IQ_id,
             'from': view.model.get('jid'),
@@ -266,13 +272,13 @@
         const iq = await utils.waitUntil(() =>
             _.filter(
                 _converse.connection.IQ_stanzas,
-                iq => sizzle(`iq[type="get"] query[xmlns="${Strophe.NS.ROSTER}"]`, iq.nodeTree).length
+                iq => sizzle(`iq[type="get"] query[xmlns="${Strophe.NS.ROSTER}"]`, iq).length
             ).pop());
 
         const result = $iq({
             'to': _converse.connection.jid,
             'type': 'result',
-            'id': iq.nodeTree.getAttribute('id')
+            'id': iq.getAttribute('id')
         }).c('query', {
             'xmlns': 'jabber:iq:roster'
         });

@@ -45,17 +45,6 @@ converse.plugins.add('converse-register', {
         // New functions which don't exist yet can also be added.
 
         LoginPanel: {
-
-            insertRegisterLink () {
-                const { _converse } = this.__super__;
-                if (_.isUndefined(this.registerlinkview)) {
-                    this.registerlinkview = new _converse.RegisterLinkView({'model': this.model});
-                    this.registerlinkview.render();
-                    this.el.querySelector('.buttons').insertAdjacentElement('afterend', this.registerlinkview.el);
-                }
-                this.registerlinkview.render();
-            },
-
             render (cfg) {
                 const { _converse } = this.__super__;
                 this.__super__.render.apply(this, arguments);
@@ -67,43 +56,6 @@ converse.plugins.add('converse-register', {
         },
 
         ControlBoxView: {
-
-            initialize () {
-                this.__super__.initialize.apply(this, arguments);
-                this.model.on('change:active-form', this.showLoginOrRegisterForm.bind(this))
-            },
-
-            showLoginOrRegisterForm () {
-                const { _converse } = this.__super__;
-                if (_.isNil(this.registerpanel)) {
-                    return;
-                }
-                if (this.model.get('active-form') == "register") {
-                    this.loginpanel.el.classList.add('hidden');
-                    this.registerpanel.el.classList.remove('hidden');
-                } else {
-                    this.loginpanel.el.classList.remove('hidden');
-                    this.registerpanel.el.classList.add('hidden');
-                }
-            },
-
-            renderRegistrationPanel () {
-                const { _converse } = this.__super__;
-                if (_converse.allow_registration) {
-                    this.registerpanel = new _converse.RegisterPanel({
-                        'model': this.model
-                    });
-                    this.registerpanel.render();
-                    this.registerpanel.el.classList.add('hidden');
-                    this.el.querySelector('#converse-login-panel').insertAdjacentElement(
-                        'afterend',
-                        this.registerpanel.el
-                    );
-                    this.showLoginOrRegisterForm();
-                }
-                return this;
-            },
-
             renderLoginPanel () {
                 /* Also render a registration panel, when rendering the
                  * login panel.
@@ -132,6 +84,52 @@ converse.plugins.add('converse-register', {
             'domain_placeholder': __(" e.g. conversejs.org"),  // Placeholder text shown in the domain input on the registration form
             'providers_link': 'https://compliance.conversations.im/', // Link to XMPP providers shown on registration page
             'registration_domain': ''
+        });
+
+
+        Object.assign(_converse.LoginPanel.prototype, {
+
+            insertRegisterLink () {
+                if (_.isUndefined(this.registerlinkview)) {
+                    this.registerlinkview = new _converse.RegisterLinkView({'model': this.model});
+                    this.registerlinkview.render();
+                    this.el.querySelector('.buttons').insertAdjacentElement('afterend', this.registerlinkview.el);
+                }
+                this.registerlinkview.render();
+            }
+        });
+
+        Object.assign(_converse.ControlBoxView.prototype, {
+
+            showLoginOrRegisterForm () {
+                const { _converse } = this.__super__;
+                if (_.isNil(this.registerpanel)) {
+                    return;
+                }
+                if (this.model.get('active-form') == "register") {
+                    this.loginpanel.el.classList.add('hidden');
+                    this.registerpanel.el.classList.remove('hidden');
+                } else {
+                    this.loginpanel.el.classList.remove('hidden');
+                    this.registerpanel.el.classList.add('hidden');
+                }
+            },
+
+            renderRegistrationPanel () {
+                if (_converse.allow_registration) {
+                    this.registerpanel = new _converse.RegisterPanel({
+                        'model': this.model
+                    });
+                    this.registerpanel.render();
+                    this.registerpanel.el.classList.add('hidden');
+                    this.el.querySelector('#converse-login-panel').insertAdjacentElement(
+                        'afterend',
+                        this.registerpanel.el
+                    );
+                    this.showLoginOrRegisterForm();
+                }
+                return this;
+            }
         });
 
 
@@ -438,7 +436,7 @@ converse.plugins.add('converse-register', {
             },
 
             renderLegacyRegistrationForm (form) {
-                _.each(Object.keys(this.fields), (key) => {
+                Object.keys(this.fields).forEach(key => {
                     if (key === "username") {
                         form.insertAdjacentHTML(
                             'beforeend',
@@ -466,12 +464,10 @@ converse.plugins.add('converse-register', {
                     }
                 });
                 // Show urls
-                _.each(this.urls, (url) => {
-                    form.insertAdjacentHTML(
-                        'afterend',
-                        '<a target="blank" rel="noopener" href="'+url+'">'+url+'</a>'
-                    );
-                });
+                this.urls.forEach(u => form.insertAdjacentHTML(
+                    'afterend',
+                    '<a target="blank" rel="noopener" href="'+u+'">'+u+'</a>'
+                ));
             },
 
             /**
@@ -493,7 +489,7 @@ converse.plugins.add('converse-register', {
 
                 const buttons = form.querySelector('fieldset.buttons');
                 if (this.form_type === 'xform') {
-                    _.each(stanza.querySelectorAll('field'), (field) => {
+                    stanza.querySelectorAll('field').forEach(field => {
                         buttons.insertAdjacentHTML(
                             'beforebegin',
                             utils.xForm2webForm(field, stanza, {'domain': this.domain})
@@ -540,9 +536,7 @@ converse.plugins.add('converse-register', {
              */
             reportErrors (stanza) {
                 const errors = stanza.querySelectorAll('error');
-                _.each(errors, (error) => {
-                    this.showValidationError(error.textContent);
-                });
+                errors.forEach(e => this.showValidationError(e.textContent));
                 if (!errors.length) {
                     const message = __('The provider rejected your registration attempt. '+
                         'Please check the values you entered for correctness.');
@@ -596,13 +590,9 @@ converse.plugins.add('converse-register', {
 
                 if (this.form_type === 'xform') {
                     iq.c("x", {xmlns: Strophe.NS.XFORM, type: 'submit'});
-                    _.each(inputs, (input) => {
-                        iq.cnode(utils.webForm2xForm(input)).up();
-                    });
+                    inputs.forEach(input => iq.cnode(utils.webForm2xForm(input)).up());
                 } else {
-                    _.each(inputs, (input) => {
-                        iq.c(input.getAttribute('name'), {}, input.value);
-                    });
+                    inputs.forEach(input => iq.c(input.getAttribute('name'), {}, input.value));
                 }
                 _converse.connection._addSysHandler(this._onRegisterIQ.bind(this), null, "iq", null, null);
                 _converse.connection.send(iq);
@@ -625,7 +615,7 @@ converse.plugins.add('converse-register', {
             },
 
             _setFieldsFromLegacy (query) {
-                _.each(query.children, (field) => {
+                [].forEach.call(query.children, field => {
                     if (field.tagName.toLowerCase() === 'instructions') {
                         this.instructions = Strophe.getText(field);
                         return;
@@ -643,7 +633,7 @@ converse.plugins.add('converse-register', {
             _setFieldsFromXForm (xform) {
                 this.title = _.get(xform.querySelector('title'), 'textContent');
                 this.instructions = _.get(xform.querySelector('instructions'), 'textContent');
-                _.each(xform.querySelectorAll('field'), (field) => {
+                xform.querySelectorAll('field').forEach(field => {
                     const _var = field.getAttribute('var');
                     if (_var) {
                         this.fields[_var.toLowerCase()] = _.get(field.querySelector('value'), 'textContent', '');
@@ -687,6 +677,12 @@ converse.plugins.add('converse-register', {
                 return false;
             }
         });
+
+        /************************ BEGIN Event Handlers ************************/
+        _converse.api.listen.on('controlboxInitialized', view => {
+            view.model.on('change:active-form', view.showLoginOrRegisterForm, view);
+        });
+        /************************ END Event Handlers ************************/
     }
 });
 

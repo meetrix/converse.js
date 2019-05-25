@@ -14,9 +14,9 @@ import tpl_info from "templates/info.html";
 import tpl_message from "templates/message.html";
 import tpl_message_versions_modal from "templates/message_versions_modal.html";
 import u from "@converse/headless/utils/emoji";
-import xss from "xss";
+import xss from "xss/dist/xss";
 
-const { Backbone, _, moment } = converse.env;
+const { Backbone, _, dayjs } = converse.env;
 
 
 converse.plugins.add('converse-message-view', {
@@ -69,7 +69,8 @@ converse.plugins.add('converse-message-view', {
             toHTML () {
                 return tpl_message_versions_modal(Object.assign(
                     this.model.toJSON(), {
-                    '__': __
+                    '__': __,
+                    'dayjs': dayjs
                 }));
             }
         });
@@ -81,7 +82,13 @@ converse.plugins.add('converse-message-view', {
             },
 
             initialize () {
-                this.debouncedRender = _.debounce(this.render, 50);
+                this.debouncedRender = _.debounce(() => {
+                    // If the model gets destroyed in the meantime,
+                    // it no longer has a collection
+                    if (this.model.collection) {
+                        this.render();
+                    }
+                }, 50);
                 if (this.model.vcard) {
                     this.model.vcard.on('change', this.debouncedRender, this);
                 }
@@ -149,7 +156,7 @@ converse.plugins.add('converse-message-view', {
 
             async renderChatMessage () {
                 const is_me_message = this.isMeCommand(),
-                      moment_time = moment(this.model.get('time')),
+                      time = dayjs(this.model.get('time')),
                       role = this.model.vcard ? this.model.vcard.get('role') : null,
                       roles = role ? role.split(',') : [];
 
@@ -159,8 +166,8 @@ converse.plugins.add('converse-message-view', {
                         '__': __,
                         'is_me_message': is_me_message,
                         'roles': roles,
-                        'pretty_time': moment_time.format(_converse.time_format),
-                        'time': moment_time.format(),
+                        'pretty_time': time.format(_converse.time_format),
+                        'time': time.toISOString(),
                         'extra_classes': this.getExtraMessageClasses(),
                         'label_show': __('Show more'),
                         'username': this.model.getDisplayName()
@@ -197,16 +204,20 @@ converse.plugins.add('converse-message-view', {
                 }
                 await promise;
                 this.replaceElement(msg);
-                this.model.collection.trigger('rendered', this);
+                if (this.model.collection) {
+                    // If the model gets destroyed in the meantime, it no
+                    // longer has a collection.
+                    this.model.collection.trigger('rendered', this);
+                }
             },
 
             renderErrorMessage () {
-                const moment_time = moment(this.model.get('time')),
-                      msg = u.stringToElement(
-                        tpl_info(Object.assign(this.model.toJSON(), {
-                            'extra_classes': 'chat-error',
-                            'isodate': moment_time.format()
-                        })));
+                const msg = u.stringToElement(
+                    tpl_info(Object.assign(this.model.toJSON(), {
+                        'extra_classes': 'chat-error',
+                        'isodate': dayjs(this.model.get('time')).toISOString()
+                    }))
+                );
                 return this.replaceElement(msg);
             },
 
@@ -232,7 +243,7 @@ converse.plugins.add('converse-message-view', {
                 } else {
                     return;
                 }
-                const isodate = moment().format();
+                const isodate = (new Date()).toISOString();
                 this.replaceElement(
                       u.stringToElement(
                         tpl_csn({

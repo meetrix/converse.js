@@ -4,7 +4,7 @@
     const _ = converse.env._;
     const Promise = converse.env.Promise;
     const Strophe = converse.env.Strophe;
-    const moment = converse.env.moment;
+    const dayjs = converse.env.dayjs;
     const $iq = converse.env.$iq;
     const u = converse.env.utils;
 
@@ -117,6 +117,9 @@
             c.IQ_stanzas = [];
             c.IQ_ids = [];
             c.sendIQ = function (iq, callback, errback) {
+                if (!_.isElement(iq)) {
+                    iq = iq.nodeTree;
+                }
                 this.IQ_stanzas.push(iq);
                 const id = sendIQ.bind(this)(iq, callback, errback);
                 this.IQ_ids.push(id);
@@ -222,7 +225,7 @@
                     'image': _.get(vcard.querySelector('PHOTO BINVAL'), 'textContent'),
                     'image_type': _.get(vcard.querySelector('PHOTO TYPE'), 'textContent'),
                     'url': _.get(vcard.querySelector('URL'), 'textContent'),
-                    'vcard_updated': moment().format(),
+                    'vcard_updated': dayjs().format(),
                     'vcard_error': undefined
                 };
                 resolve(result);

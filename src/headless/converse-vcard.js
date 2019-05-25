@@ -4,11 +4,11 @@
 // Copyright (c) 2013-2019, the Converse.js developers
 // Licensed under the Mozilla Public License (MPLv2)
 
-
+import BrowserStorage from "backbone.browserStorage";
 import converse from "./converse-core";
 import tpl_vcard from "./templates/vcard.html";
 
-const { Backbone, Promise, Strophe, _, $iq, $build, moment, sizzle } = converse.env;
+const { Backbone, Promise, Strophe, _, $iq, $build, dayjs, sizzle } = converse.env;
 const u = converse.env.utils;
 
 
@@ -73,7 +73,7 @@ converse.plugins.add('converse-vcard', {
                     'url': _.get(vcard.querySelector('URL'), 'textContent'),
                     'role': _.get(vcard.querySelector('ROLE'), 'textContent'),
                     'email': _.get(vcard.querySelector('EMAIL USERID'), 'textContent'),
-                    'vcard_updated': moment().format(),
+                    'vcard_updated': (new Date()).toISOString(),
                     'vcard_error': undefined
                 };
             }
@@ -112,7 +112,7 @@ converse.plugins.add('converse-vcard', {
                 return {
                     'stanza': iq,
                     'jid': jid,
-                    'vcard_error': moment().format()
+                    'vcard_error': (new Date()).toISOString()
                 }
             }
             return onVCardData(jid, iq);
@@ -122,7 +122,7 @@ converse.plugins.add('converse-vcard', {
         _converse.initVCardCollection = function () {
             _converse.vcards = new _converse.VCards();
             const id = `${_converse.bare_jid}-converse.vcards`;
-            _converse.vcards.browserStorage = new Backbone.BrowserStorage[_converse.config.get('storage')](id);
+            _converse.vcards.browserStorage = new BrowserStorage[_converse.config.get('storage')](id);
             _converse.vcards.fetch();
         }
         _converse.api.listen.on('setUserJID', _converse.initVCardCollection);
@@ -196,7 +196,7 @@ converse.plugins.add('converse-vcard', {
                         return getVCard(_converse, model);
                     } else if (force ||
                             !model.get('vcard_updated') ||
-                            !moment(model.get('vcard_error')).isSame(new Date(), "day")) {
+                            !dayjs(model.get('vcard_error')).isSame(new Date(), "day")) {
 
                         const jid = model.get('jid');
                         if (!jid) {

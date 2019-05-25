@@ -7,7 +7,7 @@
           $msg = converse.env.$msg,
           Strophe = converse.env.Strophe,
           Promise = converse.env.Promise,
-          moment = converse.env.moment,
+          dayjs = converse.env.dayjs,
           sizzle = converse.env.sizzle,
           Backbone = converse.env.Backbone,
           u = converse.env.utils;
@@ -54,8 +54,8 @@
 
                 test_utils.createContacts(_converse, 'current');
                 await test_utils.waitUntil(() => _converse.rosterview.el.querySelectorAll('.roster-group .group-toggle').length, 300);
-                await test_utils.openAndEnterChatRoom(_converse, 'lounge', 'localhost', 'dummy');
-                let jid = 'lounge@localhost';
+                await test_utils.openAndEnterChatRoom(_converse, 'chillout', 'localhost', 'dummy');
+                let jid = 'chillout@localhost';
                 let room = _converse.api.rooms.get(jid);
                 expect(room instanceof Object).toBeTruthy();
 
@@ -87,7 +87,7 @@
                 chatroomview.close();
 
                 // Non-existing room
-                jid = 'lounge2@localhost';
+                jid = 'chillout2@localhost';
                 room = _converse.api.rooms.get(jid);
                 expect(typeof room === 'undefined').toBeTruthy();
                 done();
@@ -145,10 +145,8 @@
                 chatroomview.close();
 
                 _converse.muc_instant_rooms = false;
-                var sendIQ = _converse.connection.sendIQ;
+                const sendIQ = _converse.connection.sendIQ;
                 spyOn(_converse.connection, 'sendIQ').and.callFake(function (iq, callback, errback) {
-                    sent_IQ = iq;
-                    sent_IQ_els.push(iq.nodeTree);
                     IQ_id = sendIQ.bind(this)(iq, callback, errback);
                 });
                 // Test with configuration
@@ -156,6 +154,7 @@
                     'nick': 'some1',
                     'auto_configure': true,
                     'roomconfig': {
+                        'getmemberlist': ['moderator', 'participant'],
                         'changesubject': false,
                         'membersonly': true,
                         'persistentroom': true,
@@ -198,15 +197,18 @@
                     .c('status', {code:'201'});
                 _converse.connection._dataRecv(test_utils.createRequest(presence));
                 expect(_converse.connection.sendIQ).toHaveBeenCalled();
-                expect(sent_IQ.toLocaleString()).toBe(
-                    `<iq id="${IQ_id}" to="room@conference.example.org" type="get" xmlns="jabber:client">`+
-                    `<query xmlns="http://jabber.org/protocol/muc#owner"/></iq>`
-                );
+
+                const IQ_stanzas = _converse.connection.IQ_stanzas;
+                const iq = IQ_stanzas.filter(s => s.querySelector(`query[xmlns="${Strophe.NS.MUC_OWNER}"]`)).pop();
+                expect(Strophe.serialize(iq)).toBe(
+                    `<iq id="${iq.getAttribute('id')}" to="room@conference.example.org" type="get" xmlns="jabber:client">`+
+                    `<query xmlns="http://jabber.org/protocol/muc#owner"/></iq>`);
+
                 const node = u.toStanza(`
                    <iq xmlns="jabber:client"
                         type="result"
                         to="dummy@localhost/pda"
-                        from="room@conference.example.org" id="${IQ_id}">
+                        from="room@conference.example.org" id="${iq.getAttribute('id')}">
                     <query xmlns="http://jabber.org/protocol/muc#owner">
                         <x xmlns="jabber:x:data" type="form">
                         <title>Configuration for room@conference.example.org</title>
@@ -224,6 +226,13 @@
                         <field type="list-single" var="muc#roomconfig_whois" label="Who May Discover Real JIDs?"><option label="Moderators Only">
                            <value>moderators</value></option><option label="Anyone"><value>anyone</value></option>
                         </field>
+                        <field label="Roles and Affiliations that May Retrieve Member List"
+                               type="list-multi"
+                               var="muc#roomconfig_getmemberlist">
+                            <value>moderator</value>
+                            <value>participant</value>
+                            <value>visitor</value>
+                        </field>
                         <field type="text-private" var="muc#roomconfig_roomsecret" label="Password"><value/></field>
                         <field type="boolean" var="muc#roomconfig_moderatedroom" label="Make Room Moderated?"/>
                         <field type="boolean" var="muc#roomconfig_membersonly" label="Make Room Members-Only?"/>
@@ -236,13 +245,12 @@
                 spyOn(chatroomview.model, 'sendConfiguration').and.callThrough();
                 _converse.connection._dataRecv(test_utils.createRequest(node));
                 await test_utils.waitUntil(() => chatroomview.model.sendConfiguration.calls.count() === 1);
-                var sent_stanza = sent_IQ_els.pop();
-                while (sent_stanza.getAttribute('type') !== 'set') {
-                    sent_stanza = sent_IQ_els.pop();
-                }
+
+                const sent_stanza = IQ_stanzas.filter(s => s.getAttribute('type') === 'set').pop();
                 expect(sizzle('field[var="muc#roomconfig_roomname"] value', sent_stanza).pop().textContent).toBe('Room');
                 expect(sizzle('field[var="muc#roomconfig_roomdesc"] value', sent_stanza).pop().textContent).toBe('Welcome to this groupchat');
                 expect(sizzle('field[var="muc#roomconfig_persistentroom"] value', sent_stanza).pop().textContent).toBe('1');
+                expect(sizzle('field[var="muc#roomconfig_getmemberlist"] value', sent_stanza).map(e => e.textContent).join(' ')).toBe('moderator participant');
                 expect(sizzle('field[var="muc#roomconfig_publicroom"] value ', sent_stanza).pop().textContent).toBe('1');
                 expect(sizzle('field[var="muc#roomconfig_changesubject"] value', sent_stanza).pop().textContent).toBe('0');
                 expect(sizzle('field[var="muc#roomconfig_whois"] value ', sent_stanza).pop().textContent).toBe('anyone');
@@ -272,11 +280,11 @@
                     }
                 });
                 await test_utils.openChatRoom(_converse, 'lounge', 'localhost', 'dummy');
-                let stanza = await test_utils.waitUntil(() => _.get(_.filter(
+                let stanza = await test_utils.waitUntil(() => _.filter(
                     IQ_stanzas,
-                    iq => iq.nodeTree.querySelector(
+                    iq => iq.querySelector(
                         `iq[to="${room_jid}"] query[xmlns="http://jabber.org/protocol/disco#info"]`
-                    )).pop(), 'nodeTree'));
+                    )).pop());
                 // We pretend this is a new room, so no disco info is returned.
 
                 /* <iq from="jordie.langen@chat.example.org/converse.js-11659299" to="myroom@conference.chat.example.org" type="get">
@@ -298,7 +306,7 @@
                 _converse.connection._dataRecv(test_utils.createRequest(features_stanza));
 
                 const view = _converse.chatboxviews.get('lounge@localhost');
-                spyOn(view, 'join').and.callThrough();
+                spyOn(view.model, 'join').and.callThrough();
 
                 /* <iq to="myroom@conference.chat.example.org"
                  *     from="jordie.langen@chat.example.org/converse.js-11659299"
@@ -307,13 +315,12 @@
                  *          node="x-roomuser-item"/>
                  * </iq>
                  */
-                const node = await test_utils.waitUntil(() => _.filter(
+                stanza = await test_utils.waitUntil(() => _.filter(
                         IQ_stanzas,
-                        s => sizzle(`iq[to="${room_jid}"] query[node="x-roomuser-item"]`, s.nodeTree).length
+                        s => sizzle(`iq[to="${room_jid}"] query[node="x-roomuser-item"]`, s).length
                     ).pop()
                 );
-                stanza = node.nodeTree;
-                expect(node.toLocaleString()).toBe(
+                expect(Strophe.serialize(stanza)).toBe(
                     `<iq from="dummy@localhost/resource" id="${stanza.getAttribute("id")}" to="lounge@localhost" `+
                         `type="get" xmlns="jabber:client">`+
                             `<query node="x-roomuser-item" xmlns="http://jabber.org/protocol/disco#info"/></iq>`);
@@ -335,7 +342,7 @@
                 const input = await test_utils.waitUntil(() => view.el.querySelector('input[name="nick"]'));
                 input.value = 'nicky';
                 view.el.querySelector('input[type=submit]').click();
-                expect(view.join).toHaveBeenCalled();
+                expect(view.model.join).toHaveBeenCalled();
 
                 // The user has just entered the room (because join was called)
                 // and receives their own presence from the server.
@@ -350,7 +357,7 @@
                  *    </x>
                  *  </presence>
                  */
-                var presence = $pres({
+                const presence = $pres({
                         to:'dummy@localhost/resource',
                         from:'lounge@localhost/thirdwitch',
                         id:'5025e055-036c-4bc5-a227-706e7e352053'
@@ -364,8 +371,9 @@
                 .c('status').attrs({code:'201'}).nodeTree;
 
                 _converse.connection._dataRecv(test_utils.createRequest(presence));
-                var info_text = view.el.querySelector('.chat-content .chat-info').textContent;
+                const info_text = view.el.querySelector('.chat-content .chat-info').textContent;
                 expect(info_text).toBe('A new groupchat has been created');
+
 
                 // An instant room is created by saving the default configuratoin.
                 //
@@ -373,8 +381,9 @@
                  *   <query xmlns="http://jabber.org/protocol/muc#owner"><x xmlns="jabber:x:data" type="submit"/></query>
                  * </iq>
                  */
-                expect(sent_IQ.toLocaleString()).toBe(
-                    `<iq id="${IQ_id}" to="lounge@localhost" type="set" xmlns="jabber:client">`+
+                const iq = IQ_stanzas.filter(s => s.querySelector(`query[xmlns="${Strophe.NS.MUC_OWNER}"]`)).pop();
+                expect(Strophe.serialize(iq)).toBe(
+                    `<iq id="${iq.getAttribute('id')}" to="lounge@localhost" type="set" xmlns="jabber:client">`+
                         `<query xmlns="http://jabber.org/protocol/muc#owner"><x type="submit" xmlns="jabber:x:data"/>`+
                     `</query></iq>`);
                 done();
@@ -382,6 +391,33 @@
         });
 
         describe("A Groupchat", function () {
+
+            it("clears cached messages when it gets closed",
+                mock.initConverse(
+                    null, ['rosterGroupsFetched'], {},
+                    async function (done, _converse) {
+
+                await test_utils.waitUntil(() => test_utils.openAndEnterChatRoom(_converse, 'lounge', 'localhost', 'dummy'));
+                const view = _converse.chatboxviews.get('lounge@localhost');
+                const message = 'Hello world',
+                        nick = mock.chatroom_names[0],
+                        msg = $msg({
+                        'from': 'lounge@localhost/'+nick,
+                        'id': (new Date()).getTime(),
+                        'to': 'dummy@localhost',
+                        'type': 'groupchat'
+                    }).c('body').t(message).tree();
+
+                await view.model.onMessage(msg);
+                await new Promise((resolve, reject) => view.once('messageInserted', resolve));
+
+                spyOn(view.model, 'clearMessages').and.callThrough();
+                view.model.close();
+                await test_utils.waitUntil(() => view.model.clearMessages.calls.count());
+                expect(view.model.messages.length).toBe(0);
+                expect(view.content.innerHTML).toBe('');
+                done()
+            }));
 
             it("is opened when an xmpp: URI is clicked inside another groupchat",
                 mock.initConverse(
@@ -417,7 +453,7 @@
                     null, ['rosterGroupsFetched', 'chatBoxesFetched'], {},
                     async function (done, _converse) {
 
-                await test_utils.openChatRoom(_converse, "coven", 'chat.shakespeare.lit', 'some1');
+                await test_utils.openChatRoom(_converse, "coven", 'chat.shakespeare.lit');
                 const view = _converse.chatboxviews.get('coven@chat.shakespeare.lit');
                 const chat_content = view.el.querySelector('.chat-content');
                 /* <presence to="dummy@localhost/_converse.js-29092160"
@@ -846,6 +882,7 @@
                 presence = u.toStanza(
                     `<presence xmlns="jabber:client" to="dummy@localhost/resource" from="coven@chat.shakespeare.lit/fabio">
                         <c xmlns="http://jabber.org/protocol/caps" node="http://conversations.im" ver="INI3xjRUioclBTP/aACfWi5m9UY=" hash="sha-1"/>
+                        <status>Ready for a new day</status>
                         <x xmlns="http://jabber.org/protocol/muc#user">
                             <item affiliation="none" jid="fabio@montefuscolo.com.br/Conversations.ZvLu" role="participant"/>
                         </x>
@@ -853,7 +890,7 @@
                 _converse.connection._dataRecv(test_utils.createRequest(presence));
                 expect(sizzle('div.chat-info', chat_content).length).toBe(5);
                 expect(sizzle('div.chat-info:last', chat_content).pop().textContent).toBe(
-                    `fabio has entered the groupchat`);
+                    `fabio has entered the groupchat. "Ready for a new day"`);
 
                 // XXX: hack so that we can test leave/enter of occupants
                 // who were already in the room when we joined.
@@ -893,6 +930,81 @@
                 expect(sizzle('div.chat-info', chat_content).length).toBe(2);
                 expect(sizzle('div.chat-info:last', chat_content).pop().textContent).toBe(
                     `fabio has left and re-entered the groupchat`);
+                done();
+            }));
+
+            it("doesn't show the disconnection status when muc_show_join_leave_status is false",
+                mock.initConverse(
+                    null, ['rosterGroupsFetched', 'chatBoxesFetched'], {'muc_show_join_leave_status': false},
+                    async function (done, _converse) {
+
+                await test_utils.openAndEnterChatRoom(_converse, "coven", 'chat.shakespeare.lit', 'some1');
+                const view = _converse.chatboxviews.get('coven@chat.shakespeare.lit');
+                const chat_content = view.el.querySelector('.chat-content');
+                expect(sizzle('div.chat-info', chat_content).pop().textContent).toBe('some1 has entered the groupchat');
+
+                let presence = $pres({
+                        to: 'dummy@localhost/resource',
+                        from: 'coven@chat.shakespeare.lit/newguy'
+                    }).c('x', {xmlns: Strophe.NS.MUC_USER})
+                    .c('item', {
+                        'affiliation': 'none',
+                        'jid': 'newguy@localhost/_converse.js-290929789',
+                        'role': 'participant'
+                    });
+                _converse.connection._dataRecv(test_utils.createRequest(presence));
+                expect(chat_content.querySelectorAll('div.chat-info').length).toBe(2);
+                expect(sizzle('div.chat-info', chat_content).pop().textContent).toBe('newguy has entered the groupchat');
+
+                presence = $pres({
+                    to: 'dummy@localhost/resource',
+                    type: 'unavailable',
+                    from: 'coven@chat.shakespeare.lit/newguy'
+                    })
+                    .c('status', 'Disconnected: Replaced by new connection').up()
+                    .c('x', {xmlns: Strophe.NS.MUC_USER})
+                        .c('item', {
+                            'affiliation': 'none',
+                            'jid': 'newguy@localhost/_converse.js-290929789',
+                            'role': 'none'
+                        });
+                _converse.connection._dataRecv(test_utils.createRequest(presence));
+                expect(chat_content.querySelectorAll('div.chat-info').length).toBe(2);
+                expect(sizzle('div.chat-info', chat_content).pop().textContent).toBe('newguy has entered and left the groupchat');
+
+                presence = u.toStanza(
+                    `<presence xmlns="jabber:client" to="dummy@localhost/resource" from="coven@chat.shakespeare.lit/fabio">
+                        <c xmlns="http://jabber.org/protocol/caps" node="http://conversations.im" ver="INI3xjRUioclBTP/aACfWi5m9UY=" hash="sha-1"/>
+                        <status>Ready for a new day</status>
+                        <x xmlns="http://jabber.org/protocol/muc#user">
+                            <item affiliation="none" jid="fabio@montefuscolo.com.br/Conversations.ZvLu" role="participant"/>
+                        </x>
+                    </presence>`);
+                _converse.connection._dataRecv(test_utils.createRequest(presence));
+
+                expect(sizzle('div.chat-info:last', chat_content).pop().textContent).toBe(`fabio has entered the groupchat`);
+
+                presence = u.toStanza(
+                    `<presence xmlns="jabber:client" to="dummy@localhost/resource" from="coven@chat.shakespeare.lit/Dele Olajide">
+                        <x xmlns="http://jabber.org/protocol/muc#user">
+                            <item affiliation="none" jid="deleo@traderlynk.4ng.net/converse.js-39320524" role="participant"/>
+                        </x>
+                    </presence>`);
+                _converse.connection._dataRecv(test_utils.createRequest(presence));
+                expect(sizzle('div.chat-info', chat_content).length).toBe(4);
+                expect(sizzle('div.chat-info:last', chat_content).pop().textContent).toBe("Dele Olajide has entered the groupchat");
+                await test_utils.sendMessage(view, 'hello world');
+
+                presence = u.toStanza(
+                    `<presence xmlns="jabber:client" to="dummy@localhost/resource" type="unavailable" from="coven@chat.shakespeare.lit/Dele Olajide">
+                        <status>Gotta go!</status>
+                        <x xmlns="http://jabber.org/protocol/muc#user">
+                            <item affiliation="none" jid="deleo@traderlynk.4ng.net/converse.js-74567907" role="none"/>
+                        </x>
+                    </presence>`);
+                _converse.connection._dataRecv(test_utils.createRequest(presence));
+                expect(sizzle('div.chat-info', chat_content).length).toBe(5);
+                expect(sizzle('div.chat-info:last', chat_content).pop().textContent).toBe(`Dele Olajide has left the groupchat`);
                 done();
             }));
 
@@ -969,8 +1081,8 @@
                 let indicator = chat_content.querySelector('.date-separator');
                 expect(indicator).not.toBe(null);
                 expect(indicator.getAttribute('class')).toEqual('message date-separator');
-                expect(indicator.getAttribute('data-isodate')).toEqual(moment().startOf('day').format());
-                expect(indicator.querySelector('time').textContent).toEqual(moment().startOf('day').format("dddd MMM Do YYYY"));
+                expect(indicator.getAttribute('data-isodate')).toEqual(dayjs().startOf('day').toISOString());
+                expect(indicator.querySelector('time').textContent).toEqual(dayjs().startOf('day').format("dddd MMM Do YYYY"));
                 expect(chat_content.querySelectorAll('div.chat-info').length).toBe(1);
                 expect(chat_content.querySelector('div.chat-info').textContent).toBe("dummy has entered the groupchat");
 
@@ -999,13 +1111,13 @@
                     });
                 _converse.connection._dataRecv(test_utils.createRequest(presence));
 
-                indicator = chat_content.querySelector('.date-separator[data-isodate="'+moment().startOf('day').format()+'"]');
+                indicator = chat_content.querySelector('.date-separator[data-isodate="'+dayjs().startOf('day').toISOString()+'"]');
                 expect(indicator).not.toBe(null);
 
                 expect(indicator.getAttribute('class')).toEqual('message date-separator');
-                expect(indicator.getAttribute('data-isodate')).toEqual(moment().startOf('day').format());
+                expect(indicator.getAttribute('data-isodate')).toEqual(dayjs().startOf('day').toISOString());
                 expect(indicator.querySelector('time').getAttribute('class')).toEqual('separator-text');
-                expect(indicator.querySelector('time').textContent).toEqual(moment().startOf('day').format("dddd MMM Do YYYY"));
+                expect(indicator.querySelector('time').textContent).toEqual(dayjs().startOf('day').format("dddd MMM Do YYYY"));
                 expect(chat_content.querySelectorAll('div.chat-info').length).toBe(2);
                 expect(chat_content.querySelector('div.chat-info:last-child').textContent).toBe(
                     "some1 has entered the groupchat"
@@ -1028,13 +1140,13 @@
                         });
                 _converse.connection._dataRecv(test_utils.createRequest(presence));
 
-                indicator = chat_content.querySelector('.date-separator[data-isodate="'+moment().startOf('day').format()+'"]');
+                indicator = chat_content.querySelector('.date-separator[data-isodate="'+dayjs().startOf('day').toISOString()+'"]');
 
                 expect(indicator).not.toBe(null);
                 expect(indicator.getAttribute('class')).toEqual('message date-separator');
-                expect(indicator.getAttribute('data-isodate')).toEqual(moment().startOf('day').format());
+                expect(indicator.getAttribute('data-isodate')).toEqual(dayjs().startOf('day').toISOString());
 
-                expect(indicator.querySelector('time').textContent).toEqual(moment().startOf('day').format("dddd MMM Do YYYY"));
+                expect(indicator.querySelector('time').textContent).toEqual(dayjs().startOf('day').format("dddd MMM Do YYYY"));
                 expect(chat_content.querySelectorAll('div.chat-info').length).toBe(3);
                 expect(sizzle('div.chat-info:last', chat_content).pop().textContent).toBe(
                     'some1 has left the groupchat. '+
@@ -1048,7 +1160,7 @@
                         type="groupchat"
                         from="coven@chat.shakespeare.lit/some1">
                             <body>hello world</body>
-                            <delay xmlns="urn:xmpp:delay" stamp="${moment().format()}" from="some1@localhost"/>
+                            <delay xmlns="urn:xmpp:delay" stamp="${(new Date()).toISOString()}" from="some1@localhost"/>
                      </message>`);
                 _converse.connection._dataRecv(test_utils.createRequest(stanza));
                 await new Promise((resolve, reject) => view.once('messageInserted', resolve));
@@ -1069,8 +1181,8 @@
 
                 indicator = sizzle('.date-separator:eq(3)', chat_content).pop();
                 expect(indicator.getAttribute('class')).toEqual('message date-separator');
-                expect(indicator.getAttribute('data-isodate')).toEqual(moment().startOf('day').format());
-                expect(indicator.querySelector('time').textContent).toEqual(moment().startOf('day').format("dddd MMM Do YYYY"));
+                expect(indicator.getAttribute('data-isodate')).toEqual(dayjs().startOf('day').toISOString());
+                expect(indicator.querySelector('time').textContent).toEqual(dayjs().startOf('day').format("dddd MMM Do YYYY"));
                 expect(chat_content.querySelectorAll('div.chat-info').length).toBe(4);
                 expect(sizzle('div.chat-info:last', chat_content).pop().textContent)
                     .toBe("newguy has entered the groupchat");
@@ -1083,7 +1195,7 @@
                        type="groupchat"
                        from="coven@chat.shakespeare.lit/some1">"+
                            <body>hello world</body>"+
-                           <delay xmlns="urn:xmpp:delay" stamp="${moment().format()}" from="some1@localhost"/>"+
+                           <delay xmlns="urn:xmpp:delay" stamp="${(new Date()).toISOString()}" from="some1@localhost"/>"+
                     </message>`);
                 _converse.connection._dataRecv(test_utils.createRequest(stanza));
                 await new Promise((resolve, reject) => view.once('messageInserted', resolve));
@@ -1109,8 +1221,8 @@
 
                 indicator = sizzle('.date-separator:eq(5)', chat_content).pop();
                 expect(indicator.getAttribute('class')).toEqual('message date-separator');
-                expect(indicator.getAttribute('data-isodate')).toEqual(moment().startOf('day').format());
-                expect(indicator.querySelector('time').textContent).toEqual(moment().startOf('day').format("dddd MMM Do YYYY"));
+                expect(indicator.getAttribute('data-isodate')).toEqual(dayjs().startOf('day').toISOString());
+                expect(indicator.querySelector('time').textContent).toEqual(dayjs().startOf('day').format("dddd MMM Do YYYY"));
                 expect(chat_content.querySelectorAll('div.chat-info').length).toBe(5);
                 expect(sizzle('div.chat-info:last', chat_content).pop().textContent).toBe(
                     'newguy has left the groupchat. '+
@@ -1385,8 +1497,8 @@
 
                 await test_utils.openAndEnterChatRoom(_converse, 'lounge', 'localhost', 'dummy');
                 var name;
-                var view = _converse.chatboxviews.get('lounge@localhost'),
-                    occupants = view.el.querySelector('.occupant-list');
+                const view = _converse.chatboxviews.get('lounge@localhost');
+                const occupants = view.el.querySelector('.occupant-list');
                 var presence, role, jid, model;
                 for (var i=0; i<mock.chatroom_names.length; i++) {
                     name = mock.chatroom_names[i];
@@ -1405,8 +1517,8 @@
                     .c('status').attrs({code:'110'}).nodeTree;
                     _converse.connection._dataRecv(test_utils.createRequest(presence));
                     expect(occupants.querySelectorAll('li').length).toBe(2+i);
-                    model = view.occupantsview.model.where({'nick': name})[0];
-                    var index = view.occupantsview.model.indexOf(model);
+                    model = view.model.occupants.where({'nick': name})[0];
+                    const index = view.model.occupants.indexOf(model);
                     expect(occupants.querySelectorAll('li .occupant-nick')[index].textContent.trim()).toBe(mock.chatroom_names[i]);
                 }
 
@@ -1459,8 +1571,8 @@
                     .c('status').attrs({code:'110'}).nodeTree;
                     _converse.connection._dataRecv(test_utils.createRequest(presence));
                     expect(occupants.querySelectorAll('li').length).toBe(2+i);
-                    model = view.occupantsview.model.where({'nick': name})[0];
-                    var index = view.occupantsview.model.indexOf(model);
+                    model = view.model.occupants.where({'nick': name})[0];
+                    const index = view.model.occupants.indexOf(model);
                     expect(occupants.querySelectorAll('li .occupant-nick')[index].textContent.trim()).toBe(mock.chatroom_names[i]);
                 }
 
@@ -1622,13 +1734,12 @@
 
                 await test_utils.openChatRoom(_converse, 'lounge', 'localhost', 'dummy');
 
-                let stanza = await test_utils.waitUntil(() => _.get(_.filter(
+                let stanza = await test_utils.waitUntil(() => _.filter(
                     IQ_stanzas,
-                    iq => iq.nodeTree.querySelector(
+                    iq => iq.querySelector(
                         `iq[to="${room_jid}"] query[xmlns="http://jabber.org/protocol/disco#info"]`
-                    )).pop(), 'nodeTree')
+                    )).pop()
                 );
-
                 // We pretend this is a new room, so no disco info is returned.
                 const features_stanza = $iq({
                         from: 'lounge@localhost',
@@ -1640,7 +1751,7 @@
                 _converse.connection._dataRecv(test_utils.createRequest(features_stanza));
 
                 const view = _converse.chatboxviews.get('lounge@localhost');
-                spyOn(view, 'join').and.callThrough();
+                spyOn(view.model, 'join').and.callThrough();
 
                 /* <iq from='hag66@shakespeare.lit/pda'
                  *     id='getnick1'
@@ -1650,13 +1761,12 @@
                  *         node='x-roomuser-item'/>
                  * </iq>
                  */
-                const node = await test_utils.waitUntil(() => _.filter(
+                const iq = await test_utils.waitUntil(() => _.filter(
                         IQ_stanzas,
-                        s => sizzle(`iq[to="${room_jid}"] query[node="x-roomuser-item"]`, s.nodeTree).length
+                        s => sizzle(`iq[to="${room_jid}"] query[node="x-roomuser-item"]`, s).length
                     ).pop()
                 );
-                const iq = node.nodeTree;
-                expect(node.toLocaleString()).toBe(
+                expect(Strophe.serialize(iq)).toBe(
                     `<iq from="dummy@localhost/resource" id="${iq.getAttribute('id')}" to="lounge@localhost" `+
                         `type="get" xmlns="jabber:client">`+
                             `<query node="x-roomuser-item" xmlns="http://jabber.org/protocol/disco#info"/></iq>`);
@@ -1676,14 +1786,14 @@
                  */
                 stanza = $iq({
                     'type': 'result',
-                    'id': node.nodeTree.getAttribute('id'),
+                    'id': iq.getAttribute('id'),
                     'from': view.model.get('jid'),
                     'to': _converse.connection.jid
                 }).c('query', {'xmlns': 'http://jabber.org/protocol/disco#info', 'node': 'x-roomuser-item'})
                 .c('identity', {'category': 'conference', 'name': 'thirdwitch', 'type': 'text'});
                 _converse.connection._dataRecv(test_utils.createRequest(stanza));
 
-                expect(view.join).toHaveBeenCalled();
+                expect(view.model.join).toHaveBeenCalled();
 
                 // The user has just entered the groupchat (because join was called)
                 // and receives their own presence from the server.
@@ -1751,11 +1861,8 @@
                 input.dispatchEvent(evt);
 
                 let sent_stanza;
-                spyOn(_converse.connection, 'send').and.callFake(function (stanza) {
-                    sent_stanza = stanza;
-                });
-                const results_el =  view.occupantsview.el.querySelector('.suggestion-box__results');
-                const hint = results_el.firstElementChild;
+                spyOn(_converse.connection, 'send').and.callFake(stanza => (sent_stanza = stanza));
+                const hint = await test_utils.waitUntil(() => view.el.querySelector('.suggestion-box__results li'));
                 expect(input.value).toBe('Felix');
                 expect(hint.textContent).toBe('Felix Amsel');
 
@@ -2103,15 +2210,14 @@
                 const room_jid = 'coven@chat.shakespeare.lit';
 
                 await _converse.api.rooms.open(room_jid, {'nick': 'some1'});
-                const node = await test_utils.waitUntil(() => _.filter(
+                const stanza = await test_utils.waitUntil(() => _.filter(
                     IQ_stanzas,
-                    iq => iq.nodeTree.querySelector(
+                    iq => iq.querySelector(
                         `iq[to="${room_jid}"] query[xmlns="http://jabber.org/protocol/disco#info"]`
                     )).pop());
 
                 // Check that the groupchat queried for the feautures.
-                const stanza = node.nodeTree;
-                expect(node.toLocaleString()).toBe(
+                expect(Strophe.serialize(stanza)).toBe(
                     `<iq from="dummy@localhost/resource" id="${stanza.getAttribute("id")}" to="${room_jid}" type="get" xmlns="jabber:client">`+
                         `<query xmlns="http://jabber.org/protocol/disco#info"/>`+
                     `</iq>`);
@@ -2209,7 +2315,7 @@
                 const IQs = _converse.connection.IQ_stanzas;
                 let iq = await test_utils.waitUntil(() => _.filter(
                     IQs,
-                    iq => iq.nodeTree.querySelector(
+                    iq => iq.querySelector(
                         `iq[to="${jid}"] query[xmlns="${Strophe.NS.MUC_OWNER}"]`
                     )).pop());
 
@@ -2217,7 +2323,7 @@
                    `<iq xmlns="jabber:client"
                          type="result"
                          to="dummy@localhost/pda"
-                         from="room@conference.example.org" id="${iq.nodeTree.getAttribute('id')}">
+                         from="room@conference.example.org" id="${iq.getAttribute('id')}">
                      <query xmlns="http://jabber.org/protocol/muc#owner">
                          <x xmlns="jabber:x:data" type="form">
                          <title>Configuration for room@conference.example.org</title>
@@ -2285,13 +2391,13 @@
                 sizzle('[name="muc#roomconfig_roomname"]', chatroomview.el).pop().value = "New room name"
                 chatroomview.el.querySelector('.btn-primary').click();
 
-                iq = await test_utils.waitUntil(() => _.filter(IQs, iq => u.matchesSelector(iq.nodeTree, `iq[to="${jid}"][type="set"]`)).pop());
+                iq = await test_utils.waitUntil(() => _.filter(IQs, iq => u.matchesSelector(iq, `iq[to="${jid}"][type="set"]`)).pop());
                 const result = $iq({
                     "xmlns": "jabber:client",
                     "type": "result",
                     "to": "dummy@localhost/resource",
                     "from": "lounge@muc.localhost",
-                    "id": iq.nodeTree.getAttribute('id')
+                    "id": iq.getAttribute('id')
                 });
 
                 IQs.length = 0; // Empty the array
@@ -2299,13 +2405,13 @@
 
                 iq = await test_utils.waitUntil(() => _.filter(
                     IQs,
-                    iq => iq.nodeTree.querySelector(
+                    iq => iq.querySelector(
                         `iq[to="${jid}"] query[xmlns="http://jabber.org/protocol/disco#info"]`
                     )).pop());
 
                 const features_stanza = $iq({
                     'from': jid,
-                    'id': iq.nodeTree.getAttribute('id'),
+                    'id': iq.getAttribute('id'),
                     'to': 'dummy@localhost/desktop',
                     'type': 'result'
                 }).c('query', { 'xmlns': 'http://jabber.org/protocol/disco#info'})
@@ -2724,13 +2830,12 @@
                 });
                 _converse.connection.IQ_stanzas = [];
                 _converse.connection._dataRecv(test_utils.createRequest(result));
-                let node = await test_utils.waitUntil(() => _.filter(
+                iq_stanza = await test_utils.waitUntil(() => _.filter(
                     _converse.connection.IQ_stanzas,
-                    iq => iq.nodeTree.querySelector('iq[to="lounge@muc.localhost"][type="get"] item[affiliation="member"]')).pop()
+                    iq => iq.querySelector('iq[to="lounge@muc.localhost"][type="get"] item[affiliation="member"]')).pop()
                 );
 
-                iq_stanza = node.nodeTree;
-                expect(node.toLocaleString()).toBe(
+                expect(Strophe.serialize(iq_stanza)).toBe(
                     `<iq id="${iq_stanza.getAttribute('id')}" to="lounge@muc.localhost" type="get" xmlns="jabber:client">`+
                         `<query xmlns="http://jabber.org/protocol/muc#admin">`+
                             `<item affiliation="member"/>`+
@@ -2749,13 +2854,12 @@
                 _converse.connection._dataRecv(test_utils.createRequest(result));
 
                 expect(view.model.occupants.length).toBe(2);
-                node = await test_utils.waitUntil(() => _.filter(
+                iq_stanza = await test_utils.waitUntil(() => _.filter(
                     _converse.connection.IQ_stanzas,
-                    (iq) => iq.nodeTree.querySelector('iq[to="lounge@muc.localhost"][type="get"] item[affiliation="owner"]')).pop()
+                    iq => iq.querySelector('iq[to="lounge@muc.localhost"][type="get"] item[affiliation="owner"]')).pop()
                 );
 
-                iq_stanza = node.nodeTree;
-                expect(node.toLocaleString()).toBe(
+                expect(Strophe.serialize(iq_stanza)).toBe(
                     `<iq id="${iq_stanza.getAttribute('id')}" to="lounge@muc.localhost" type="get" xmlns="jabber:client">`+
                         `<query xmlns="http://jabber.org/protocol/muc#admin">`+
                             `<item affiliation="owner"/>`+
@@ -2774,13 +2878,12 @@
                 _converse.connection._dataRecv(test_utils.createRequest(result));
 
                 expect(view.model.occupants.length).toBe(2);
-                node = await test_utils.waitUntil(() => _.filter(
+                iq_stanza = await test_utils.waitUntil(() => _.filter(
                     _converse.connection.IQ_stanzas,
-                    (iq) => iq.nodeTree.querySelector('iq[to="lounge@muc.localhost"][type="get"] item[affiliation="admin"]')).pop()
+                    iq => iq.querySelector('iq[to="lounge@muc.localhost"][type="get"] item[affiliation="admin"]')).pop()
                 );
 
-                iq_stanza = node.nodeTree;
-                expect(node.toLocaleString()).toBe(
+                expect(Strophe.serialize(iq_stanza)).toBe(
                     `<iq id="${iq_stanza.getAttribute('id')}" to="lounge@muc.localhost" type="get" xmlns="jabber:client">`+
                         `<query xmlns="http://jabber.org/protocol/muc#admin">`+
                             `<item affiliation="admin"/>`+
@@ -3506,11 +3609,11 @@
                     .toBe('This groupchat requires a password');
 
                 // Let's submit the form
-                spyOn(view, 'join');
+                spyOn(view.model, 'join');
                 const input_el = view.el.querySelector('[name="password"]');
                 input_el.value = 'secret';
                 view.el.querySelector('input[type=submit]').click();
-                expect(view.join).toHaveBeenCalledWith('dummy', 'secret');
+                expect(view.model.join).toHaveBeenCalledWith('dummy', 'secret');
                 done();
             }));
 
@@ -3623,12 +3726,12 @@
 
                 const view = _converse.chatboxviews.get(groupchat_jid);
                 spyOn(view, 'showErrorMessage').and.callThrough();
-                spyOn(view, 'join').and.callThrough();
+                spyOn(view.model, 'join').and.callThrough();
 
                 // Simulate repeatedly that there's already someone in the groupchat
                 // with that nickname
                 _converse.connection._dataRecv(test_utils.createRequest(presence));
-                expect(view.join).toHaveBeenCalledWith('dummy-2');
+                expect(view.model.join).toHaveBeenCalledWith('dummy-2');
 
                 attrs.from = `${groupchat_jid}/dummy-2`;
                 attrs.id = u.getUniqueId();
@@ -3638,7 +3741,7 @@
                         .c('conflict').attrs({xmlns:'urn:ietf:params:xml:ns:xmpp-stanzas'}).nodeTree;
                 _converse.connection._dataRecv(test_utils.createRequest(presence));
 
-                expect(view.join).toHaveBeenCalledWith('dummy-3');
+                expect(view.model.join).toHaveBeenCalledWith('dummy-3');
 
                 attrs.from = `${groupchat_jid}/dummy-3`;
                 attrs.id = new Date().getTime();
@@ -3647,7 +3750,7 @@
                     .c('error').attrs({'by': groupchat_jid, 'type': 'cancel'})
                         .c('conflict').attrs({'xmlns':'urn:ietf:params:xml:ns:xmpp-stanzas'}).nodeTree;
                 _converse.connection._dataRecv(test_utils.createRequest(presence));
-                expect(view.join).toHaveBeenCalledWith('dummy-4');
+                expect(view.model.join).toHaveBeenCalledWith('dummy-4');
                 done();
             }));
 
@@ -3764,21 +3867,20 @@
                 });
 
                 await _converse.api.rooms.open(room_jid, {'nick': 'dummy'});
-                const node = await test_utils.waitUntil(() => _.filter(
+                let stanza = await test_utils.waitUntil(() => _.filter(
                     IQ_stanzas,
-                    iq => iq.nodeTree.querySelector(
+                    iq => iq.querySelector(
                         `iq[to="${room_jid}"] query[xmlns="http://jabber.org/protocol/disco#info"]`
                     )).pop());
                 // Check that the groupchat queried for the feautures.
-                let stanza = node.nodeTree;
-                expect(node.toLocaleString()).toBe(
+                expect(Strophe.serialize(stanza)).toBe(
                     `<iq from="dummy@localhost/resource" id="${stanza.getAttribute("id")}" to="${room_jid}" type="get" xmlns="jabber:client">`+
                         `<query xmlns="http://jabber.org/protocol/disco#info"/>`+
                     `</iq>`);
 
                 const view = _converse.chatboxviews.get('coven@chat.shakespeare.lit');
                 // State that the chat is members-only via the features IQ
-                var features_stanza = $iq({
+                const features_stanza = $iq({
                         from: 'coven@chat.shakespeare.lit',
                         'id': IQ_ids.pop(),
                         'to': 'dummy@localhost/desktop',
@@ -3890,11 +3992,11 @@
                         });
                 _converse.connection._dataRecv(test_utils.createRequest(owner_list_stanza));
                 await test_utils.waitUntil(() => IQ_ids.length, 300);
-                stanza = await test_utils.waitUntil(() => _.get(_.filter(
+                stanza = await test_utils.waitUntil(() => _.filter(
                     IQ_stanzas,
-                    iq => iq.nodeTree.querySelector(
+                    iq => iq.querySelector(
                         `iq[to="${room_jid}"] query[xmlns="http://jabber.org/protocol/muc#admin"]`
-                    )).pop(), 'nodeTree'));
+                    )).pop());
                 expect(stanza.outerHTML,
                     `<iq id="${IQ_ids.pop()}" to="coven@chat.shakespeare.lit" type="set" xmlns="jabber:client">`+
                         `<query xmlns="http://jabber.org/protocol/muc#admin">`+
@@ -4170,13 +4272,6 @@
                     null, ['rosterGroupsFetched', 'chatBoxesFetched'], {},
                     async function (done, _converse) {
 
-                const sendIQ = _converse.connection.sendIQ;
-                let sent_stanza, IQ_id;
-                spyOn(_converse.connection, 'sendIQ').and.callFake(function (iq, callback, errback) {
-                    sent_stanza = iq;
-                    IQ_id = sendIQ.bind(this)(iq, callback, errback);
-                });
-
                 test_utils.openControlBox();
                 const roomspanel = _converse.chatboxviews.get('controlbox').roomspanel;
                 roomspanel.el.querySelector('.show-list-muc-modal').click();
@@ -4191,19 +4286,28 @@
 
                 const server_input = modal.el.querySelector('input[name="server"]');
                 expect(server_input.placeholder).toBe('conference.example.org');
-                const input = server_input.value = 'chat.shakespear.lit';
+                const input = server_input.value = 'chat.shakespeare.lit';
                 modal.el.querySelector('input[type="submit"]').click();
                 await test_utils.waitUntil(() => _converse.chatboxes.length);
-                expect(sent_stanza.toLocaleString()).toBe(
-                    `<iq from="dummy@localhost/resource" id="${IQ_id}" to="chat.shakespear.lit" type="get" xmlns="jabber:client">`+
-                        `<query xmlns="http://jabber.org/protocol/disco#items"/>`+
+
+                const IQ_stanzas = _converse.connection.IQ_stanzas;
+                const sent_stanza = await test_utils.waitUntil(
+                    () => IQ_stanzas.filter(s => sizzle(`query[xmlns="${Strophe.NS.DISCO_ITEMS}"]`, s).length).pop()
+                );
+                const id = sent_stanza.getAttribute('id');
+                expect(Strophe.serialize(sent_stanza)).toBe(
+                    `<iq from="dummy@localhost/resource" id="${id}" `+
+                        `to="chat.shakespeare.lit" `+
+                        `type="get" `+
+                        `xmlns="jabber:client">`+
+                            `<query xmlns="http://jabber.org/protocol/disco#items"/>`+
                     `</iq>`
                 );
                 const iq = $iq({
-                    from:'muc.localhost',
-                    to:'dummy@localhost/pda',
-                    id: IQ_id,
-                    type:'result'
+                    'from':'muc.localhost',
+                    'to':'dummy@localhost/pda',
+                    'id': id,
+                    'type':'result'
                 }).c('query')
                 .c('item', { jid:'heath@chat.shakespeare.lit', name:'A Lonely Heath'}).up()
                 .c('item', { jid:'coven@chat.shakespeare.lit', name:'A Dark Cave'}).up()
@@ -4428,9 +4532,7 @@
                     expect(notifications[0].textContent).toEqual('newguy is typing');
 
                     const timeout_functions = [];
-                    spyOn(window, 'setTimeout').and.callFake(function (func, delay) {
-                        timeout_functions.push(func);
-                    });
+                    spyOn(window, 'setTimeout').and.callFake(f => timeout_functions.push(f));
 
                     // Check that it doesn't appear twice
                     msg = $msg({
@@ -4450,7 +4552,6 @@
                     notifications = view.el.querySelectorAll('.chat-state-notification');
                     expect(notifications.length).toBe(1);
                     expect(notifications[0].textContent).toEqual('newguy is typing');
-
                     expect(timeout_functions.length).toBe(1);
 
                     // <composing> state for a different occupant
@@ -4470,8 +4571,8 @@
                     await test_utils.waitUntil(() => (view.el.querySelectorAll('.chat-state-notification').length === 2));
                     notifications = view.el.querySelectorAll('.chat-state-notification');
                     expect(notifications.length).toBe(2);
-                    expect(notifications[0].textContent).toEqual('newguy is typing');
-                    expect(notifications[1].textContent).toEqual('nomorenicks is typing');
+                    expect(notifications[0].textContent).toEqual('nomorenicks is typing');
+                    expect(notifications[1].textContent).toEqual('newguy is typing');
 
                     // Check that new messages appear under the chat state notifications
                     msg = $msg({

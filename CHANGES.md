@@ -1,7 +1,7 @@
 # Changelog
 
 ## 5.0.0 (Unreleased)
-
+- Groupchat default configuration now supports `list-multi` fields
 - Bugfix: Don't set `muc_domain` for roomspanel if `locked_muc_domain` is `true`.
 - Bugfix: Modal auto-closes when you open it for a second time.
 - Take roster nickname into consideration when rendering messages and chat headings.
@@ -10,11 +10,30 @@
 - In the `/help` menu, only show allowed commands
 - Message deduplication bugfixes and improvements
 - Continuously retry (in 2s intervals) to fetch login credentials (via [credentials_url](https://conversejs.org/docs/html/configuration.html#credentials-url)) in case of failure
+- Replace `moment` with [DayJS](https://github.com/iamkun/dayjs).
+- New API method [\_converse.api.disco.features.get](https://conversejs.org/docs/html/api/-_converse.api.disco.features.html#.get)
+- New config setting [muc_show_join_leave_status](https://conversejs.org/docs/html/configuration.html#muc-show-join-leave-status)
+- New config option [singleton](https://conversejs.org/docs/html/configuration.html#singleton).
+  By setting this option to `false` and `view_mode` to `'embedded'`, it's now possible to
+  "embed" the full app and not just a single chat. To embed just a single chat,
+  it's now necessary to explicitly set `singleton` to `true`.
+- New event: `chatBoxBlurred`.
+- New event: [chatBoxBlurred](https://conversejs.org/docs/html/api/-_converse.html#event:chatBoxBlurred)
+- New event: [chatReconnected](https://conversejs.org/docs/html/api/-_converse.html#event:chatReconnected)
+- Properly handle message correction being received before the corrected message
 - #1296: `embedded` view mode shows `chatbox-navback` arrow in header
+- #1465: When highlighting a roster contact, they're incorrectly shown as online
 - #1532: Converse reloads on enter pressed in the filter box
+- #1550: Legitimate carbons being blocked due to erroneous forgery check
+- #1554: Room auto-configuration broke if the config form contained fields with type `fixed`
+- #1558: `this.get` is not a function error when `forward_messages` is set to `true`.
+- #1572: In `fullscreen` view mode the top is cut off on iOS
 
 - **Breaking changes**:
 - Rename `muc_disable_moderator_commands` to [muc_disable_slash_commands](https://conversejs.org/docs/html/configuration.html#muc-disable-slash-commands).
+- `_converse.api.archive.query` now returns a Promise instead of accepting a callback functions.
+- `_converse.api.disco.supports` now returns a Promise which resolves to a Boolean instead of an Array.
+
 
 ### API changes
 
