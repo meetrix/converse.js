@@ -20,20 +20,59 @@ const AvatarMixin = {
     renderAvatar (el) {
         el = el || this.el;
         const canvas_el = el.querySelector('canvas');
-        if (_.isNull(canvas_el)) {
+        if(!_.isNull(el.querySelector('image'))){
+            if (this.model.vcard) {
+                const data = {
+                    'classes': 'avatar align-self-center',
+                    'width': 40,
+                    'height': 40,
+                }
+                const image_type = this.model.vcard.get('image_type'),
+                      image = this.model.vcard.get('image');
+                      
+                data['image'] = "data:" + image_type + ";base64," + image;
+                // el.querySelector('.show-profile').innerHTML = tpl_avatar(data);
+                el.querySelector('image').setAttribute('xlink:href',data['image'])
+                
+            }
             return;
         }
-        if (this.model.vcard) {
-            const data = {
-                'classes': canvas_el.getAttribute('class'),
-                'width': canvas_el.width,
-                'height': canvas_el.height,
-            }
-            const image_type = this.model.vcard.get('image_type'),
-                  image = this.model.vcard.get('image');
-            data['image'] = "data:" + image_type + ";base64," + image;
-            canvas_el.outerHTML = tpl_avatar(data);
+        else if (_.isNull(canvas_el)) {
+            return;
         }
+        const defaultAvatar = "PD94bWwgdmVyc2lvbj0iMS4wIj8+CjxzdmcgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB3aWR0aD0iMTI4IiBoZWlnaHQ9IjEyOCI+CiA8cmVjdCB3aWR0aD0iMTI4IiBoZWlnaHQ9IjEyOCIgZmlsbD0iIzU1NSIvPgogPGNpcmNsZSBjeD0iNjQiIGN5PSI0MSIgcj0iMjQiIGZpbGw9IiNmZmYiLz4KIDxwYXRoIGQ9Im0yOC41IDExMiB2LTEyIGMwLTEyIDEwLTI0IDI0LTI0IGgyMyBjMTQgMCAyNCAxMiAyNCAyNCB2MTIiIGZpbGw9IiNmZmYiLz4KPC9zdmc+Cg==";
+        let image_type = "image/png";
+        let image = defaultAvatar;
+        let display_name = this.model.get('jid');
+ 
+        if (this.model.vcard)
+        {
+            image_type = this.model.vcard.get('image_type');
+            image = this.model.vcard.get('image');
+            display_name = this.model.vcard.attributes.fullname || this.model.vcard.get('jid');
+        }
+
+        var dataUri = "data:" + image_type + ";base64," + image;
+
+        if (!image || (display_name && defaultAvatar == image))
+        {
+            // eslint-disable-next-line no-undef
+            dataUri = createAvatar(display_name);
+        }
+  
+        // else {
+        //     setAvatar(display_name, dataUri);
+        // }
+
+        // const image_type = this.model.vcard.get('image_type'),
+        //         image = this.model.vcard.get('image');         
+        canvas_el.outerHTML = tpl_avatar({
+            'classes': canvas_el.getAttribute('class'),
+            'width': canvas_el.width,
+            'height': canvas_el.height,
+            //'image': "data:" + image_type + ";base64," + image,
+            'image':dataUri
+        });
     },
 };
 
@@ -108,10 +147,10 @@ converse.plugins.add('converse-chatboxviews', {
 
             initialize () {
                 this.model.on("destroy", this.removeChat, this);
-                const bg = document.getElementById('conversejs-bg');
-                if (bg && !bg.innerHTML.trim()) {
-                    bg.innerHTML = tpl_background_logo();
-                }
+                //const bg = document.getElementById('conversejs-bg');
+                // if (bg && !bg.innerHTML.trim()) {
+                //     bg.innerHTML = tpl_background_logo();
+                // }
                 const body = document.querySelector('body');
                 body.classList.add(`converse-${_converse.view_mode}`);
                 this.el.classList.add(`converse-${_converse.view_mode}`);
@@ -162,6 +201,8 @@ converse.plugins.add('converse-chatboxviews', {
              * @event _converse#chatBoxViewsInitialized
              * @example _converse.api.listen.on('chatBoxViewsInitialized', () => { ... });
              */
+            _converse.api.trigger('chatBoxViewPortCalculate');
+            _converse.api.trigger('chatBoxViewPortCaclulateWhenResize');
             _converse.api.trigger('chatBoxViewsInitialized');
         });
 

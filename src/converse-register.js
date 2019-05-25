@@ -23,7 +23,7 @@ import utils from "@converse/headless/utils/form";
 
 // Strophe methods for building stanzas
 const { Strophe, Backbone, sizzle, $iq, _ } = converse.env;
-
+const u = utils;
 // Add Strophe Namespaces
 Strophe.addNamespace('REGISTER', 'jabber:iq:register');
 
@@ -274,10 +274,30 @@ converse.plugins.add('converse-register', {
                 this.setFields(stanza);
                 if (!this.model.get('registration_form_rendered')) {
                     this.renderRegistrationForm(stanza);
+                    this.registerFieldTips();
                 }
                 return false;
             },
+            //<----MDEV
+            registerFieldTips(){
+                this.el.querySelector('input[name=username]').insertAdjacentHTML(
+                    'afterend',
+                    '<p>characters A-Z, a-z and 0-9</p>'
+                    
+                );
+                this.el.querySelector('input[name=name]').insertAdjacentHTML(
+                    'afterend',
+                    '<p>characters A-Z, a-z and space</p>'
+                    
+                );
+                this.el.querySelector('input[name=password]').insertAdjacentHTML(
+                    'afterend',
+                    '<p>characters A-Z, a-z, 0-9,[!@#$%^&*], more than 8</p>'
+                    
+                );
 
+            },
+            //------>
             reset (settings) {
                 const defaults = {
                     fields: {},
@@ -495,6 +515,18 @@ converse.plugins.add('converse-register', {
                             utils.xForm2webForm(field, stanza, {'domain': this.domain})
                         );
                     });
+                    buttons.insertAdjacentHTML(
+                        'beforebegin',
+                         tpl_form_input({
+                            'id': u.getUniqueId(),
+                            'label': __('Confirm Password'),
+                            'name': 'confirmpassword',
+                            'placeholder': null,
+                            'required': true,
+                            'type': 'password',
+                            'value':'',
+                        })
+                    );
                 } else {
                     this.renderLegacyRegistrationForm(form);
                 }
@@ -573,6 +605,11 @@ converse.plugins.add('converse-register', {
              * @param { HTMLElement } form - The HTML form that was submitted
              */
             submitRegistrationForm (form) {
+                //<-----MDEV
+                if(!this.validationRegistationForm(form)){
+                    return;
+                }
+                //-------->
                 const has_empty_inputs = _.reduce(
                     this.el.querySelectorAll('input.required'),
                     function (result, input) {
@@ -598,6 +635,40 @@ converse.plugins.add('converse-register', {
                 _converse.connection.send(iq);
                 this.setFields(iq.tree());
             },
+            //<---MDEV
+            validationRegistationForm(form){
+                const password = form.querySelector('input[name=password]').value;
+                const username = form.querySelector('input[name=username]').value;
+                const fullname = form.querySelector('input[name=name]').value;
+                const usernameReg =  new RegExp(_converse.user_settings.username_regex);
+                const fullnameReg =  new RegExp(_converse.user_settings.fullname_regex);
+                const confirmpassword = form.querySelector('input[name=confirmpassword]').value;
+                const strongRegex= new RegExp(_converse.user_settings.password_regex.strongRegex);
+                const mediumRegex= new RegExp(_converse.user_settings.password_regex.mediumRegex);
+                if(!usernameReg.test(username)){
+                    this.showValidationError(__('Username should only contains characters A-Z, a-z and 0-9'));
+                    return false;
+                }
+                if(!fullnameReg.test(fullname)){
+                    this.showValidationError(__('fullname should only contains characters A-Z, a-z and space'));
+                    return false;
+                }
+                if( password!==confirmpassword ){
+                    this.showValidationError(__('passwords does not match'));
+                    return false;
+                }
+                if(strongRegex.test(password)){
+                    return true;
+                }else if(mediumRegex.test(password)){
+                    return true;
+                } else {
+                    const passwordWeekMsg = __('A minimum 8 characters password contains a combination of uppercase and lowercase letter and number are required');
+                    this.showValidationError(passwordWeekMsg);
+                    return false;
+                }
+                
+            },
+            //------>
 
             /* Stores the values that will be sent to the XMPP server during attempted registration.
              * @private
@@ -631,7 +702,8 @@ converse.plugins.add('converse-register', {
             },
 
             _setFieldsFromXForm (xform) {
-                this.title = _.get(xform.querySelector('title'), 'textContent');
+                //this.title = _.get(xform.querySe'lector('title'), 'textContent');
+                this.title = 'User Registation';
                 this.instructions = _.get(xform.querySelector('instructions'), 'textContent');
                 xform.querySelectorAll('field').forEach(field => {
                     const _var = field.getAttribute('var');

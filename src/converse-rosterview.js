@@ -70,13 +70,13 @@ converse.plugins.add('converse-rosterview', {
             },
 
             toHTML () {
-                const label_nickname = _converse.xhr_user_search_url ? __('Contact name') : __('Optional nickname');
+                const label_nickname = _converse.xhr_user_search_url ? __('Contact name') : __('nickname (Optional)');
                 return tpl_add_contact_modal(Object.assign(this.model.toJSON(), {
                     '_converse': _converse,
                     'heading_new_contact': __('Add a Contact'),
-                    'label_xmpp_address': __('XMPP Address'),
+                    'label_xmpp_address': __('User Address'),//__('XMPP Address')
                     'label_nickname': label_nickname,
-                    'contact_placeholder': __('name@example.org'),
+                    'contact_placeholder': __('name'),//__('name@example.org'),
                     'label_add': __('Add'),
                     'error_message': __('Please enter a valid XMPP address')
                 }));
@@ -88,8 +88,8 @@ converse.plugins.add('converse-rosterview', {
                 } else {
                     this.initJIDAutoComplete();
                 }
-                const jid_input = this.el.querySelector('input[name="jid"]');
-                this.el.addEventListener('shown.bs.modal', () => jid_input.focus(), false);
+                // const jid_input = this.el.querySelector('input[name="jid"]');
+                // this.el.addEventListener('shown.bs.modal', () => jid_input.focus(), false);
             },
 
             initJIDAutoComplete () {
@@ -105,10 +105,16 @@ converse.plugins.add('converse-rosterview', {
             },
 
             initXHRAutoComplete () {
+                const button = this.el.querySelector('.btn-primary')
+                button.disabled = true;
                 if (!_converse.autocomplete_add_contact) {
                     return this.initXHRFetch();
                 }
                 const el = this.el.querySelector('.suggestion-box__name').parentElement;
+               
+                this.el.querySelector('.suggestion-box__input').addEventListener('keyup',function(e){
+                    button.disabled = true;
+                })
                 this.name_auto_complete = new _converse.AutoComplete(el, {
                     'auto_evaluate': false,
                     'filter': _converse.FILTER_STARTSWITH,
@@ -119,19 +125,26 @@ converse.plugins.add('converse-rosterview', {
                 xhr.onload = () => {
                     if (xhr.responseText) {
                         const r = xhr.responseText;
-                        this.name_auto_complete.list = JSON.parse(r).map(i => ({'label': i.fullname || i.jid, 'value': i.jid}));
+                        
+                        this.name_auto_complete.list = JSON.parse(r).users.map(i => ({'label': i.fullname || i.username, 'value': i.username}));
                         this.name_auto_complete.auto_completing = true;
                         this.name_auto_complete.evaluate();
                     }
                 };
-                const input_el = this.el.querySelector('input[name="name"]');
+                const input_el = this.el.querySelector('input[name="contact"]');
                 input_el.addEventListener('input', _.debounce(() => {
-                    xhr.open("GET", `${_converse.xhr_user_search_url}q=${input_el.value}`, true);
+                    this.el.querySelector('.btn-primary').disabled = true;
+                    xhr.open("GET", `${_converse.xhr_user_search_url}search=${input_el.value.toLowerCase()}`, true);
+                    xhr.setRequestHeader('Authorization',"Basic " + btoa(_converse.connection.jid.split('/')[0] + ":" + _converse.connection.pass));
+                    xhr.setRequestHeader( 'Content-Type',   'application/json' );
                     xhr.send()
                 } , 300));
                 this.name_auto_complete.on('suggestion-box-selectcomplete', ev => {
-                    this.el.querySelector('input[name="name"]').value = ev.text.label;
-                    this.el.querySelector('input[name="jid"]').value = ev.text.value;
+                    this.el.querySelector('input[name="contact"]').value = ev.text.label;
+                    this.el.querySelector('.btn-primary').disabled = false;
+                    //<----MDEV
+                    // this.el.querySelector('input[name="jid"]').value = ev.text.value;
+                    //---------
                 });
             },
 
@@ -179,22 +192,35 @@ converse.plugins.add('converse-rosterview', {
             afterSubmission (form, jid, name) {
                 _converse.roster.addAndSubscribe(jid, name);
                 this.model.clear();
+                //<-----MDEV
+                //const input_el = this.el.querySelector('input[name="jid"]');
+                const input_el = this.el.querySelector('input[name="contact"]');
+                //------>
+                input_el.value = '';
                 this.modal.hide();
             },
 
             addContactFromForm (ev) {
                 ev.preventDefault();
-                const data = new FormData(ev.target),
-                      jid = data.get('jid');
-
+                const data = new FormData(ev.target)
+                //<------MDEV
+                let jid = data.get('contact');
+                if(_.compact(jid.split('@')).length < 2){
+                    jid = _.compact(jid.split('@'))[0]+'@'+_converse.api.settings.get("default_domain");
+                }
+                // let jid = data.get('jid');
+                // if(_.compact(jid.split('@')).length < 2){
+                //     jid = _.compact(jid.split('@'))[0]+'@'+_converse.api.settings.get("default_domain");
+                // }
+                //------>
                 if (!jid && _converse.xhr_user_search_url && _.isString(_converse.xhr_user_search_url)) {
-                    const input_el = this.el.querySelector('input[name="name"]');
+                    const input_el = this.el.querySelector('input[name="contact"]');
                     this.xhr.open("GET", `${_converse.xhr_user_search_url}q=${input_el.value}`, true);
                     this.xhr.send()
                     return;
                 }
                 if (this.validateSubmission(jid)) {
-                    this.afterSubmission(ev.target, jid, data.get('name'));
+                    this.afterSubmission(ev.target, jid, data.get('contact'));
                 }
             }
         });
@@ -292,7 +318,8 @@ converse.plugins.add('converse-rosterview', {
             },
 
             shouldBeVisible () {
-                return _converse.roster.length >= 5 || this.isActive();
+                //not show 
+                return _converse.roster.length >= 999999 || this.isActive();
             },
 
             showOrHide () {
@@ -402,7 +429,7 @@ converse.plugins.add('converse-rosterview', {
                     this.el.innerHTML = tpl_pending_contact(
                         Object.assign(this.model.toJSON(), {
                             'display_name': display_name,
-                            'desc_remove': __('Click to remove %1$s as a contact', display_name),
+                            'desc_remove': __('Click to remove %1$s as a contact', display_name.split('@')[0]),
                             'allow_chat_pending_contacts': _converse.allow_chat_pending_contacts
                         })
                     );
@@ -411,9 +438,9 @@ converse.plugins.add('converse-rosterview', {
                     this.el.classList.add('requesting-xmpp-contact');
                     this.el.innerHTML = tpl_requesting_contact(
                         Object.assign(this.model.toJSON(), {
-                            'display_name': display_name,
-                            'desc_accept': __("Click to accept the contact request from %1$s", display_name),
-                            'desc_decline': __("Click to decline the contact request from %1$s", display_name),
+                            'display_name': display_name.split('@')[0],
+                            'desc_accept': __("Click to accept the contact request from %1$s", display_name.split('@')[0]),
+                            'desc_decline': __("Click to decline the contact request from %1$s", display_name.split('@')[0]),
                             'allow_chat_pending_contacts': _converse.allow_chat_pending_contacts
                         })
                     );
@@ -440,21 +467,34 @@ converse.plugins.add('converse-rosterview', {
             },
 
             renderRosterItem (item) {
-                let status_icon = 'fa fa-times-circle';
+                let status_icon = 'fa fa-circle';
                 const show = item.presence.get('show') || 'offline';
                 if (show === 'online') {
                     status_icon = 'fa fa-circle chat-status chat-status--online';
                 } else if (show === 'away') {
                     status_icon = 'fa fa-circle chat-status chat-status--away';
                 } else if (show === 'xa') {
-                    status_icon = 'far fa-circle chat-status';
+                    status_icon = 'fa fa-circle chat-status';
                 } else if (show === 'dnd') {
                     status_icon = 'fa fa-minus-circle chat-status chat-status--busy';
                 }
-                const display_name = item.getDisplayName();
+                //const display_name = item.getDisplayName(); MD
+                var display_name = item.getDisplayName();
+                var dataUri = "data:" + item.vcard.attributes.image_type + ";base64," + item.vcard.attributes.image;
+
+                if (display_name && _converse.DEFAULT_IMAGE === item.vcard.attributes.image)
+                {
+                    // eslint-disable-next-line no-undef
+                    dataUri = createAvatar(display_name);
+                }
+                let roster_displayname = display_name;
+                if(_.includes(display_name,'@')){
+                    roster_displayname = display_name.split('@')[0]
+                }
                 this.el.innerHTML = tpl_roster_item(
                     Object.assign(item.toJSON(), {
-                        'display_name': display_name,
+                        'display_name': roster_displayname,
+                        'dataUri':dataUri,
                         'desc_status': STATUSES[show],
                         'status_icon': status_icon,
                         'desc_chat': __('Click to chat with %1$s (JID: %2$s)', display_name, item.get('jid')),

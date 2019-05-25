@@ -9416,7 +9416,7 @@ readers do not read off random characters that represent icons */
   --avatar-border: 1px solid lightgrey;
   --avatar-background-color: white;
   --fullpage-chat-head-height: 62px;
-  --fullpage-chat-height: 100vh;
+  --fullpage-chat-height: calc(var(--vh, 1vh) * 100);
   --fullpage-chat-width: 100%;
   --fullpage-emoji-picker-height: 200px;
   --fullpage-max-chat-textarea-height: 15em;
@@ -11833,6 +11833,13 @@ body.converse-fullscreen {
 #conversejs.converse-mobile .chatroom .room-invite span .invited-contact {
   margin: 0 0 0.5em -1px; }
 
+<<<<<<< HEAD
+=======
+@media (min-width: 768px) {
+  .chatroom .box-flyout .occupants .occupants-header .hide-occupants {
+    display: block; } }
+
+>>>>>>> ui2
 #conversejs .chatbox.headlines .chat-head.chat-head-chatbox {
   background-color: var(--headline-head-color); }
 

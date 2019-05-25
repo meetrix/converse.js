@@ -1,7 +1,19 @@
 <!-- <div class="occupants"> -->
 <div class="occupants-header">
     <i class="hide-occupants fa fa-times"></i>
-    <p class="occupants-heading">{{{o.label_occupants}}}</p>
+    <p class="room-info"><strong>{{{o.__('ABOUT#')}}}</strong> {{{o.name}}}</p>
+    <!-- <p class="occupants-heading">{{{o.label_occupants}}}</p> -->
+</div>
+<div>
+    <i class="fa fa-users"></i>
+    <div>
+        <span class="numberofonline">0</span>/<span class="numberofoccupants">0</span>
+    </div>
+    <span>{{{o.__('Members')}}}</span>
+    <!-- <p class="room-info"><strong>{{{o.__('Online users')}}}</strong></p> -->
+</div>
+<div>
+    <p class="occupants-heading"></p>
 </div>
 <ul class="occupant-list"></ul>
 <div class="chatroom-features"></div>

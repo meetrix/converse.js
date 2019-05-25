@@ -2,23 +2,46 @@
 <div class="controlbox-section profile d-flex">
     <a class="show-profile" href="#">
         <canvas class="avatar align-self-center" height="40" width="40"></canvas>
+        <div class="d-flex xmpp-status">
+                <span class="{{{o.chat_status}}} w-100 align-self-center" data-value="{{{o.chat_status}}}">
+                    <span class="
+                        {[ if (o.chat_status === 'online') { ]} fa fa-circle chat-status chat-status--online{[ } ]}
+                        {[ if (o.chat_status === 'dnd') { ]} fa fa-minus-circle chat-status chat-status--busy {[ } ]}
+                        {[ if (o.chat_status === 'away') { ]} fa fa-circle chat-status chat-status--away{[ } ]}
+                        {[ if (o.chat_status === 'xa') { ]} fa fa-circle chat-status chat-status--xa {[ } ]}
+                        {[ if (o.chat_status === 'offline') { ]} fa fa-circle chat-status chat-status--offline{[ } ]}"></span>
+                        <!-- {{{o.status_message}}}-->
+                        </span>
+                </span>
+                <!-- <span>{{{o.status_message}}}</span> -->
+                <!-- <a class="controlbox-heading__btn change-status fa fa-pencil-alt" title="{{{o.title_change_status}}}" data-toggle="modal" data-target="#changeStatusModal"></a> -->
+            </div>
     </a>
-    <span class="username w-100 align-self-center">{{{o.fullname}}}</span>
+
+    <div class="media-body dropdown">
+        <a href="#" data-toggle="dropdown" class="profile-menu media-title dropdown-toggle font-weight-semibold" aria-expanded="false">{{{o.fullname}}}</a>
+        <ul class="dropdown-menu animate slideIn">
+            <li><a href="#" class="dropdown-item show-profile">Profile &amp; Account</a></li>
+            <!-- <a href="javascript:void(0);" class="dropdown-item">Preferences</a> -->
+            <!-- <a href="javascript:void(0);" class="dropdown-item">Help &amp; feedback</a> -->
+            <li><a href="#" class="dropdown-item controlbox-heading__btn change-status" title="{{{o.title_change_status}}}" data-toggle="modal" data-target="#changeStatusModal">Change Status</a></li>
+            <li><a href="#" class="dropdown-item logout align-self-center">Log out</a></li>
+            <li><a href="#" class="dropdown-item cancel align-self-center">Cancel</a></li>
+        </ul>
+        <div class="user-role font-size-xs opacity-75">
+                {{{o.role}}}
+        </div>
+        
+    </div>
+    <div>
+        <i class="fas fa-bell"></i>
+    </div>
+    <!-- <span class="username w-100 align-self-center">{{{o.fullname}}}</span>
     {[ if (o._converse.show_client_info) { ]}
         <a class="controlbox-heading__btn show-client-info fa fa-info-circle align-self-center" title="{{{o.info_details}}}"></a>
     {[ } ]}
     {[ if (o._converse.allow_logout) { ]}
         <a class="controlbox-heading__btn logout fa fa-sign-out-alt align-self-center" title="{{{o.title_log_out}}}"></a>
-    {[ } ]}
-</div>
-<div class="d-flex xmpp-status">
-    <span class="{{{o.chat_status}}} w-100 align-self-center" data-value="{{{o.chat_status}}}">
-        <span class="
-            {[ if (o.chat_status === 'online') { ]} fa fa-circle chat-status chat-status--online{[ } ]}
-            {[ if (o.chat_status === 'dnd') { ]} fa fa-minus-circle chat-status chat-status--busy {[ } ]}
-            {[ if (o.chat_status === 'away') { ]} fa fa-circle chat-status chat-status--away{[ } ]}
-            {[ if (o.chat_status === 'xa') { ]} far fa-circle chat-status chat-status--xa {[ } ]}
-            {[ if (o.chat_status === 'offline') { ]} fa fa-circle chat-status chat-status--offline{[ } ]}"></span> {{{o.status_message}}}</span>
-    <a class="controlbox-heading__btn change-status fa fa-pencil-alt" title="{{{o.title_change_status}}}" data-toggle="modal" data-target="#changeStatusModal"></a>
+    {[ } ]} -->
 </div>
 </div>

@@ -139,7 +139,10 @@ u.renderFileURL = function (_converse, url) {
     }
     const { __ } = _converse,
           filename = uri.filename();
+    var re = /(?:\.([^.]+))?$/;
+    var ext = re.exec(filename)[1];       
     return tpl_file({
+        'fileType': ext,
         'url': url,
         'label_download': __('Download file "%1$s"', decodeURI(filename))
     })

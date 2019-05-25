@@ -353,6 +353,7 @@ converse.plugins.add('converse-muc', {
             },
 
             getDisplayName () {
+                
                 return this.get('name') || this.get('jid');
             },
 
@@ -553,6 +554,7 @@ converse.plugins.add('converse-muc', {
              * @param { String } reason - Optional reason for the invitation
              */
             directInvite (recipient, reason) {
+                //<-----MDEV
                 if (this.features.get('membersonly')) {
                     // When inviting to a members-only groupchat, we first add
                     // the person to the member list by giving them an
@@ -562,10 +564,11 @@ converse.plugins.add('converse-muc', {
                     const deltaFunc = _.partial(u.computeAffiliationsDelta, true, false);
                     this.updateMemberLists(
                         [{'jid': recipient, 'affiliation': 'member', 'reason': reason}],
-                        ['member', 'owner', 'admin'],
+                        ['member', 'owner', 'admin','visitor'],
                         deltaFunc
                     );
                 }
+                //------MDEV
                 const attrs = {
                     'xmlns': 'jabber:x:conference',
                     'jid': this.get('jid')
@@ -700,6 +703,48 @@ converse.plugins.add('converse-muc', {
                     this.sendConfiguration(configArray, resolve, reject);
                 });
             },
+             //<----MDEV
+             saveCustomConfiguration (config) {
+                return new Promise((resolve, reject) => {
+                    this.fetchRoomConfiguration().then((stanza) => {
+                        const configArray = [],
+                            fields = stanza.querySelectorAll('field');
+                        let count = fields.length;
+                        _.each(fields, (field) => {
+                            let fieldname;
+                            const type = field.getAttribute('type');
+                            if (type !== 'fixed') {
+                                fieldname = field.getAttribute('var').replace('muc#roomconfig_', '');
+                            }
+                            let values;
+                            // <---- MDEV 
+                            if (fieldname in config) {
+                                switch (type) {
+                                    case 'boolean':
+                                        values = [config[fieldname] ? 1 : 0];
+                                        break;
+                                    case 'list-multi':
+                                        // TODO: we don't yet handle "list-multi" types
+                                        //value = field.innerHTML;
+                                        values = config[fieldname];
+                                        break;
+                                    default:
+                                        values= [config[fieldname]];
+                                }
+                               
+                                field.innerHTML = values.reduce((accumulator, currentValue) => (
+                                    `${accumulator}${$build('value').t(currentValue)}`
+                                ),'')
+                            }
+                            //---------->MDEV
+                            configArray.push(field);
+                            if (!--count) {
+                                this.sendConfiguration(configArray, resolve, reject);
+                            }
+                        });
+                    });
+                });
+            },
 
             /**
              * Given a <field> element, return a copy with a <value> child if
@@ -784,6 +829,7 @@ converse.plugins.add('converse-muc', {
                 config.forEach(node => iq.cnode(node).up());
                 callback = _.isUndefined(callback) ? _.noop : _.partial(callback, iq.nodeTree);
                 errback = _.isUndefined(errback) ? _.noop : _.partial(errback, iq.nodeTree);
+                
                 return _converse.api.sendIQ(iq).then(callback).catch(errback);
             },
 
@@ -1169,6 +1215,7 @@ converse.plugins.add('converse-muc', {
              * @param { XMLElement } stanza - The message stanza.
              */
             async onMessage (stanza) {
+                console.log('muc',stanza)
                 this.fetchFeaturesIfConfigurationChanged(stanza);
 
                 const original_stanza = stanza,
@@ -1248,7 +1295,6 @@ converse.plugins.add('converse-muc', {
              */
             onOwnPresence (pres) {
                 this.saveAffiliationAndRole(pres);
-
                 const locked_room = pres.querySelector("status[code='201']");
                 if (locked_room) {
                     if (this.get('auto_configure')) {
@@ -1467,7 +1513,6 @@ converse.plugins.add('converse-muc', {
 
             let contact = _converse.roster.get(from),
                 result;
-
             if (_converse.auto_join_on_invite) {
                 result = true;
             } else {

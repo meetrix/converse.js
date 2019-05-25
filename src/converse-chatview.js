@@ -162,6 +162,7 @@ converse.plugins.add('converse-chatview', {
 
 
         _converse.ChatBoxHeading = _converse.ViewWithAvatar.extend({
+            className: 'chat-box-header',
             initialize () {
                 this.model.on('change:status', this.onStatusMessageChanged, this);
 
@@ -320,6 +321,7 @@ converse.plugins.add('converse-chatview', {
             events: {
                 'change input.fileupload': 'onFileSelection',
                 'click .chat-msg__action-edit': 'onMessageEditButtonClicked',
+                'click .chat-msg__action-delete': 'onMessageDeleteButtonClicked',
                 'click .chatbox-navback': 'showControlBox',
                 'click .close-chatbox-button': 'close',
                 'click .new-msgs-indicator': 'viewUnreadMessages',
@@ -368,7 +370,8 @@ converse.plugins.add('converse-chatview', {
                 this.markScrolled = _.debounce(this._markScrolled, 100);
                 this.show = _.debounce(this._show, 250, {'leading': true});
             },
-
+            videoCall(){
+            },
             render () {
                 this.el.innerHTML = tpl_chatbox(
                     Object.assign(
@@ -381,7 +384,6 @@ converse.plugins.add('converse-chatview', {
                 this.insertHeading();
                 return this;
             },
-
             renderToolbar (toolbar, options) {
                 if (!_converse.show_toolbar) {
                     return this;
@@ -481,13 +483,17 @@ converse.plugins.add('converse-chatview', {
                  * messages, based on whether the contact's client supports
                  * it.
                  */
+
                 if (!options.show_spoiler_button || this.model.get('type') === _converse.CHATROOMS_TYPE) {
                     return;
                 }
+
                 const contact_jid = this.model.get('jid');
-                if (this.model.presence.resources.length === 0) {
-                    return;
-                }
+                //<----MDEV
+                // if (this.model.presence.resources.length === 0) {
+                //     return;
+                // }
+                ///---->
                 const results = await Promise.all(
                     this.model.presence.resources.map(
                         r => _converse.api.disco.supports(Strophe.NS.SPOILER, `${contact_jid}/${r.get('name')}`)
@@ -497,8 +503,10 @@ converse.plugins.add('converse-chatview', {
                 if (all_resources_support_spolers) {
                     const html = tpl_spoiler_button(this.model.toJSON());
                     if (_converse.visible_toolbar_buttons.emoji) {
+         
                         this.el.querySelector('.toggle-smiley').insertAdjacentHTML('afterEnd', html);
                     } else {
+                     
                         this.el.querySelector('.chat-toolbar').insertAdjacentHTML('afterBegin', html);
                     }
                 }
@@ -1006,6 +1014,7 @@ converse.plugins.add('converse-chatview', {
             },
 
             onMessageEditButtonClicked (ev) {
+                
                 ev.preventDefault();
                 const idx = this.model.messages.findLastIndex('correcting'),
                       currently_correcting = idx >=0 ? this.model.messages.at(idx) : null,
@@ -1022,6 +1031,29 @@ converse.plugins.add('converse-chatview', {
                     message.save('correcting', false);
                     this.insertIntoTextArea('', true, false);
                 }
+            },
+            async onMessageDeleteButtonClicked (ev) {
+                ev.preventDefault();
+                // const idx = this.model.messages.findLastIndex('correcting'),
+                //       currently_correcting = idx >=0 ? this.model.messages.at(idx) : null,
+                    const    message_el = u.ancestor(ev.target, '.chat-msg');
+                    const  message = this.model.messages.findWhere({'msgid': message_el.getAttribute('data-msgid')});
+                    message.save('deleting', true);
+                    const spoiler_hint = {};
+                    if (await this.model.sendMessage('This message was deleted', {})) {
+                        _converse.api.trigger('messageSend', 'This message was deleted');
+                    }
+                    this.setChatState(_converse.ACTIVE, {'silent': true});
+                // if (currently_correcting !== message) {
+                //     if (!_.isNil(currently_correcting)) {
+                //         currently_correcting.save('correcting', false);
+                //     }
+                //     message.save('correcting', true);
+                //     this.insertIntoTextArea(u.prefixMentions(message), true, true);
+                // } else {
+                //     message.save('correcting', false);
+                //     this.insertIntoTextArea('', true, false);
+                // }
             },
 
             editLaterMessage () {
@@ -1126,7 +1158,7 @@ converse.plugins.add('converse-chatview', {
             },
 
             toggleEmojiMenu (ev) {
-                if (_.isUndefined(this.emoji_dropdown)) {
+                if (_.isUndefined(this.emoji_dropdown) ) {
                     ev.stopPropagation();
                     this.createEmojiPicker();
                     this.insertEmojiPicker();
@@ -1137,6 +1169,7 @@ converse.plugins.add('converse-chatview', {
                     this.emoji_dropdown.el = dropdown_el;
                     this.emoji_dropdown.toggle();
                 }
+                
             },
 
             toggleCall (ev) {
@@ -1157,6 +1190,7 @@ converse.plugins.add('converse-chatview', {
 
             toggleComposeSpoilerMessage () {
                 this.model.set('composing_spoiler', !this.model.get('composing_spoiler'));
+                this.emoji_dropdown = undefined;
                 this.renderMessageForm();
                 this.focus();
             },

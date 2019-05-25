@@ -8,9 +8,9 @@
 
 import converse from "@converse/headless/converse-core";
 
-const { Strophe, _, sizzle } = converse.env,
+const { Strophe, _, sizzle, Backbone } = converse.env,
       u = converse.env.utils;
-
+    //   const { Strophe, Backbone, Promise, $iq, $build, $msg, $pres, b64_sha1, sizzle, f, moment, _ } = converse.env;
 
 converse.plugins.add('converse-notification', {
 
@@ -36,7 +36,7 @@ converse.plugins.add('converse-notification', {
             notification_icon: 'logo/conversejs-filled.svg',
             notification_delay: 5000
         });
-
+        
         _converse.isOnlyChatStateNotification = (msg) =>
             // See XEP-0085 Chat State Notification
             _.isNull(msg.querySelector('body')) && (
@@ -133,7 +133,7 @@ converse.plugins.add('converse-notification', {
                 _converse.show_desktop_notifications &&
                 Notification.permission === "granted";
         };
-
+        //<-------MDEV
         _converse.showMessageNotification = function (message) {
             /* Shows an HTML5 Notification to indicate that a new chat
              * message was received.
@@ -146,15 +146,15 @@ converse.plugins.add('converse-notification', {
                   from_jid = Strophe.getBareJidFromJid(full_from_jid);
             if (message.getAttribute('type') === 'headline') {
                 if (!_.includes(from_jid, '@') || _converse.allow_non_roster_messaging) {
-                    title = __("Notification from %1$s", from_jid);
+                    title = __("Notification from %1$s", _converse.notitifationDisplayName(from_jid));
                 } else {
                     return;
                 }
             } else if (!_.includes(from_jid, '@')) {
                 // workaround for Prosody which doesn't give type "headline"
-                title = __("Notification from %1$s", from_jid);
+                title = __("Notification from %1$s", _converse.notitifationDisplayName(from_jid));
             } else if (message.getAttribute('type') === 'groupchat') {
-                title = __("%1$s says", Strophe.getResourceFromJid(full_from_jid));
+                title = __("%1$s says", _converse.notitifationDisplayName(Strophe.getResourceFromJid(full_from_jid)));
             } else {
                 if (_.isUndefined(_converse.roster)) {
                     _converse.log(
@@ -164,10 +164,10 @@ converse.plugins.add('converse-notification', {
                 }
                 roster_item = _converse.roster.get(from_jid);
                 if (!_.isUndefined(roster_item)) {
-                    title = __("%1$s says", roster_item.getDisplayName());
+                    title = __("%1$s says", _converse.notitifationDisplayName(roster_item.getDisplayName()));
                 } else {
                     if (_converse.allow_non_roster_messaging) {
-                        title = __("%1$s says", from_jid);
+                        title = __("%1$s says", _converse.notitifationDisplayName(from_jid));
                     } else {
                         return;
                     }
@@ -187,11 +187,12 @@ converse.plugins.add('converse-notification', {
                 'icon': _converse.notification_icon,
                 'requireInteraction': !_converse.notification_delay
             });
+        
             if (_converse.notification_delay) {
                 setTimeout(n.close.bind(n), _converse.notification_delay);
             }
         };
-
+    //-------->
         _converse.showChatStateNotification = function (contact) {
             /* Creates an HTML5 Notification to inform of a change in a
              * contact's chat state.
@@ -214,23 +215,37 @@ converse.plugins.add('converse-notification', {
             if (message === null) {
                 return;
             }
-            const n = new Notification(contact.getDisplayName(), {
+            //<------MDEV
+            const n = new Notification(_converse.notitifationDisplayName(contact.getDisplayName()), {
                     body: message,
                     lang: _converse.locale,
                     icon: _converse.notification_icon
                 });
+ 
             setTimeout(n.close.bind(n), 5000);
+            //-------->
         };
 
         _converse.showContactRequestNotification = function (contact) {
-            const n = new Notification(contact.getDisplayName(), {
+
+            //<----------MDEV
+            const n = new Notification( _converse.notitifationDisplayName(contact.getDisplayName()), {
                     body: __('wants to be your contact'),
                     lang: _converse.locale,
                     icon: _converse.notification_icon
                 });
+   
             setTimeout(n.close.bind(n), 5000);
-        };
 
+            //-------->
+        };
+        //<----MDEV
+        _converse.notitifationDisplayName = function (name) {
+            let notitifationDisplayName = name;
+            notitifationDisplayName = _.includes(notitifationDisplayName,'@') ? notitifationDisplayName.split('@')[0]:notitifationDisplayName
+            return notitifationDisplayName;
+        }
+        //---------->
         _converse.showFeedbackNotification = function (data) {
             if (data.klass === 'error' || data.klass === 'warn') {
                 const n = new Notification(data.subject, {
@@ -238,6 +253,7 @@ converse.plugins.add('converse-notification', {
                         lang: _converse.locale,
                         icon: _converse.notification_icon
                     });
+  
                 setTimeout(n.close.bind(n), 5000);
             }
         };
@@ -296,6 +312,8 @@ converse.plugins.add('converse-notification', {
             // We only register event handlers after all plugins are
             // registered, because other plugins might override some of our
             // handlers.
+            
+
             _converse.api.listen.on('contactRequest',  _converse.handleContactRequestNotification);
             _converse.api.listen.on('contactPresenceChanged',  _converse.handleChatStateNotification);
             _converse.api.listen.on('message',  _converse.handleMessageNotification);

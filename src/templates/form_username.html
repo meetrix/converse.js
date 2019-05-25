@@ -4,12 +4,13 @@
         {{{o.label}}}
     </label>
     {[ } ]}
-    <div class="input-group">
-        <div class="input-group-prepend">
-            <input name="{{{o.name}}}" type="{{{o.type}}}"
+    <!-- <div class="input-group"> -->
+    <div class="form-group">
+        <!-- <div class="input-group-prepend"> -->
+            <input class="form-control" name="{{{o.name}}}" type="{{{o.type}}}"
                 {[ if (o.value) { ]} value="{{{o.value}}}" {[ } ]}
                 {[ if (o.required) { ]} required="required" {[ } ]} />
-            <div class="input-group-text col" title="{{{o.domain}}}">{{{o.domain}}}</div>
-        </div>
+            <!-- <div class="input-group-text col" title="{{{o.domain}}}">{{{o.domain}}}</div> -->
+        <!-- </div> -->
     </div>
 </div>

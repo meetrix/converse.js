@@ -10,7 +10,7 @@ import BrowserStorage from "backbone.browserStorage";
 import converse from "./converse-core";
 import filesize from "filesize";
 
-const { $msg, Backbone, Promise, Strophe, dayjs, sizzle, utils, _ } = converse.env;
+const { $msg, Backbone, Promise, Strophe, dayjs, sizzle, utils, _,moment } = converse.env;
 const u = converse.env.utils;
 
 Strophe.addNamespace('MESSAGE_CORRECT', 'urn:xmpp:message-correct:0');
@@ -151,7 +151,7 @@ converse.plugins.add('converse-chatboxes', {
                 } else if (this.vcard) {
                     return this.vcard.getDisplayName();
                 } else {
-                    return this.get('from');
+                    return this.vcard.get('nickname') || this.vcard.get('fullname') || this.get('from');
                 }
             },
 
@@ -615,6 +615,12 @@ converse.plugins.add('converse-chatboxes', {
                         'id': message.get('msgid')
                     }).root();
                 }
+                if (message.get('deleted')) {
+                    stanza.c('replace', {
+                        'xmlns': Strophe.NS.MESSAGE_CORRECT,
+                        'id': message.get('msgid')
+                    }).root();
+                }
                 if (message.get('origin_id')) {
                     stanza.c('origin-id', {'xmlns': Strophe.NS.SID, 'id': message.get('origin_id')}).root();
                 }
@@ -670,8 +676,27 @@ converse.plugins.add('converse-chatboxes', {
                         'references': attrs.references
                     });
                 } else {
-                    message = this.messages.create(attrs);
+                    message = this.messages.findWhere('deleting')
+                    if(message){
+                        const older_versions = message.get('older_versions') || [];
+                        older_versions.push(message.get('message'));
+                        message.save({
+                            'deleting': false,
+                            'deleted': moment().format(),
+                            'message':  attrs.message,
+                            'older_versions': older_versions,
+                            'references': attrs.references,
+                            oob_desc:'',
+                            oob_url:""
+
+                        });
+                    }
+                    else {
+                        message = this.messages.create(attrs);
+                    }
+                    
                 }
+        
                 _converse.api.send(this.createMessageStanza(message));
                 return true;
             },
@@ -1004,6 +1029,7 @@ converse.plugins.add('converse-chatboxes', {
              * @param { XMLElement } stanza - The incoming message stanza
              */
             async onMessage (stanza) {
+                console.log('directchagt',stanza)
                 let to_jid = stanza.getAttribute('to');
                 const to_resource = Strophe.getResourceFromJid(to_jid);
 

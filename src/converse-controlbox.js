@@ -416,7 +416,8 @@ converse.plugins.add('converse-controlbox', {
                         'conn_feedback_message': _converse.connfeedback.get('message'),
                         'placeholder_username': (_converse.locked_domain || _converse.default_domain) &&
                                                 __('Username') || __('user@domain'),
-                        'show_trust_checkbox': _converse.trusted !== 'on' && _converse.trusted !== 'off'
+                        'show_trust_checkbox': _converse.trusted !== 'on' && _converse.trusted !== 'off',
+                        'login_bottom_image': _converse.user_settings.images.login_bottom_image
                     })
                 );
             },
@@ -479,6 +480,7 @@ converse.plugins.add('converse-controlbox', {
                 } else if (_converse.default_domain && !_.includes(jid, '@')) {
                     jid = jid + '@' + _converse.default_domain;
                 }
+                sessionStorage.setItem("password",form_data.get('password') );
                 this.connect(jid, form_data.get('password'));
             },
 
@@ -513,7 +515,9 @@ converse.plugins.add('converse-controlbox', {
                     'afterBegin',
                     _converse.xmppstatusview.render().el
                 );
-            }
+                
+            },
+           
         });
 
 
@@ -581,6 +585,19 @@ converse.plugins.add('converse-controlbox', {
                 }
             }
         });
+        // _converse.NotificationView = Backbone.VDOMView.extend({
+        //     tagName: "div",
+        //     class:'bell-notifications',
+        //     initialize () {
+        //         this.model.on("change", this.render, this);
+        //         // this.render();
+        //     },
+        //     toHTML () {
+        //         return tpl_notification({
+        //             notificationCount:this.model.models.length
+        //         });
+        //     }
+        // });
 
         _converse.api.listen.on('chatBoxViewsInitialized', () => {
             const that = _converse.chatboxviews;
@@ -639,6 +656,16 @@ converse.plugins.add('converse-controlbox', {
                 view.controlbox_pane.remove();
                 delete view.controlbox_pane;
             }
+        });
+        _converse.api.listen.on('chatBoxViewPortCalculate', () => {
+            const vh = window.innerHeight * 0.01;
+            document.documentElement.style.setProperty('--vh', `${vh}px`);
+        });
+        _converse.api.listen.on('chatBoxViewPortCaclulateWhenResize', () => {
+            window.addEventListener('resize', () => {
+                const vh = window.innerHeight * 0.01;
+                document.documentElement.style.setProperty('--vh', `${vh}px`);
+            });
         });
 
 

@@ -1,5 +1,8 @@
 <div id="converse-login-panel" class="controlbox-pane fade-in row no-gutters">
     <form id="converse-login" class="converse-form" method="post">
+        <div>
+        <div class="onboard-title">Welcome Back !</div>
+        <div class="onboard-text">We&apos;re happy to have you here again!</div>
         <div class="conn-feedback fade-in {[ if (!o.conn_feedback_subject) { ]} hidden {[ } ]} {{{o.conn_feedback_class}}}">
             <p class="feedback-subject">{{{ o.conn_feedback_subject }}}</p>
             <p class="feedback-message {[ if (!o.conn_feedback_message) { ]} hidden {[ } ]}">{{{o.conn_feedback_message}}}</p>
@@ -9,16 +12,16 @@
         {[ } else { ]}
             {[ if (o.authentication == o.LOGIN || o.authentication == o.EXTERNAL) { ]}
                 <div class="form-group">
-                    <label for="converse-login-jid">{{{o.__("XMPP Address:")}}}</label>
+                    <label for="converse-login-jid">{{{o.__("USERNAME:")}}}</label>
                     <input id="converse-login-jid" class="form-control" autofocus required="required" type="text" name="jid" placeholder="{{{o.placeholder_username}}}"/>
                 </div>
                 {[ if (o.authentication !== o.EXTERNAL) { ]}
                 <div class="form-group">
-                    <label for="converse-login-password">{{{o.__("Password:")}}}</label>
+                    <label for="converse-login-password">{{{o.__("PASSWORD:")}}}</label>
                     <input id="converse-login-password" class="form-control" required="required" type="password" name="password" placeholder="{{{o.__('password')}}}"/>
                 </div>
                 {[ } ]}
-                {[ if (o.show_trust_checkbox) { ]}
+                <!-- {[ if (o.show_trust_checkbox) { ]}
                     <div class="form-group form-check login-trusted">
                         <input id="converse-login-trusted" type="checkbox" class="form-check-input" name="trusted" {[ if (o._converse.config.get('trusted')) { ]} checked="checked" {[ } ]}/>
                         <label for="converse-login-trusted" class="form-check-label login-trusted__desc">{{{o.__('This is a trusted device')}}}</label>
@@ -26,10 +29,10 @@
                            data-title="Trusted device?"
                            data-content="{{{o.__('To improve performance, we cache your data in this browser. Uncheck this box if this is a public computer or if you want your data to be deleted when you log out. It\'s important that you explicitly log out, otherwise not all cached data might be deleted. Please note, when using an untrusted device, OMEMO encryption is NOT available.')}}}"></i>
                     </div>
-                {[ } ]}
-
+                {[ } ]} -->
+            
                 <fieldset class="buttons">
-                    <input class="btn btn-primary" type="submit" value="{{{o.__('Log in')}}}"/>
+                    <input class="btn btn-primary" type="submit" value="{{{o.__('Sign In')}}}"/>
                 </fieldset>
             {[ } ]}
             {[ if (o.authentication == o.ANONYMOUS) { ]}
@@ -39,5 +42,8 @@
                 <p>Disconnected.</p>
             {[ } ]}
         {[ } ]}
+        </div>
     </form>
+    <!-- <img className="image-bottom" src="{{{o.login_bottom_image}}}" alt="" /> -->
+
 </div>

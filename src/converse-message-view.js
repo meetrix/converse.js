@@ -78,7 +78,10 @@ converse.plugins.add('converse-message-view', {
 
         _converse.MessageView = _converse.ViewWithAvatar.extend({
             events: {
-                'click .chat-msg__edit-modal': 'showMessageVersionsModal'
+                'click .chat-msg__edit-modal': 'showMessageVersionsModal',
+                'click .cancel-chat-msg-actions': 'toggleChatMsgActions',
+                'click .toggle-chat-msg-actions': 'toggleChatMsgActions',
+                'mouseout .chat-msg-actions':'hideChatMsgActions'
             },
 
             initialize () {
@@ -98,20 +101,23 @@ converse.plugins.add('converse-message-view', {
                 });
                 this.model.on('change', this.onChanged, this);
                 this.model.on('destroy', this.remove, this);
+                this.model.set({'hidden_chat_actions':true })
             },
 
             async render () {
                 const is_followup = u.hasClass('chat-msg--followup', this.el);
                 if (this.model.isOnlyChatStateNotification()) {
                     this.renderChatStateNotification()
-                } else if (this.model.get('file') && !this.model.get('oob_url')) {
+                } else if (this.model.get('file') && !this.model.get('oob_url') && !this.model.get('deleted')) {
                     if (!this.model.file) {
                         _converse.log("Attempted to render a file upload message with no file data");
                         return this.el;
                     }
                     this.renderFileUploadProgresBar();
                 } else if (this.model.get('type') === 'error') {
-                    this.renderErrorMessage();
+                    //<-----MDEV
+                    // this.renderErrorMessage();
+                    //------>
                 } else {
                     await this.renderChatMessage();
                 }
@@ -126,19 +132,63 @@ converse.plugins.add('converse-message-view', {
                 // attr gets removed when this.render() gets called further
                 // down.
                 const edited = item.changed.edited;
+                const deleted = item.changed.deleted;
                 if (this.model.changed.progress) {
                     return this.renderFileUploadProgresBar();
                 }
-                if (_.filter(['correcting', 'message', 'type', 'upload', 'received'],
+                if (_.filter(['correcting', 'message', 'type', 'upload', 'received','deleting'],
                              prop => Object.prototype.hasOwnProperty.call(this.model.changed, prop)).length) {
                     await this.debouncedRender();
                 }
                 if (edited) {
                     this.onMessageEdited();
                 }
+                if(deleted){
+                    this.onMessageDeleted();
+                }
             },
+            //------MDEV
+            toggleChatMsgActions(ev){
+                ev.preventDefault();
+                ev.stopPropagation();
+                var actiosnel= this.el.querySelector('.chat-msg-actions');
 
+                this.model.set({'hidden_chat_actions': !this.model.get('hidden_chat_actions')})
+                if (this.model.get('hidden_chat_actions')){
+                    u.addClass('hidden', actiosnel);
+                }else{
+                    var buttonPosition = this.el.querySelector('.toggle-chat-msg-actions').getBoundingClientRect();
+                    var targetPosition = buttonPosition.top + buttonPosition.bottom;
+                    var buttontop = targetPosition/2 - 80;
+                    actiosnel.setAttribute("style", "top:"+buttontop);
+                    u.removeClass('hidden', actiosnel);
+                }
+                // if(actiosnelstyle === 'none'){
+                //     actiosnelstyle = 'block'
+                // }
+                // else{
+                //     actiosnelstyle = 'none'
+                // }
+                
+            },
+            hideChatMsgActions(ev){
+                ev.stopPropagation();
+                if(ev.target.className !== 'chat-msg-actionsr'){
+                    return;
+                }
+            
+                this.model.set({'hidden_chat_actions': true})
+                var actiosnel= this.el.querySelector('.chat-msg-actions');
+                u.addClass('hidden', actiosnel);
+        
+            },
+            onMessageDeleted(){
+                this.model.set({'hidden_chat_actions': !this.model.get('hidden_chat_actions')})
+         
+            },
+            //-------
             onMessageEdited () {
+                this.model.set({'hidden_chat_actions': !this.model.get('hidden_chat_actions')})
                 if (this.model.get('is_archived')) {
                     return;
                 }
@@ -159,7 +209,11 @@ converse.plugins.add('converse-message-view', {
                       time = dayjs(this.model.get('time')),
                       role = this.model.vcard ? this.model.vcard.get('role') : null,
                       roles = role ? role.split(',') : [];
-
+                let username = this.model.getDisplayName();
+                if(_.includes(username,'@')){
+                    username = username.split('@')[0]
+                }
+                
                 const msg = u.stringToElement(tpl_message(
                     Object.assign(
                         this.model.toJSON(), {
@@ -170,7 +224,7 @@ converse.plugins.add('converse-message-view', {
                         'time': time.toISOString(),
                         'extra_classes': this.getExtraMessageClasses(),
                         'label_show': __('Show more'),
-                        'username': this.model.getDisplayName()
+                        'username': username
                     })
                 ));
 
@@ -223,9 +277,11 @@ converse.plugins.add('converse-message-view', {
 
             renderChatStateNotification () {
                 let text;
-                const from = this.model.get('from'),
-                      name = this.model.getDisplayName();
-
+                const from = this.model.get('from');
+                let  name = this.model.getDisplayName();
+                    if(_.includes(name, '@')){
+                        name = name.split('@')[0]
+                    }
                 if (this.model.get('chat_state') === _converse.COMPOSING) {
                     if (this.model.get('sender') === 'me') {
                         text = __('Typing from another device');

@@ -125,8 +125,11 @@ converse.plugins.add('converse-roomslist', {
                         'info_remove_bookmark': __('Unbookmark this groupchat'),
                         'info_add_bookmark': __('Bookmark this groupchat'),
                         'info_title': __('Show more information on this groupchat'),
+                        'delete_room': __('Delete Channel'),
                         'name': this.getRoomsListElementName(),
-                        'open_title': __('Click to open this groupchat')
+                        'open_title': __('Click to open this groupchat'),
+                        // eslint-disable-next-line no-undef
+                        'dataUri': createAvatar(this.getRoomsListElementName())
                     }));
             },
 
@@ -140,13 +143,74 @@ converse.plugins.add('converse-roomslist', {
             },
 
             getRoomsListElementName () {
+                let name = '';
                 if (this.model.get('bookmarked') && _converse.bookmarks) {
                     const bookmark = _.head(_converse.bookmarks.where({'jid': this.model.get('jid')}));
                     return bookmark.get('name');
                 } else {
-                    return this.model.get('name');
+                    name =  this.model.get('name');
                 }
-            }
+                if(!name){
+                    name = this.model.get('jid')
+                }
+                if(name){
+                    name = name.split('@')[0]
+                }
+                return name
+            },
+            createAvatar(nickname, width, height, font)
+            {
+                if(!nickname){
+                    nickname= 'no-name' 
+                }
+                nickname = nickname.toLowerCase();
+
+
+                if (!width) width = 32;
+                if (!height) height = 32;
+                if (!font) font = "16px Arial";
+
+                var canvas = document.createElement('canvas');
+                canvas.style.display = 'none';
+                canvas.width = width;
+                canvas.height = height;
+                document.body.appendChild(canvas);
+                var context = canvas.getContext('2d');
+                context.fillStyle = this.getRandomColor(nickname);
+                context.fillRect(0, 0, canvas.width, canvas.height);
+                context.font = font;
+                context.fillStyle = "#fff";
+
+                var first, last;
+                var name = nickname.split(" ");
+                var l = name.length - 1;
+
+                if (name && name[0] && name.first != '')
+                {
+                    first = name[0][0];
+                    last = name[l] && name[l] != '' && l > 0 ? name[l][0] : null;
+                    var initials
+                    if (last) {
+                         initials = first + last;
+                        context.fillText(initials.toUpperCase(), 3, 23);
+                    } else {
+                         initials = first;
+                        context.fillText(initials.toUpperCase(), 10, 23);
+                    }
+                    var data = canvas.toDataURL();
+                    document.body.removeChild(canvas);
+                }
+                return canvas.toDataURL();
+            },
+            getRandomColor(nickname){
+                    var letters = '0123456789ABCDEF';
+                    var color = '#';
+
+                    for (var i = 0; i < 6; i++) {
+                        color += letters[Math.floor(Math.random() * 16)];
+                    }
+                    return color;
+                }
         });
 
 
@@ -159,6 +223,7 @@ converse.plugins.add('converse-roomslist', {
                 'click .list-toggle': 'toggleRoomsList',
                 'click .remove-bookmark': 'removeBookmark',
                 'click .open-room': 'openRoom',
+                'click .delete-room': 'deleteRoom',
             },
             listSelector: '.rooms-list',
             ItemView: _converse.RoomsListElementView,
@@ -192,9 +257,15 @@ converse.plugins.add('converse-roomslist', {
                 }
                 this.showOrHide();
                 this.insertIntoControlBox();
+                
                 return this;
             },
-
+            deleteRoom(ev){
+                ev.preventDefault();
+                const name = ev.target.getAttribute('data-room-name');
+                const jid = ev.target.getAttribute('data-room-jid');
+                _converse.chatboxviews.get(jid).parseMessageForCommands('/destroy'); 
+            },
             insertIntoControlBox () {
                 const controlboxview = _converse.chatboxviews.get('controlbox');
                 if (!_.isUndefined(controlboxview) && !u.rootContains(_converse.root, this.el)) {
@@ -261,7 +332,34 @@ converse.plugins.add('converse-roomslist', {
                         icon_el.classList.add("fa-caret-down");
                     });
                 }
-            }
+            },
+            filter(q){
+                var rooms = this.model.models.filter(
+                    (room) => !_.includes(room.get('name').toLowerCase(), q.toLowerCase())
+                );
+                this.filterOutRooms(rooms)
+
+            },
+            filterOutRooms (rooms=[]) {
+                /* Given a list of contacts, make sure they're filtered out
+                 * (aka hidden) and that all other contacts are visible.
+                 *
+                 * If all contacts are hidden, then also hide the group
+                 * title.
+                 */
+
+                const all__views = this.getAll();
+                _.each(this.model.models, (room) => {
+                    const room_view = this.get(room.get('id'));
+                    if (_.includes(rooms, room)) {
+                        u.hideElement(room_view.el);
+                    } else{
+                        u.showElement(room_view.el);
+                    }
+                     
+                    
+                });
+            },
         });
 
         const initRoomsListView = function () {

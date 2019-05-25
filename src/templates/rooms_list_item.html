@@ -2,6 +2,9 @@
     {[ if (o.currently_open) { ]} open {[ } ]}
     {[ if (o.num_unread_general) { ]} unread-msgs {[ } ]}"
     data-room-jid="{{{o.jid}}}">
+    <div>
+            <img class="channle-icon" src="{{{o.dataUri}}}">
+    </div>
 
 {[ if (o.num_unread) { ]}
     <span class="list-item-badge badge badge-room-color msgs-indicator">{{{ o.num_unread }}}</span>
@@ -24,5 +27,11 @@
    data-room-jid="{{{o.jid}}}"
    data-room-name="{{{o.name || o.jid}}}"
    title="{{{o.info_leave_room}}}" href="#"></a>
-
+   
+{[ if (o.affiliation==='owner') { ]}
+<a class="list-item-action far fa-trash-alt delete-room"
+   data-room-jid="{{{o.jid}}}"
+   data-room-name="{{{o.name || o.jid}}}"
+   title="{{{o.delete_room}}}" href="#"></a>   
+{[ } ]}
 </div>

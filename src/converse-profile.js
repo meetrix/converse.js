@@ -58,6 +58,11 @@ converse.plugins.add('converse-profile', {
             },
 
             toHTML () {
+                var dataUri = "data:" + this.model.vcard.toJSON().image_type + ";base64," + this.model.vcard.toJSON().image;
+                if(this.model.vcard.toJSON().image === _converse.DEFAULT_IMAGE){
+                    // eslint-disable-next-line no-undef
+                    dataUri = createAvatar(this.model.vcard.toJSON().jid)
+                }
                 return tpl_profile_modal(Object.assign(
                     this.model.toJSON(),
                     this.model.vcard.toJSON(), {
@@ -77,7 +82,8 @@ converse.plugins.add('converse-profile', {
                         'Your roles are shown next to your name on your chat messages.'),
                     'label_url': __('URL'),
                     'utils': u,
-                    'view': this
+                    'view': this,
+                    'dataUri':dataUri
                 }));
             },
 
@@ -174,7 +180,7 @@ converse.plugins.add('converse-profile', {
 
             afterRender () {
                 this.el.addEventListener('shown.bs.modal', () => {
-                    this.el.querySelector('input[name="status_message"]').focus();
+                    // this.el.querySelector('input[name="status_message"]').focus();
                 }, false);
             },
 
@@ -222,19 +228,21 @@ converse.plugins.add('converse-profile', {
                 );
             }
         });
-
         _converse.XMPPStatusView = _converse.VDOMViewWithAvatar.extend({
             tagName: "div",
             events: {
                 "click a.show-profile": "showProfileModal",
                 "click a.change-status": "showStatusChangeModal",
                 "click .show-client-info": "showClientInfoModal",
-                "click .logout": "logOut"
+                "click .logout": "logOut",
+                // "click .profile-menu":"toggleDropDown",
+                "click .dropdown-item":"hideDropDown"
             },
 
             initialize () {
                 this.model.on("change", this.render, this);
                 this.model.vcard.on("change", this.render, this);
+                // 
             },
 
             toHTML () {
@@ -243,9 +251,10 @@ converse.plugins.add('converse-profile', {
                     this.model.toJSON(),
                     this.model.vcard.toJSON(), {
                     '__': __,
-                    'fullname': this.model.vcard.get('fullname') || _converse.bare_jid,
+                    'fullname': this.model.vcard.get('nickname') || this.model.vcard.get('fullname') || _converse.bare_jid.split('@')[0],
                     'status_message': this.model.get('status_message') ||
                                         __("I am %1$s", this.getPrettyStatus(chat_status)),
+                    'role': this.model.vcard.get('role') || '',                    
                     'chat_status': chat_status,
                     '_converse': _converse,
                     'title_change_settings': __('Change settings'),
@@ -258,6 +267,28 @@ converse.plugins.add('converse-profile', {
 
             afterRender () {
                 this.renderAvatar();
+               
+               
+            },
+            toggleDropDown(ev){
+                console.log('dropdown')
+                const listEl = this.el.querySelector('.dropdown-menu')
+                if(listEl.classList.contains('hidden')){
+                    u.showElement(listEl);
+                    u.removeClass('hidden', listEl);
+                   
+                }else {
+                    u.removeClass('show', listEl);
+                    u.hideElement(listEl)
+                }
+            },
+            hideDropDown(ev){
+                console.log('hide')
+                const listEl = this.el.querySelector('.dropdown-menu')
+                const profilemenu = this.el.querySelector('.profile-menu')
+                profilemenu.setAttribute('aria-expanded',false);
+                u.removeClass('show', listEl);
+                // u.hideElement(listEl)
             },
 
             showProfileModal (ev) {
