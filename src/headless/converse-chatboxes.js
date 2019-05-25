@@ -10,7 +10,7 @@ import BrowserStorage from "backbone.browserStorage";
 import converse from "./converse-core";
 import filesize from "filesize";
 
-const { $msg, Backbone, Promise, Strophe, dayjs, sizzle, utils, _,moment } = converse.env;
+const { $msg, Backbone, Promise, Strophe, dayjs, sizzle, utils, _ } = converse.env;
 const u = converse.env.utils;
 
 Strophe.addNamespace('MESSAGE_CORRECT', 'urn:xmpp:message-correct:0');
@@ -682,7 +682,7 @@ converse.plugins.add('converse-chatboxes', {
                         older_versions.push(message.get('message'));
                         message.save({
                             'deleting': false,
-                            'deleted': moment().format(),
+                            'deleted': (new Date()).toISOString(),
                             'message':  attrs.message,
                             'older_versions': older_versions,
                             'references': attrs.references,

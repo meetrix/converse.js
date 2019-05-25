@@ -56079,8 +56079,7 @@ const {
   dayjs,
   sizzle,
   utils,
-  _,
-  moment
+  _
 } = _converse_core__WEBPACK_IMPORTED_MODULE_3__["default"].env;
 const u = _converse_core__WEBPACK_IMPORTED_MODULE_3__["default"].env.utils;
 Strophe.addNamespace('MESSAGE_CORRECT', 'urn:xmpp:message-correct:0');
@@ -56876,7 +56875,7 @@ _converse_core__WEBPACK_IMPORTED_MODULE_3__["default"].plugins.add('converse-cha
             older_versions.push(message.get('message'));
             message.save({
               'deleting': false,
-              'deleted': moment().format(),
+              'deleted': new Date().toISOString(),
               'message': attrs.message,
               'older_versions': older_versions,
               'references': attrs.references,
