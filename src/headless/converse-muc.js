@@ -1215,7 +1215,6 @@ converse.plugins.add('converse-muc', {
              * @param { XMLElement } stanza - The message stanza.
              */
             async onMessage (stanza) {
-                console.log('muc',stanza)
                 this.fetchFeaturesIfConfigurationChanged(stanza);
 
                 const original_stanza = stanza,

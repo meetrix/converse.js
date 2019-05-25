@@ -57250,7 +57250,6 @@ _converse_core__WEBPACK_IMPORTED_MODULE_3__["default"].plugins.add('converse-cha
        * @param { XMLElement } stanza - The incoming message stanza
        */
       async onMessage(stanza) {
-        console.log('directchagt', stanza);
         let to_jid = stanza.getAttribute('to');
         const to_resource = Strophe.getResourceFromJid(to_jid);
 
@@ -62497,7 +62496,6 @@ _converse_core__WEBPACK_IMPORTED_MODULE_4__["default"].plugins.add('converse-muc
        * @param { XMLElement } stanza - The message stanza.
        */
       async onMessage(stanza) {
-        console.log('muc', stanza);
         this.fetchFeaturesIfConfigurationChanged(stanza);
         const original_stanza = stanza,
               forwarded = sizzle("forwarded[xmlns=\"".concat(Strophe.NS.FORWARD, "\"]"), stanza).pop();

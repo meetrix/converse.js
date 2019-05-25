@@ -1029,7 +1029,6 @@ converse.plugins.add('converse-chatboxes', {
              * @param { XMLElement } stanza - The incoming message stanza
              */
             async onMessage (stanza) {
-                console.log('directchagt',stanza)
                 let to_jid = stanza.getAttribute('to');
                 const to_resource = Strophe.getResourceFromJid(to_jid);
 
