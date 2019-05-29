@@ -88012,7 +88012,25 @@ __e( o.status ) +
 __e(o.info_close) +
 '"></a>\n        <a class="chatbox-btn show-user-details-modal fa fa-id-card" title="' +
 __e(o.info_details) +
-'"></a>\n    </div> -->\n<!-- </div> -->\n<div class="top-toolbar">\n        <div class="container-fluid">\n            <div class="row">\n                <!-- <div class="col-sm-6 room-description">\n                    <div class="container-fluid">\n                        <div class="row channel-name">\n                            #Announcements\n                        </div>\n                        <div class="row channel-summary">\n                                <ul class="m-0 pl-0 d-block list-unstyled channel-info">\n                                <li class="favorite-star">\n                                    <span class="favorite"><i class="fas fa-star"></i></span>\n                                </li>\n                                <li class="favorite-user">\n                                    <span class="mr-1 ">13</span>\n                                    <i class="far fa-user"></i>\n                                </li>\n                                <li class="favorite-channel">\n                                    <span class="channel-desc ">Company-wide announcements and work-based\n                                        matters</span>\n                                </li>\n                            </ul>\n                        </div>\n                    </div>\n                    </div> -->\n                <div class="col"></div>\n                <div class="col-auto room-controls">\n                    <ul class="top-toolbar-menu">\n                    </ul>\n                    <div class="chatbox-buttons">\n                        <a class="chatbox-btn show-user-details-modal fa fa-id-card" title="' +
+'"></a>\n    </div> -->\n<!-- </div> -->\n<div class="top-toolbar">\n        <div class="container-fluid">\n            <div class="row">\n                <!-- <div class="col-sm-6 room-description">\n                    <div class="container-fluid">\n                        <div class="row channel-name">\n                            #Announcements\n                        </div>\n                        <div class="row channel-summary">\n                                <ul class="m-0 pl-0 d-block list-unstyled channel-info">\n                                <li class="favorite-star">\n                                    <span class="favorite"><i class="fas fa-star"></i></span>\n                                </li>\n                                <li class="favorite-user">\n                                    <span class="mr-1 ">13</span>\n                                    <i class="far fa-user"></i>\n                                </li>\n                                <li class="favorite-channel">\n                                    <span class="channel-desc ">Company-wide announcements and work-based\n                                        matters</span>\n                                </li>\n                            </ul>\n                        </div>\n                    </div>\n                    </div> -->\n                <div class="col">\n                    <div class="col chat-title" title="' +
+__e(o.jid) +
+'">\n                            ';
+ if (o.type !== o._converse.HEADLINES_TYPE) { ;
+__p += '\n                            <canvas class="avatar" height="36" width="36"></canvas>\n                            ';
+ } ;
+__p += '\n                        ';
+ if (o.url) { ;
+__p += '\n                            <a href="' +
+__e(o.url) +
+'" target="_blank" rel="noopener" class="user">\n                        ';
+ } ;
+__p += '\n                                ' +
+__e( o.display_name ) +
+'\n                        ';
+ if (o.url) { ;
+__p += '\n                            </a>\n                        ';
+ } ;
+__p += '\n                    </div>\n                </div>\n                <div class="col-auto room-controls">\n                    <ul class="top-toolbar-menu">\n                    </ul>\n                    <div class="chatbox-buttons">\n                        <a class="chatbox-btn show-user-details-modal fa fa-id-card" title="' +
 __e(o.info_details) +
 '"></a>\n                        <a class="chatbox-btn close-chatbox-button fa fa-times" title="' +
 __e(o.info_close) +

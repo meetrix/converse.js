@@ -47,7 +47,20 @@
                         </div>
                     </div>
                     </div> -->
-                <div class="col"></div>
+                <div class="col">
+                    <div class="col chat-title" title="{{{o.jid}}}">
+                            {[ if (o.type !== o._converse.HEADLINES_TYPE) { ]}
+                            <canvas class="avatar" height="36" width="36"></canvas>
+                            {[ } ]}
+                        {[ if (o.url) { ]}
+                            <a href="{{{o.url}}}" target="_blank" rel="noopener" class="user">
+                        {[ } ]}
+                                {{{ o.display_name }}}
+                        {[ if (o.url) { ]}
+                            </a>
+                        {[ } ]}
+                    </div>
+                </div>
                 <div class="col-auto room-controls">
                     <ul class="top-toolbar-menu">
                     </ul>
