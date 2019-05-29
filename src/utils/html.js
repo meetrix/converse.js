@@ -88,7 +88,7 @@ u.isAudioURL = function (url) {
     if (url.protocol().toLowerCase() !== "https") {
         return false;
     }
-    return filename.endsWith('.ogg') || filename.endsWith('.mp3') || filename.endsWith('.m4a');
+    return filename.endsWith('.ogg') || filename.endsWith('.mp3') || filename.endsWith('.m4a') || filename.endsWith('.wav');
 }
 
 
@@ -115,8 +115,8 @@ u.isVideoURL = function (url) {
     if (url.protocol().toLowerCase() !== "https") {
         return false;
     }
-    // return filename.endsWith('.mp4') || filename.endsWith('.webm');
-    return filename.endsWith('.mp4');
+    return filename.endsWith('.mp4') || filename.endsWith('.webm');
+    // return filename.endsWith('.mp4');
 }
 
 

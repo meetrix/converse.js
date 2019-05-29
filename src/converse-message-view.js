@@ -214,7 +214,6 @@ converse.plugins.add('converse-message-view', {
                 if(_.includes(username,'@')){
                     username = username.split('@')[0]
                 }
-                console.log('msg', this.model.toJSON())
                 const msg = u.stringToElement(tpl_message(
                     Object.assign(
                         this.model.toJSON(), {
@@ -231,8 +230,7 @@ converse.plugins.add('converse-message-view', {
 
                 const url = this.model.get('oob_url');
                 const deleted = this.model.get('deleted');
-                if (url && !deleted) {
-                    console.log('url',deleted,url,msg.querySelector('.chat-msg__media'))
+                if (url ) {
                     msg.querySelector('.chat-msg__media').innerHTML = _.flow(
                         _.partial(u.renderFileURL, _converse),
                         _.partial(u.renderMovieURL, _converse),

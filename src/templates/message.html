@@ -30,9 +30,9 @@
                 <div class="chat-msg__text
                     {[ if (o.is_single_emoji &&  !o.deleted ) { ]} chat-msg__text--larger{[ } ]}
                     {[ if (o.is_spoiler &&  !o.deleted) { ]} spoiler collapsed{[ } ]}"><!-- message gets added here via renderMessage --></div>
-                    {[ if (!o.deleted) { ]}
+                    <!-- {[ if (!o.deleted) { ]} -->
                     <div class="chat-msg__media"></div>
-                    {[ } ]}   
+                    <!-- {[ } ]}    -->
             {[ if (!o.is_me_message) { ]}</div>{[ } ]}
             {[ if (o.type !== 'headline' && !o.is_me_message && o.sender === 'me' && !o.deleted) { ]}
             <!-- <div class="chat-msg__actions">

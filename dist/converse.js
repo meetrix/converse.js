@@ -46455,7 +46455,6 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_1__["default"].plugins
           username = username.split('@')[0];
         }
 
-        console.log('msg', this.model.toJSON());
         const msg = _converse_headless_utils_emoji__WEBPACK_IMPORTED_MODULE_9__["default"].stringToElement(templates_message_html__WEBPACK_IMPORTED_MODULE_7___default()(Object.assign(this.model.toJSON(), {
           '__': __,
           'is_me_message': is_me_message,
@@ -46469,8 +46468,7 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_1__["default"].plugins
         const url = this.model.get('oob_url');
         const deleted = this.model.get('deleted');
 
-        if (url && !deleted) {
-          console.log('url', deleted, url, msg.querySelector('.chat-msg__media'));
+        if (url) {
           msg.querySelector('.chat-msg__media').innerHTML = _.flow(_.partial(_converse_headless_utils_emoji__WEBPACK_IMPORTED_MODULE_9__["default"].renderFileURL, _converse), _.partial(_converse_headless_utils_emoji__WEBPACK_IMPORTED_MODULE_9__["default"].renderMovieURL, _converse), _.partial(_converse_headless_utils_emoji__WEBPACK_IMPORTED_MODULE_9__["default"].renderAudioURL, _converse), _.partial(_converse_headless_utils_emoji__WEBPACK_IMPORTED_MODULE_9__["default"].renderImageURL, _converse))(url);
         }
 
@@ -56927,25 +56925,28 @@ _converse_core__WEBPACK_IMPORTED_MODULE_3__["default"].plugins.add('converse-cha
             'older_versions': older_versions,
             'references': attrs.references
           });
-        } else {
-          message = this.messages.findWhere('deleting');
-
-          if (message) {
-            const older_versions = message.get('older_versions') || [];
-            older_versions.push(message.get('message'));
-            message.save({
-              'deleting': false,
-              'deleted': new Date().toISOString(),
-              'message': attrs.message,
-              'older_versions': older_versions,
-              'references': attrs.references,
-              oob_desc: '',
-              oob_url: ""
-            });
-          } else {
+        } // else {
+        //     message = this.messages.findWhere('deleting')
+        //     if(message){
+        //         const older_versions = message.get('older_versions') || [];
+        //         older_versions.push(message.get('message'));
+        //         message.save({
+        //             'deleting': false,
+        //             'deleted': (new Date()).toISOString(),
+        //             'message':  attrs.message,
+        //             'older_versions': older_versions,
+        //             'references': attrs.references,
+        //             oob_desc:'',
+        //             oob_url:""
+        //         });
+        //     }
+        //     else {
+        //         message = this.messages.create(attrs);
+        //     }
+        // }
+        else {
             message = this.messages.create(attrs);
           }
-        }
 
         console.log(this.createMessageStanza(message));
 
@@ -57154,11 +57155,10 @@ _converse_core__WEBPACK_IMPORTED_MODULE_3__["default"].plugins.add('converse-cha
 
         if (replaced_id) {
           attrs['edited'] = new Date().toISOString();
-        }
-
-        if (delete_id) {
-          attrs['deleted'] = new Date().toISOString();
-        } // We prefer to use one of the XEP-0359 unique and stable stanza IDs as the Model id, to avoid duplicates.
+        } // if(delete_id){
+        //     attrs['deleted'] = (new Date()).toISOString();
+        // }
+        // We prefer to use one of the XEP-0359 unique and stable stanza IDs as the Model id, to avoid duplicates.
 
 
         attrs['id'] = attrs['origin_id'] || attrs["stanza_id ".concat(attrs.from)] || _converse.connection.getUniqueId();
@@ -57388,7 +57388,7 @@ _converse_core__WEBPACK_IMPORTED_MODULE_3__["default"].plugins.add('converse-cha
             const attrs = await chatbox.getMessageAttributesFromStanza(stanza, original_stanza);
 
             if (attrs['chat_state'] || !u.isEmptyMessage(attrs)) {
-              const msg = chatbox.correctMessage(attrs) || chatbox.deleteMessage(attrs) || chatbox.messages.create(attrs);
+              const msg = chatbox.correctMessage(attrs) || chatbox.messages.create(attrs);
               chatbox.incrementUnreadMsgCounter(msg);
             }
           }
@@ -62591,7 +62591,7 @@ _converse_core__WEBPACK_IMPORTED_MODULE_4__["default"].plugins.add('converse-muc
 
         if (attrs.nick && !this.subjectChangeHandled(attrs) && !this.ignorableCSN(attrs) && (attrs['chat_state'] || !_utils_form__WEBPACK_IMPORTED_MODULE_5__["default"].isEmptyMessage(attrs))) {
           attrs = this.addOccupantData(attrs);
-          const msg = this.correctMessage(attrs) || this.deleteMessage(attrs) || this.messages.create(attrs);
+          const msg = this.correctMessage(attrs) || this.messages.create(attrs);
           this.incrementUnreadMsgCounter(msg);
 
           if (forwarded && msg && msg.get('sender') === 'me') {
@@ -89732,11 +89732,11 @@ __p += '\n                    ';
  if (o.is_spoiler &&  !o.deleted) { ;
 __p += ' spoiler collapsed';
  } ;
-__p += '"><!-- message gets added here via renderMessage --></div>\n                    ';
+__p += '"><!-- message gets added here via renderMessage --></div>\n                    <!-- ';
  if (!o.deleted) { ;
-__p += '\n                    <div class="chat-msg__media"></div>\n                    ';
+__p += ' -->\n                    <div class="chat-msg__media"></div>\n                    <!-- ';
  } ;
-__p += '   \n            ';
+__p += '    -->\n            ';
  if (!o.is_me_message) { ;
 __p += '</div>';
  } ;
@@ -91356,7 +91356,7 @@ _headless_utils_core__WEBPACK_IMPORTED_MODULE_16__["default"].isAudioURL = funct
     return false;
   }
 
-  return filename.endsWith('.ogg') || filename.endsWith('.mp3') || filename.endsWith('.m4a');
+  return filename.endsWith('.ogg') || filename.endsWith('.mp3') || filename.endsWith('.m4a') || filename.endsWith('.wav');
 };
 
 _headless_utils_core__WEBPACK_IMPORTED_MODULE_16__["default"].isImageURL = function (url) {
@@ -91382,10 +91382,9 @@ _headless_utils_core__WEBPACK_IMPORTED_MODULE_16__["default"].isVideoURL = funct
 
   if (url.protocol().toLowerCase() !== "https") {
     return false;
-  } // return filename.endsWith('.mp4') || filename.endsWith('.webm');
+  }
 
-
-  return filename.endsWith('.mp4');
+  return filename.endsWith('.mp4') || filename.endsWith('.webm'); // return filename.endsWith('.mp4');
 };
 
 _headless_utils_core__WEBPACK_IMPORTED_MODULE_16__["default"].renderAudioURL = function (_converse, url) {
