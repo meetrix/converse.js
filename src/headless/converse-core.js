@@ -1327,6 +1327,7 @@ _converse.initialize = async function (settings, callback) {
             }
             const resource = Strophe.getResourceFromJid(this.jid);
             if (!resource) {
+                console.log('jid',this.jid)
                 this.jid = this.jid.toLowerCase() + _converse.generateResource();
             } else {
                 this.jid = Strophe.getBareJidFromJid(this.jid).toLowerCase()+'/'+resource;

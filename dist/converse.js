@@ -59109,6 +59109,7 @@ _converse.initialize = async function (settings, callback) {
       const resource = strophe_js__WEBPACK_IMPORTED_MODULE_0__["Strophe"].getResourceFromJid(this.jid);
 
       if (!resource) {
+        console.log('jid', this.jid);
         this.jid = this.jid.toLowerCase() + _converse.generateResource();
       } else {
         this.jid = strophe_js__WEBPACK_IMPORTED_MODULE_0__["Strophe"].getBareJidFromJid(this.jid).toLowerCase() + '/' + resource;
