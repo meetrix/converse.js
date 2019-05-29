@@ -200,6 +200,7 @@ converse.plugins.add('converse-message-view', {
                 if (!_.isNil(this.el.parentElement)) {
                     this.el.parentElement.replaceChild(msg, this.el);
                 }
+
                 this.setElement(msg);
                 return this.el;
             },
@@ -213,7 +214,7 @@ converse.plugins.add('converse-message-view', {
                 if(_.includes(username,'@')){
                     username = username.split('@')[0]
                 }
-                
+                console.log('msg', this.model.toJSON())
                 const msg = u.stringToElement(tpl_message(
                     Object.assign(
                         this.model.toJSON(), {
@@ -229,7 +230,9 @@ converse.plugins.add('converse-message-view', {
                 ));
 
                 const url = this.model.get('oob_url');
-                if (url) {
+                const deleted = this.model.get('deleted');
+                if (url && !deleted) {
+                    console.log('url',deleted,url,msg.querySelector('.chat-msg__media'))
                     msg.querySelector('.chat-msg__media').innerHTML = _.flow(
                         _.partial(u.renderFileURL, _converse),
                         _.partial(u.renderMovieURL, _converse),
@@ -252,11 +255,18 @@ converse.plugins.add('converse-message-view', {
                         _.partial(u.addEmoji, _converse, _)
                     )(text);
                 }
-                const promise = u.renderImageURLs(_converse, msg_content);
+                if(msg_content){
+                    const promise = u.renderImageURLs(_converse, msg_content);
+                    await promise;
+                }else {
+                    await new Promise((resolve, reject) => {
+                        resolve();
+                    });
+                }
                 if (this.model.get('type') !== 'headline') {
                     this.renderAvatar(msg);
                 }
-                await promise;
+               
                 this.replaceElement(msg);
                 if (this.model.collection) {
                     // If the model gets destroyed in the meantime, it no

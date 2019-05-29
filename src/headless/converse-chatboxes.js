@@ -14,6 +14,7 @@ const { $msg, Backbone, Promise, Strophe, dayjs, sizzle, utils, _ } = converse.e
 const u = converse.env.utils;
 
 Strophe.addNamespace('MESSAGE_CORRECT', 'urn:xmpp:message-correct:0');
+Strophe.addNamespace('MESSAGE_DELETE', 'urn:xmpp:message-delete:0');
 Strophe.addNamespace('RECEIPTS', 'urn:xmpp:receipts');
 Strophe.addNamespace('REFERENCE', 'urn:xmpp:reference:0');
 Strophe.addNamespace('MARKERS', 'urn:xmpp:chat-markers:0');
@@ -415,7 +416,14 @@ converse.plugins.add('converse-chatboxes', {
                     return el.getAttribute('id');
                 }
             },
-
+             //<----MDEV
+            getDeleteId (stanza) {
+                const el = sizzle(`replace[xmlns="${Strophe.NS.MESSAGE_DELETE}"]`, stanza).pop();
+                if (el) {
+                    return el.getAttribute('id');
+                }
+            },
+            ///----->
             /**
              * Determine whether the passed in message attributes represent a
              * message which corrects a previously received message, or an
@@ -448,7 +456,29 @@ converse.plugins.add('converse-chatboxes', {
                 }
                 return message;
             },
-
+            //<----MDEV
+            deleteMessage (attrs) {
+                if (!attrs.msgid || !attrs.from) {
+                    return;
+                }
+                const message = this.messages.findWhere({'msgid': attrs.msgid, 'from': attrs.from});
+                if (!message) {
+                    return;
+                }
+                const older_versions = message.get('older_versions') || {};
+                if ((attrs.time < message.get('time')) && message.get('deleted')) {
+                    // This is an older message which has been corrected already
+                    older_versions[attrs.time] = attrs['message'];
+                    message.save({'older_versions': older_versions});
+                } else {
+                    // This is a correction of an earlier message we already received
+                    older_versions[message.get('time')] = message.get('message');
+                    attrs = Object.assign(attrs, {'older_versions': older_versions});
+                    message.save(attrs);
+                }
+                return message;
+            },
+            //----->
             async getDuplicateMessage (stanza) {
                 return this.findDuplicateFromOriginID(stanza) ||
                     await this.findDuplicateFromStanzaID(stanza) ||
@@ -617,7 +647,7 @@ converse.plugins.add('converse-chatboxes', {
                 }
                 if (message.get('deleted')) {
                     stanza.c('replace', {
-                        'xmlns': Strophe.NS.MESSAGE_CORRECT,
+                        'xmlns': Strophe.NS.MESSAGE_DELETE,
                         'id': message.get('msgid')
                     }).root();
                 }
@@ -696,7 +726,7 @@ converse.plugins.add('converse-chatboxes', {
                     }
                     
                 }
-        
+                console.log(this.createMessageStanza(message))
                 _converse.api.send(this.createMessageStanza(message));
                 return true;
             },
@@ -848,6 +878,7 @@ converse.plugins.add('converse-chatboxes', {
                             stanza.getElementsByTagName(_converse.GONE).length && _converse.GONE;
 
                 const replaced_id = this.getReplaceId(stanza)
+                const delete_id = this.getDeleteId(stanza)
                 const msgid = replaced_id || stanza.getAttribute('id') || original_stanza.getAttribute('id');
                 const attrs = Object.assign({
                     'chat_state': chat_state,
@@ -887,6 +918,9 @@ converse.plugins.add('converse-chatboxes', {
                 }
                 if (replaced_id) {
                     attrs['edited'] = (new Date()).toISOString();
+                }
+                if(delete_id){
+                    attrs['deleted'] = (new Date()).toISOString();
                 }
                 // We prefer to use one of the XEP-0359 unique and stable stanza IDs as the Model id, to avoid duplicates.
                 attrs['id'] = attrs['origin_id'] ||
@@ -1099,7 +1133,7 @@ converse.plugins.add('converse-chatboxes', {
 
                         const attrs = await chatbox.getMessageAttributesFromStanza(stanza, original_stanza);
                         if (attrs['chat_state'] || !u.isEmptyMessage(attrs)) {
-                            const msg = chatbox.correctMessage(attrs) || chatbox.messages.create(attrs);
+                            const msg = chatbox.correctMessage(attrs) || chatbox.deleteMessage(attrs) || chatbox.messages.create(attrs);
                             chatbox.incrementUnreadMsgCounter(msg);
                         }
                     }

@@ -73,6 +73,7 @@ converse.plugins.add('converse-register', {
          */
         const { _converse } = this,
             { __ } = _converse;
+            
 
         _converse.CONNECTION_STATUS[Strophe.Status.REGIFAIL] = 'REGIFAIL';
         _converse.CONNECTION_STATUS[Strophe.Status.REGISTERED] = 'REGISTERED';
@@ -325,6 +326,7 @@ converse.plugins.add('converse-register', {
                 if (ev && ev.preventDefault) { ev.preventDefault(); }
                 if (_.isNull(ev.target.querySelector('input[name=domain]'))) {
                     this.submitRegistrationForm(ev.target);
+
                 } else {
                     this.onProviderChosen(ev.target);
                 }
@@ -446,6 +448,9 @@ converse.plugins.add('converse-register', {
                             this.fields.password,
                             _converse.onConnectStatusChanged
                         );
+                        //<--MDEV
+                        _converse.registerData = this.fields
+                        //---->
                         this.giveFeedback(__('Now logging you in'), 'info');
                     } else {
                         _converse.chatboxviews.get('controlbox').renderLoginPanel();
@@ -635,6 +640,7 @@ converse.plugins.add('converse-register', {
                 _converse.connection.send(iq);
                 this.setFields(iq.tree());
             },
+
             //<---MDEV
             validationRegistationForm(form){
                 const password = form.querySelector('input[name=password]').value;

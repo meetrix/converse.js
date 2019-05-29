@@ -115,7 +115,8 @@ u.isVideoURL = function (url) {
     if (url.protocol().toLowerCase() !== "https") {
         return false;
     }
-    return filename.endsWith('.mp4') || filename.endsWith('.webm');
+    // return filename.endsWith('.mp4') || filename.endsWith('.webm');
+    return filename.endsWith('.mp4');
 }
 
 
@@ -171,6 +172,7 @@ u.renderImageURLs = function (_converse, el) {
         return Promise.resolve();
     }
     const { __ } = _converse;
+    
     const list = el.textContent.match(URL_REGEX) || [];
     return Promise.all(
         _.map(list, url =>

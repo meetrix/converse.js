@@ -46455,6 +46455,7 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_1__["default"].plugins
           username = username.split('@')[0];
         }
 
+        console.log('msg', this.model.toJSON());
         const msg = _converse_headless_utils_emoji__WEBPACK_IMPORTED_MODULE_9__["default"].stringToElement(templates_message_html__WEBPACK_IMPORTED_MODULE_7___default()(Object.assign(this.model.toJSON(), {
           '__': __,
           'is_me_message': is_me_message,
@@ -46466,8 +46467,10 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_1__["default"].plugins
           'username': username
         })));
         const url = this.model.get('oob_url');
+        const deleted = this.model.get('deleted');
 
-        if (url) {
+        if (url && !deleted) {
+          console.log('url', deleted, url, msg.querySelector('.chat-msg__media'));
           msg.querySelector('.chat-msg__media').innerHTML = _.flow(_.partial(_converse_headless_utils_emoji__WEBPACK_IMPORTED_MODULE_9__["default"].renderFileURL, _converse), _.partial(_converse_headless_utils_emoji__WEBPACK_IMPORTED_MODULE_9__["default"].renderMovieURL, _converse), _.partial(_converse_headless_utils_emoji__WEBPACK_IMPORTED_MODULE_9__["default"].renderAudioURL, _converse), _.partial(_converse_headless_utils_emoji__WEBPACK_IMPORTED_MODULE_9__["default"].renderImageURL, _converse))(url);
         }
 
@@ -46486,13 +46489,19 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_1__["default"].plugins
           msg_content.innerHTML = _.flow(_.partial(_converse_headless_utils_emoji__WEBPACK_IMPORTED_MODULE_9__["default"].geoUriToHttp, _, _converse.geouri_replacement), _.partial(_converse_headless_utils_emoji__WEBPACK_IMPORTED_MODULE_9__["default"].addMentionsMarkup, _, this.model.get('references'), this.model.collection.chatbox), _converse_headless_utils_emoji__WEBPACK_IMPORTED_MODULE_9__["default"].addHyperlinks, _converse_headless_utils_emoji__WEBPACK_IMPORTED_MODULE_9__["default"].renderNewLines, _.partial(_converse_headless_utils_emoji__WEBPACK_IMPORTED_MODULE_9__["default"].addEmoji, _converse, _))(text);
         }
 
-        const promise = _converse_headless_utils_emoji__WEBPACK_IMPORTED_MODULE_9__["default"].renderImageURLs(_converse, msg_content);
+        if (msg_content) {
+          const promise = _converse_headless_utils_emoji__WEBPACK_IMPORTED_MODULE_9__["default"].renderImageURLs(_converse, msg_content);
+          await promise;
+        } else {
+          await new Promise((resolve, reject) => {
+            resolve();
+          });
+        }
 
         if (this.model.get('type') !== 'headline') {
           this.renderAvatar(msg);
         }
 
-        await promise;
         this.replaceElement(msg);
 
         if (this.model.collection) {
@@ -53335,7 +53344,10 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_1__["default"].plugins
 
           if (this.fields.password && this.fields.username) {
             // automatically log the user in
-            _converse.connection.connect(this.fields.username.toLowerCase() + '@' + this.domain.toLowerCase(), this.fields.password, _converse.onConnectStatusChanged);
+            _converse.connection.connect(this.fields.username.toLowerCase() + '@' + this.domain.toLowerCase(), this.fields.password, _converse.onConnectStatusChanged); //<--MDEV
+
+
+            _converse.registerData = this.fields; //---->
 
             this.giveFeedback(__('Now logging you in'), 'info');
           } else {
@@ -56083,6 +56095,7 @@ const {
 } = _converse_core__WEBPACK_IMPORTED_MODULE_3__["default"].env;
 const u = _converse_core__WEBPACK_IMPORTED_MODULE_3__["default"].env.utils;
 Strophe.addNamespace('MESSAGE_CORRECT', 'urn:xmpp:message-correct:0');
+Strophe.addNamespace('MESSAGE_DELETE', 'urn:xmpp:message-delete:0');
 Strophe.addNamespace('RECEIPTS', 'urn:xmpp:receipts');
 Strophe.addNamespace('REFERENCE', 'urn:xmpp:reference:0');
 Strophe.addNamespace('MARKERS', 'urn:xmpp:chat-markers:0');
@@ -56532,6 +56545,17 @@ _converse_core__WEBPACK_IMPORTED_MODULE_3__["default"].plugins.add('converse-cha
         }
       },
 
+      //<----MDEV
+      getDeleteId(stanza) {
+        const el = sizzle("replace[xmlns=\"".concat(Strophe.NS.MESSAGE_DELETE, "\"]"), stanza).pop();
+
+        if (el) {
+          return el.getAttribute('id');
+        }
+      },
+
+      ///----->
+
       /**
        * Determine whether the passed in message attributes represent a
        * message which corrects a previously received message, or an
@@ -56577,6 +56601,42 @@ _converse_core__WEBPACK_IMPORTED_MODULE_3__["default"].plugins.add('converse-cha
         return message;
       },
 
+      //<----MDEV
+      deleteMessage(attrs) {
+        if (!attrs.msgid || !attrs.from) {
+          return;
+        }
+
+        const message = this.messages.findWhere({
+          'msgid': attrs.msgid,
+          'from': attrs.from
+        });
+
+        if (!message) {
+          return;
+        }
+
+        const older_versions = message.get('older_versions') || {};
+
+        if (attrs.time < message.get('time') && message.get('deleted')) {
+          // This is an older message which has been corrected already
+          older_versions[attrs.time] = attrs['message'];
+          message.save({
+            'older_versions': older_versions
+          });
+        } else {
+          // This is a correction of an earlier message we already received
+          older_versions[message.get('time')] = message.get('message');
+          attrs = Object.assign(attrs, {
+            'older_versions': older_versions
+          });
+          message.save(attrs);
+        }
+
+        return message;
+      },
+
+      //----->
       async getDuplicateMessage(stanza) {
         return this.findDuplicateFromOriginID(stanza) || (await this.findDuplicateFromStanzaID(stanza)) || this.findDuplicateFromMessage(stanza);
       },
@@ -56801,7 +56861,7 @@ _converse_core__WEBPACK_IMPORTED_MODULE_3__["default"].plugins.add('converse-cha
 
         if (message.get('deleted')) {
           stanza.c('replace', {
-            'xmlns': Strophe.NS.MESSAGE_CORRECT,
+            'xmlns': Strophe.NS.MESSAGE_DELETE,
             'id': message.get('msgid')
           }).root();
         }
@@ -56886,6 +56946,8 @@ _converse_core__WEBPACK_IMPORTED_MODULE_3__["default"].plugins.add('converse-cha
             message = this.messages.create(attrs);
           }
         }
+
+        console.log(this.createMessageStanza(message));
 
         _converse.api.send(this.createMessageStanza(message));
 
@@ -57048,6 +57110,7 @@ _converse_core__WEBPACK_IMPORTED_MODULE_3__["default"].plugins.add('converse-cha
         const chat_state = stanza.getElementsByTagName(_converse.COMPOSING).length && _converse.COMPOSING || stanza.getElementsByTagName(_converse.PAUSED).length && _converse.PAUSED || stanza.getElementsByTagName(_converse.INACTIVE).length && _converse.INACTIVE || stanza.getElementsByTagName(_converse.ACTIVE).length && _converse.ACTIVE || stanza.getElementsByTagName(_converse.GONE).length && _converse.GONE;
 
         const replaced_id = this.getReplaceId(stanza);
+        const delete_id = this.getDeleteId(stanza);
         const msgid = replaced_id || stanza.getAttribute('id') || original_stanza.getAttribute('id');
         const attrs = Object.assign({
           'chat_state': chat_state,
@@ -57091,6 +57154,10 @@ _converse_core__WEBPACK_IMPORTED_MODULE_3__["default"].plugins.add('converse-cha
 
         if (replaced_id) {
           attrs['edited'] = new Date().toISOString();
+        }
+
+        if (delete_id) {
+          attrs['deleted'] = new Date().toISOString();
         } // We prefer to use one of the XEP-0359 unique and stable stanza IDs as the Model id, to avoid duplicates.
 
 
@@ -57321,7 +57388,7 @@ _converse_core__WEBPACK_IMPORTED_MODULE_3__["default"].plugins.add('converse-cha
             const attrs = await chatbox.getMessageAttributesFromStanza(stanza, original_stanza);
 
             if (attrs['chat_state'] || !u.isEmptyMessage(attrs)) {
-              const msg = chatbox.correctMessage(attrs) || chatbox.messages.create(attrs);
+              const msg = chatbox.correctMessage(attrs) || chatbox.deleteMessage(attrs) || chatbox.messages.create(attrs);
               chatbox.incrementUnreadMsgCounter(msg);
             }
           }
@@ -62496,6 +62563,10 @@ _converse_core__WEBPACK_IMPORTED_MODULE_4__["default"].plugins.add('converse-muc
        * @param { XMLElement } stanza - The message stanza.
        */
       async onMessage(stanza) {
+        if (!stanza) {
+          return;
+        }
+
         this.fetchFeaturesIfConfigurationChanged(stanza);
         const original_stanza = stanza,
               forwarded = sizzle("forwarded[xmlns=\"".concat(Strophe.NS.FORWARD, "\"]"), stanza).pop();
@@ -62520,7 +62591,7 @@ _converse_core__WEBPACK_IMPORTED_MODULE_4__["default"].plugins.add('converse-muc
 
         if (attrs.nick && !this.subjectChangeHandled(attrs) && !this.ignorableCSN(attrs) && (attrs['chat_state'] || !_utils_form__WEBPACK_IMPORTED_MODULE_5__["default"].isEmptyMessage(attrs))) {
           attrs = this.addOccupantData(attrs);
-          const msg = this.correctMessage(attrs) || this.messages.create(attrs);
+          const msg = this.correctMessage(attrs) || this.deleteMessage(attrs) || this.messages.create(attrs);
           this.incrementUnreadMsgCounter(msg);
 
           if (forwarded && msg && msg.get('sender') === 'me') {
@@ -88160,7 +88231,7 @@ __e(o.__('Names must be lowercase without spaces or period, and shorter than 22 
 __e(o.__('Purpose')) +
 '&nbsp;(' +
 __e(o.__('Optional')) +
-')</label>\n                          <input type="text" required="required" name="purpose" class="form-control" value="' +
+')</label>\n                          <input type="text" name="purpose" class="form-control" value="' +
 __e(o.roomdesc) +
 '" />\n                          <span>' +
 __e(o.__("What's the channel about?")) +
@@ -90474,11 +90545,11 @@ __e(o.info_add_bookmark) +
  } ;
 __p += '"\n   href="#"></a>\n';
  } ;
-__p += '\n\n<a class="list-item-action room-info fa fa-info-circle" data-room-jid="' +
+__p += '\n\n<!-- <a class="list-item-action room-info fa fa-info-circle" data-room-jid="' +
 __e(o.jid) +
 '"\n   title="' +
 __e(o.info_title) +
-'" href="#"></a>\n\n<a class="list-item-action fa fa-sign-out-alt close-room"\n   data-room-jid="' +
+'" href="#"></a> -->\n\n<a class="list-item-action fa fa-sign-out-alt close-room"\n   data-room-jid="' +
 __e(o.jid) +
 '"\n   data-room-name="' +
 __e(o.name || o.jid) +
@@ -91311,9 +91382,10 @@ _headless_utils_core__WEBPACK_IMPORTED_MODULE_16__["default"].isVideoURL = funct
 
   if (url.protocol().toLowerCase() !== "https") {
     return false;
-  }
+  } // return filename.endsWith('.mp4') || filename.endsWith('.webm');
 
-  return filename.endsWith('.mp4') || filename.endsWith('.webm');
+
+  return filename.endsWith('.mp4');
 };
 
 _headless_utils_core__WEBPACK_IMPORTED_MODULE_16__["default"].renderAudioURL = function (_converse, url) {

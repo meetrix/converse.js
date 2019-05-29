@@ -1215,6 +1215,9 @@ converse.plugins.add('converse-muc', {
              * @param { XMLElement } stanza - The message stanza.
              */
             async onMessage (stanza) {
+                if(!stanza){
+                    return;
+                }
                 this.fetchFeaturesIfConfigurationChanged(stanza);
 
                 const original_stanza = stanza,
@@ -1239,7 +1242,7 @@ converse.plugins.add('converse-muc', {
                         (attrs['chat_state'] || !u.isEmptyMessage(attrs))) {
 
                     attrs = this.addOccupantData(attrs);
-                    const msg = this.correctMessage(attrs) || this.messages.create(attrs);
+                    const msg = this.correctMessage(attrs) || this.deleteMessage(attrs) || this.messages.create(attrs);
                     this.incrementUnreadMsgCounter(msg);
                     if (forwarded && msg && msg.get('sender')  === 'me') {
                         msg.save({'received': (new Date()).toISOString()});
