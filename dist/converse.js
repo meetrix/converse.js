@@ -46450,6 +46450,8 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_1__["default"].plugins
               role = this.model.vcard ? this.model.vcard.get('role') : null,
               roles = role ? role.split(',') : [];
         let username = this.model.getDisplayName();
+        const msg_deleted = this.getMessageText();
+        const isDeleted = msg_deleted === 'This message was deleted';
 
         if (_.includes(username, '@')) {
           username = username.split('@')[0];
@@ -46463,12 +46465,13 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_1__["default"].plugins
           'time': time.toISOString(),
           'extra_classes': this.getExtraMessageClasses(),
           'label_show': __('Show more'),
-          'username': username
+          'username': username,
+          'isDeleted': isDeleted
         })));
         const url = this.model.get('oob_url');
         const deleted = this.model.get('deleted');
 
-        if (url) {
+        if (url && !deleted && !isDeleted) {
           msg.querySelector('.chat-msg__media').innerHTML = _.flow(_.partial(_converse_headless_utils_emoji__WEBPACK_IMPORTED_MODULE_9__["default"].renderFileURL, _converse), _.partial(_converse_headless_utils_emoji__WEBPACK_IMPORTED_MODULE_9__["default"].renderMovieURL, _converse), _.partial(_converse_headless_utils_emoji__WEBPACK_IMPORTED_MODULE_9__["default"].renderAudioURL, _converse), _.partial(_converse_headless_utils_emoji__WEBPACK_IMPORTED_MODULE_9__["default"].renderImageURL, _converse))(url);
         }
 
@@ -56925,30 +56928,25 @@ _converse_core__WEBPACK_IMPORTED_MODULE_3__["default"].plugins.add('converse-cha
             'older_versions': older_versions,
             'references': attrs.references
           });
-        } // else {
-        //     message = this.messages.findWhere('deleting')
-        //     if(message){
-        //         const older_versions = message.get('older_versions') || [];
-        //         older_versions.push(message.get('message'));
-        //         message.save({
-        //             'deleting': false,
-        //             'deleted': (new Date()).toISOString(),
-        //             'message':  attrs.message,
-        //             'older_versions': older_versions,
-        //             'references': attrs.references,
-        //             oob_desc:'',
-        //             oob_url:""
-        //         });
-        //     }
-        //     else {
-        //         message = this.messages.create(attrs);
-        //     }
-        // }
-        else {
+        } else {
+          message = this.messages.findWhere('deleting');
+
+          if (message) {
+            const older_versions = message.get('older_versions') || [];
+            older_versions.push(message.get('message'));
+            message.save({
+              'deleting': false,
+              'deleted': new Date().toISOString(),
+              'message': attrs.message,
+              'older_versions': older_versions,
+              'references': attrs.references,
+              oob_desc: '',
+              oob_url: ""
+            });
+          } else {
             message = this.messages.create(attrs);
           }
-
-        console.log(this.createMessageStanza(message));
+        }
 
         _converse.api.send(this.createMessageStanza(message));
 
@@ -57388,7 +57386,7 @@ _converse_core__WEBPACK_IMPORTED_MODULE_3__["default"].plugins.add('converse-cha
             const attrs = await chatbox.getMessageAttributesFromStanza(stanza, original_stanza);
 
             if (attrs['chat_state'] || !u.isEmptyMessage(attrs)) {
-              const msg = chatbox.correctMessage(attrs) || chatbox.messages.create(attrs);
+              const msg = chatbox.correctMessage(attrs) || chatbox.deleteMessage(attrs) || chatbox.messages.create(attrs);
               chatbox.incrementUnreadMsgCounter(msg);
             }
           }
@@ -62592,7 +62590,7 @@ _converse_core__WEBPACK_IMPORTED_MODULE_4__["default"].plugins.add('converse-muc
 
         if (attrs.nick && !this.subjectChangeHandled(attrs) && !this.ignorableCSN(attrs) && (attrs['chat_state'] || !_utils_form__WEBPACK_IMPORTED_MODULE_5__["default"].isEmptyMessage(attrs))) {
           attrs = this.addOccupantData(attrs);
-          const msg = this.correctMessage(attrs) || this.messages.create(attrs);
+          const msg = this.correctMessage(attrs) || this.deleteMessage(attrs) || this.messages.create(attrs);
           this.incrementUnreadMsgCounter(msg);
 
           if (forwarded && msg && msg.get('sender') === 'me') {
@@ -89714,15 +89712,15 @@ __p += '\n            ';
 __p += ' <span class="fa fa-check chat-msg__receipt"></span> ';
  } ;
 __p += '\n            ';
- if (o.edited && !o.deleted) { ;
+ if (o.edited && !o.deleted && !o.isDeleted) { ;
 __p += ' <i title="' +
 __e(o.__('This message has been edited')) +
 '" class="fa fa-edit chat-msg__edit-modal"></i> ';
  } ;
 __p += '\n            ';
- if (o.deleted) { ;
+ if (o.deleted || o.isDeleted) { ;
 __p += ' <i title="' +
-__e(o.__('This message has been edited')) +
+__e(o.__('This message has been deleted')) +
 '" class="far fa-trash-alt"></i> ';
  } ;
 __p += '\n            ';
@@ -89744,23 +89742,23 @@ __e( o.subject ) +
 '</div>\n                ';
  } ;
 __p += '\n                <div class="chat-msg__text\n                    ';
- if (o.is_single_emoji &&  !o.deleted ) { ;
+ if (o.is_single_emoji &&  !o.deleted && !o.isDeleted ) { ;
 __p += ' chat-msg__text--larger';
  } ;
 __p += '\n                    ';
- if (o.is_spoiler &&  !o.deleted) { ;
+ if (o.is_spoiler &&  !o.deleted && !o.isDeleted) { ;
 __p += ' spoiler collapsed';
  } ;
-__p += '"><!-- message gets added here via renderMessage --></div>\n                    <!-- ';
- if (!o.deleted) { ;
-__p += ' -->\n                    <div class="chat-msg__media"></div>\n                    <!-- ';
+__p += '"><!-- message gets added here via renderMessage --></div>\n                    ';
+ if (!o.deleted || !o.isDeleted) { ;
+__p += '\n                    <div class="chat-msg__media"></div>\n                    ';
  } ;
-__p += '    -->\n            ';
+__p += '   \n            ';
  if (!o.is_me_message) { ;
 __p += '</div>';
  } ;
 __p += '\n            ';
- if (o.type !== 'headline' && !o.is_me_message && o.sender === 'me' && !o.deleted) { ;
+ if (o.type !== 'headline' && !o.is_me_message && o.sender === 'me' && !o.deleted && !o.isDeleted)  { ;
 __p += '\n            <!-- <div class="chat-msg__actions">\n                \n                <button class="chat-msg__action chat-msg__action-edit fa fa-pencil-alt" title="' +
 __e(o.__('Edit this message')) +
 '"></button>\n                <button class="chat-msg__action chat-msg__action-delete fa fa-flag" title="' +

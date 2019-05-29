@@ -205,12 +205,14 @@ converse.plugins.add('converse-message-view', {
                 return this.el;
             },
 
-            async renderChatMessage () {
+             async renderChatMessage () {
                 const is_me_message = this.isMeCommand(),
                       time = dayjs(this.model.get('time')),
                       role = this.model.vcard ? this.model.vcard.get('role') : null,
                       roles = role ? role.split(',') : [];
                 let username = this.model.getDisplayName();
+                const msg_deleted = this.getMessageText();
+                const isDeleted = msg_deleted ==='This message was deleted'
                 if(_.includes(username,'@')){
                     username = username.split('@')[0]
                 }
@@ -224,13 +226,15 @@ converse.plugins.add('converse-message-view', {
                         'time': time.toISOString(),
                         'extra_classes': this.getExtraMessageClasses(),
                         'label_show': __('Show more'),
-                        'username': username
+                        'username': username,
+                        'isDeleted':isDeleted
                     })
                 ));
 
                 const url = this.model.get('oob_url');
                 const deleted = this.model.get('deleted');
-                if (url ) {
+                
+                if (url && !deleted && !isDeleted) {
                     msg.querySelector('.chat-msg__media').innerHTML = _.flow(
                         _.partial(u.renderFileURL, _converse),
                         _.partial(u.renderMovieURL, _converse),
@@ -253,6 +257,7 @@ converse.plugins.add('converse-message-view', {
                         _.partial(u.addEmoji, _converse, _)
                     )(text);
                 }
+              
                 if(msg_content){
                     const promise = u.renderImageURLs(_converse, msg_content);
                     await promise;

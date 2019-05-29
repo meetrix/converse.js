@@ -706,31 +706,27 @@ converse.plugins.add('converse-chatboxes', {
                         'references': attrs.references
                     });
                 } 
-                // else {
-                //     message = this.messages.findWhere('deleting')
-                //     if(message){
-                //         const older_versions = message.get('older_versions') || [];
-                //         older_versions.push(message.get('message'));
-                //         message.save({
-                //             'deleting': false,
-                //             'deleted': (new Date()).toISOString(),
-                //             'message':  attrs.message,
-                //             'older_versions': older_versions,
-                //             'references': attrs.references,
-                //             oob_desc:'',
-                //             oob_url:""
-
-                //         });
-                //     }
-                //     else {
-                //         message = this.messages.create(attrs);
-                //     }
-                    
-                // }
                 else {
-                    message = this.messages.create(attrs);
+                    message = this.messages.findWhere('deleting')
+                    if(message){
+                        const older_versions = message.get('older_versions') || [];
+                        older_versions.push(message.get('message'));
+                        message.save({
+                            'deleting': false,
+                            'deleted': (new Date()).toISOString(),
+                            'message':  attrs.message,
+                            'older_versions': older_versions,
+                            'references': attrs.references,
+                            oob_desc:'',
+                            oob_url:""
+
+                        });
+                    }
+                    else {
+                        message = this.messages.create(attrs);
+                    }
+                    
                 }
-                console.log(this.createMessageStanza(message))
                 _converse.api.send(this.createMessageStanza(message));
                 return true;
             },
@@ -1137,7 +1133,7 @@ converse.plugins.add('converse-chatboxes', {
 
                         const attrs = await chatbox.getMessageAttributesFromStanza(stanza, original_stanza);
                         if (attrs['chat_state'] || !u.isEmptyMessage(attrs)) {
-                            const msg = chatbox.correctMessage(attrs)|| chatbox.messages.create(attrs);
+                            const msg = chatbox.correctMessage(attrs)|| chatbox.deleteMessage(attrs) || chatbox.messages.create(attrs);
                             chatbox.incrementUnreadMsgCounter(msg);
                         }
                     }
