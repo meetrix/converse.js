@@ -46451,6 +46451,7 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_1__["default"].plugins
               roles = role ? role.split(',') : [];
         let username = this.model.getDisplayName();
         const msg_deleted = this.getMessageText();
+        const url = this.model.get('oob_url');
         const isDeleted = msg_deleted === 'This message was deleted';
 
         if (_.includes(username, '@')) {
@@ -46466,9 +46467,9 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_1__["default"].plugins
           'extra_classes': this.getExtraMessageClasses(),
           'label_show': __('Show more'),
           'username': username,
-          'isDeleted': isDeleted
+          'isDeleted': isDeleted,
+          'url': url
         })));
-        const url = this.model.get('oob_url');
         const deleted = this.model.get('deleted');
 
         if (url && !deleted && !isDeleted) {
@@ -89763,9 +89764,13 @@ __p += '\n            <!-- <div class="chat-msg__actions">\n                \n  
 __e(o.__('Edit this message')) +
 '"></button>\n                <button class="chat-msg__action chat-msg__action-delete fa fa-flag" title="' +
 __e(o.__('Delete this message')) +
-'"></button>\n            </div> -->\n            <div class="dropdown-actions">\n            <ul class="chat-msg-actions hidden">\n                <li class="chat-msg__action chat-msg__action-edit"><i class="fa fa-pencil-alt"></i>' +
+'"></button>\n            </div> -->\n            <div class="dropdown-actions">\n            <ul class="chat-msg-actions hidden">\n                    \n                    ';
+ if (!o.url) { ;
+__p += '\n                <li class="chat-msg__action chat-msg__action-edit"><i class="fa fa-pencil-alt"></i>' +
 __e(o.__('Edit message')) +
-'</li>\n                <li class="chat-msg__action chat-msg__action-delete"><i class="fa fa-flag"></i>' +
+'</li>\n                ';
+ } ;
+__p += '\n                <li class="chat-msg__action chat-msg__action-delete"><i class="fa fa-flag"></i>' +
 __e(o.__('Delete message')) +
 '</li>\n                <li class="chat-msg__action cancel-chat-msg-actions"><i class="fa fa-times"></i>' +
 __e(o.__('Cancel')) +

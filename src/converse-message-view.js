@@ -212,6 +212,7 @@ converse.plugins.add('converse-message-view', {
                       roles = role ? role.split(',') : [];
                 let username = this.model.getDisplayName();
                 const msg_deleted = this.getMessageText();
+                const url = this.model.get('oob_url');
                 const isDeleted = msg_deleted ==='This message was deleted'
                 if(_.includes(username,'@')){
                     username = username.split('@')[0]
@@ -227,11 +228,11 @@ converse.plugins.add('converse-message-view', {
                         'extra_classes': this.getExtraMessageClasses(),
                         'label_show': __('Show more'),
                         'username': username,
-                        'isDeleted':isDeleted
+                        'isDeleted':isDeleted,
+                        'url':url
                     })
                 ));
 
-                const url = this.model.get('oob_url');
                 const deleted = this.model.get('deleted');
                 
                 if (url && !deleted && !isDeleted) {
