@@ -47629,7 +47629,8 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
       'roomconfig_whitelist': [],
       'visible_toolbar_buttons': {
         'toggle_occupants': true,
-        'toggle_conference_occupants': true
+        'toggle_conference_occupants': true,
+        'xhr_restapi': null
       }
     });
 
@@ -48675,7 +48676,14 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
 
         if (Backbone.history.getFragment() === "converse/room?jid=" + this.model.get('jid')) {
           _converse.router.navigate('');
-        }
+        } ///<----MDEV
+
+
+        const xhr = new window.XMLHttpRequest();
+        xhr.open("DELETE", "".concat(_converse.xhr_restapi, "chatrooms/").concat(this.model.get('jid').split('@')[0], "/occupants/").concat(_converse.connection.jid.split('/')[0]), true);
+        xhr.setRequestHeader('Authorization', "Basic " + btoa(_converse.connection.jid.split('/')[0] + ":" + _converse.connection.pass));
+        xhr.setRequestHeader('Content-Type', 'application/json');
+        xhr.send(); ///------>
 
         this.model.leave();
 
@@ -53761,7 +53769,13 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_2__["default"].plugins
       __
     } = _converse; // Promises exposed by this plugin
 
-    _converse.api.promises.add('roomsListInitialized');
+    _converse.api.promises.add('roomsListInitialized'); //<-----MDEV
+
+
+    _converse.api.settings.update({
+      'xhr_restapi': null
+    }); //------->
+
 
     _converse.OpenRooms = Backbone.Collection.extend({
       comparator(room) {
@@ -54002,14 +54016,22 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_2__["default"].plugins
         return this;
       },
 
+      //<---<MDEV
       deleteRoom(ev) {
         ev.preventDefault();
         const name = ev.target.getAttribute('data-room-name');
         const jid = ev.target.getAttribute('data-room-jid');
 
         _converse.chatboxviews.get(jid).parseMessageForCommands('/destroy');
+
+        const xhr = new window.XMLHttpRequest();
+        xhr.open("DELETE", "".concat(_converse.xhr_restapi, "chatrooms/").concat(name, "/occupants"), true);
+        xhr.setRequestHeader('Authorization', "Basic " + btoa(_converse.connection.jid.split('/')[0] + ":" + _converse.connection.pass));
+        xhr.setRequestHeader('Content-Type', 'application/json');
+        xhr.send();
       },
 
+      ///------>
       insertIntoControlBox() {
         const controlboxview = _converse.chatboxviews.get('controlbox');
 
