@@ -143,7 +143,7 @@ function convert (unicode) {
      */
     if (unicode.indexOf("-") > -1) {
         const parts = [],
-              s = unicode.split('-');
+    s = unicode.split('-');
         for (let i = 0; i < s.length; i++) {
             let part = parseInt(s[i], 16);
             if (part >= 0x10000 && part <= 0x10FFFF) {
@@ -161,12 +161,13 @@ function convert (unicode) {
 }
 
 u.isSingleEmoji = function (str) {
-
+    str = str.trim();
     if (!str || (str.length > 2 && !str.startsWith(':'))) {
         return;
     }
     const result = _.flow(u.shortnameToUnicode, twemoji.default.parse)(str)
-    return result.match(/<img class="emoji" draggable="false" alt=".*?" src=".*?\.png"\/>/);
+    const match = result.match(/<img class="emoji" draggable="false" alt=".*?" src=".*?\.png"\/>/);
+    return match && match.length === 1;
 }
 
 u.shortnameToUnicode = function (str) {

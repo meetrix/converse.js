@@ -12803,6 +12803,9 @@ body.converse-fullscreen {
     #conversejs.converse-embedded .chatroom .box-flyout .occupants .occupant-list li.occupant {
       font-size: 120%; }
 
+#conversejs .chat-head-headline {
+  background-color: var(--headline-head-color); }
+
 #conversejs .chatbox.headlines .chat-head.chat-head-chatbox {
   background-color: var(--headline-head-color); }
 

@@ -233,6 +233,11 @@ converse.plugins.add('converse-muc', {
 
             async enterRoom () {
                 if (this.get('connection_status') !==  converse.ROOMSTATUS.ENTERED) {
+                    // We're not restoring a room from cache, so let's clear
+                    // the cache (which might be stale).
+                    this.clearMessages();
+                    this.clearOccupants();
+
                     await this.getRoomFeatures();
                     if (!u.isPersistableModel(this)) {
                         // XXX: Happens during tests, nothing to do if this
@@ -266,13 +271,11 @@ converse.plugins.add('converse-muc', {
                 }
             },
 
-            onReconnection () {
+            async onReconnection () {
                 this.save('connection_status', converse.ROOMSTATUS.DISCONNECTED);
-                this.clearMessages();
-                this.clearOccupants();
                 this.registerHandlers();
+                await this.enterRoom();
                 this.announceReconnection();
-                this.enterRoom();
             },
 
             initFeatures () {
@@ -355,8 +358,14 @@ converse.plugins.add('converse-muc', {
             },
 
             getDisplayName () {
-                
-                return this.get('name') || this.get('jid');
+                const name = this.get('name');
+                if (name) {
+                    return name;
+                } else if (_converse.locked_muc_domain === 'hidden') {
+                    return Strophe.getNodeFromJid(this.get('jid'));
+                } else {
+                    return this.get('jid');
+                }
             },
 
             /**
@@ -364,7 +373,7 @@ converse.plugins.add('converse-muc', {
              * @private
              * @method _converse.ChatRoom#join
              * @param { String } nick - The user's nickname
-             * @param { String } password - Optional password, if required by the groupchat.
+             * @param { String } [password] - Optional password, if required by the groupchat.
              */
             async join (nick, password) {
                 if (this.get('connection_status') === converse.ROOMSTATUS.ENTERED) {
@@ -391,10 +400,36 @@ converse.plugins.add('converse-muc', {
                 return this;
             },
 
-            /* Leave the groupchat.
+            /**
+             * Sends an IQ stanza to the XMPP server to destroy this groupchat. Not
+             * to be confused with the {@link _converse.ChatRoom#destroy}
+             * method, which simply removes the room from the local browser storage cache.
+             * @private
+             * @method _converse.ChatRoom#sendDestroyIQ
+             * @param { string } [reason] - The reason for destroying the groupchat
+             * @param { string } [new_jid] - The JID of the new groupchat which
+             *      replaces this one.
+             */
+            sendDestroyIQ (reason, new_jid) {
+                const destroy = $build("destroy");
+                if (new_jid) {
+                    destroy.attrs({'jid': new_jid});
+                }
+                const iq = $iq({
+                    'to': this.get('jid'),
+                    'type': "set"
+                }).c("query", {'xmlns': Strophe.NS.MUC_OWNER}).cnode(destroy.node);
+                if (reason && reason.length > 0) {
+                    iq.c("reason", reason);
+                }
+                return _converse.api.sendIQ(iq);
+            },
+
+            /**
+             * Leave the groupchat.
              * @private
              * @method _converse.ChatRoom#leave
-             * @param { string } exit_msg - Optional message to indicate your reason for leaving
+             * @param { string } [exit_msg] - Message to indicate your reason for leaving
              */
             leave (exit_msg) {
                 this.features.destroy();
@@ -553,7 +588,7 @@ converse.plugins.add('converse-muc', {
              * @private
              * @method _converse.ChatRoom#directInvite
              * @param { String } recipient - JID of the person being invited
-             * @param { String } reason - Optional reason for the invitation
+             * @param { String } [reason] - Reason for the invitation
              */
             directInvite (recipient, reason) {
                 //<-----MDEV
@@ -894,6 +929,43 @@ converse.plugins.add('converse-muc', {
                 return Promise.all(_.map(affiliations, _.partial(this.setAffiliation.bind(this), _, members)));
             },
 
+            /**
+             * Send an IQ stanza to modify an occupant's role
+             * @private
+             * @method _converse.ChatRoom#setRole
+             * @param { _converse.ChatRoomOccupant } occupant
+             * @param { String } role
+             * @param { String } reason
+             * @param { function } onSuccess - callback for a succesful response
+             * @param { function } onError - callback for an error response
+             */
+            setRole (occupant, role, reason, onSuccess, onError) {
+                const item = $build("item", {
+                    'nick': occupant.get('nick'),
+                    role
+                });
+                const iq = $iq({
+                    'to': this.get('jid'),
+                    'type': 'set'
+                }).c("query", {xmlns: Strophe.NS.MUC_ADMIN}).cnode(item.node);
+                if (reason !== null) {
+                    iq.c("reason", reason);
+                }
+                return _converse.api.sendIQ(iq).then(onSuccess).catch(onError);
+            },
+
+            /**
+             * @private
+             * @method _converse.ChatRoom#getOccupant
+             * @param { String } nick_or_jid - The nickname or JID of the occupant to be returned
+             * @returns { _converse.ChatRoomOccupant }
+             */
+            getOccupant (nick_or_jid) {
+                return (u.isValidJID(nick_or_jid) &&
+                    this.occupants.findWhere({'jid': nick_or_jid})) ||
+                    this.occupants.findWhere({'nick': nick_or_jid});
+            },
+
             async getJidsWithAffiliations (affiliations) {
                 /* Returns a map of JIDs that have the affiliations
                  * as provided.
@@ -1160,6 +1232,22 @@ converse.plugins.add('converse-muc', {
             },
 
             /**
+             * Set the subject for this {@link _converse.ChatRoom}
+             * @private
+             * @method _converse.ChatRoom#setSubject
+             * @param { String } value
+             */
+            setSubject(value='') {
+                _converse.api.send(
+                    $msg({
+                        to: this.get('jid'),
+                        from: _converse.connection.jid,
+                        type: "groupchat"
+                    }).c("subject", {xmlns: "jabber:client"}).t(value).tree()
+                );
+            },
+
+            /**
              * Is this a chat state notification that can be ignored,
              * because it's old or because it's from us.
              * @private
@@ -1253,30 +1341,33 @@ converse.plugins.add('converse-muc', {
                 _converse.api.trigger('message', {'stanza': original_stanza, 'chatbox': this});
             },
 
+            onErrorPresence (pres) {
+                // TODO: currently showErrorMessageFromPresence handles
+                // 'error" presences in converse-muc-views.
+                // Instead, they should be handled here and the presence
+                // handler removed from there.
+                if (sizzle(`error not-authorized[xmlns="${Strophe.NS.STANZAS}"]`, pres).length) {
+                    this.save('connection_status', converse.ROOMSTATUS.PASSWORD_REQUIRED);
+                } else {
+                    this.save('connection_status', converse.ROOMSTATUS.DISCONNECTED);
+                }
+            },
+
             /**
              * Handles all MUC presence stanzas.
              * @private
              * @method _converse.ChatRoom#onPresence
-             * @param { XMLElement } pres - The stanza
+             * @param { XMLElement } stanza
              */
-            onPresence (pres) {
-                if (pres.getAttribute('type') === 'error') {
-                    // TODO: currently showErrorMessageFromPresence handles
-                    // 'error" presences in converse-muc-views.
-                    // Instead, they should be handled here and the presence
-                    // handler removed from there.
-                    if (sizzle(`error not-authorized[xmlns="${Strophe.NS.STANZAS}"]`, pres).length) {
-                        this.save('connection_status', converse.ROOMSTATUS.PASSWORD_REQUIRED);
-                    } else {
-                        this.save('connection_status', converse.ROOMSTATUS.DISCONNECTED);
-                    }
-                    return;
+            onPresence (stanza) {
+                if (stanza.getAttribute('type') === 'error') {
+                    return this.onErrorPresence(stanza);
                 }
-                const is_self = pres.querySelector("status[code='110']");
-                if (is_self && pres.getAttribute('type') !== 'unavailable') {
-                    this.onOwnPresence(pres);
+                if (stanza.querySelector("status[code='110']")) {
+                    this.onOwnPresence(stanza);
                 }
-                this.updateOccupantsOnPresence(pres);
+                this.updateOccupantsOnPresence(stanza);
+
                 if (this.get('role') !== 'none' && this.get('connection_status') === converse.ROOMSTATUS.CONNECTING) {
                     this.save('connection_status', converse.ROOMSTATUS.CONNECTED);
                 }
@@ -1297,40 +1388,45 @@ converse.plugins.add('converse-muc', {
              * @method _converse.ChatRoom#onOwnPresence
              * @param { XMLElement } pres - The stanza
              */
-            onOwnPresence (pres) {
-                this.saveAffiliationAndRole(pres);
-                const locked_room = pres.querySelector("status[code='201']");
-                if (locked_room) {
-                    if (this.get('auto_configure')) {
-                        this.autoConfigureChatRoom().then(() => this.refreshRoomFeatures());
-                    } else if (_converse.muc_instant_rooms) {
-                        // Accept default configuration
-                        this.saveConfiguration().then(() => this.refreshRoomFeatures());
-                    } else {
-                        /**
-                         * Triggered when a new room has been created which first needs to be configured
-                         * and when `auto_configure` is set to `false`.
-                         * Used by `_converse.ChatRoomView` in order to know when to render the
-                         * configuration form for a new room.
-                         * @event _converse.ChatRoom#configurationNeeded
-                         * @example _converse.api.listen.on('configurationNeeded', () => { ... });
-                         */
-                        this.trigger('configurationNeeded');
-                        return; // We haven't yet entered the groupchat, so bail here.
+            onOwnPresence (stanza) {
+                this.saveAffiliationAndRole(stanza);
+
+                if (stanza.getAttribute('type') === 'unavailable') {
+                    this.save('connection_status', converse.ROOMSTATUS.DISCONNECTED);
+                } else {
+                    const locked_room = stanza.querySelector("status[code='201']");
+                    if (locked_room) {
+                        if (this.get('auto_configure')) {
+                            this.autoConfigureChatRoom().then(() => this.refreshRoomFeatures());
+                        } else if (_converse.muc_instant_rooms) {
+                            // Accept default configuration
+                            this.saveConfiguration().then(() => this.refreshRoomFeatures());
+                        } else {
+                            /**
+                             * Triggered when a new room has been created which first needs to be configured
+                             * and when `auto_configure` is set to `false`.
+                             * Used by `_converse.ChatRoomView` in order to know when to render the
+                             * configuration form for a new room.
+                             * @event _converse.ChatRoom#configurationNeeded
+                             * @example _converse.api.listen.on('configurationNeeded', () => { ... });
+                             */
+                            this.trigger('configurationNeeded');
+                            return; // We haven't yet entered the groupchat, so bail here.
+                        }
+                    } else if (!this.features.get('fetched')) {
+                        // The features for this groupchat weren't fetched.
+                        // That must mean it's a new groupchat without locking
+                        // (in which case Prosody doesn't send a 201 status),
+                        // otherwise the features would have been fetched in
+                        // the "initialize" method already.
+                        if (this.get('affiliation') === 'owner' && this.get('auto_configure')) {
+                            this.autoConfigureChatRoom().then(() => this.refreshRoomFeatures());
+                        } else {
+                            this.getRoomFeatures();
+                        }
                     }
-                } else if (!this.features.get('fetched')) {
-                    // The features for this groupchat weren't fetched.
-                    // That must mean it's a new groupchat without locking
-                    // (in which case Prosody doesn't send a 201 status),
-                    // otherwise the features would have been fetched in
-                    // the "initialize" method already.
-                    if (this.get('affiliation') === 'owner' && this.get('auto_configure')) {
-                        this.autoConfigureChatRoom().then(() => this.refreshRoomFeatures());
-                    } else {
-                        this.getRoomFeatures();
-                    }
+                    this.save('connection_status', converse.ROOMSTATUS.ENTERED);
                 }
-                this.save('connection_status', converse.ROOMSTATUS.ENTERED);
             },
 
             /**

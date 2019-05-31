@@ -11832,14 +11832,9 @@ body.converse-fullscreen {
 #conversejs.converse-fullscreen .chatroom .room-invite span .invited-contact,
 #conversejs.converse-mobile .chatroom .room-invite span .invited-contact {
   margin: 0 0 0.5em -1px; }
-
-<<<<<<< HEAD
-=======
 @media (min-width: 768px) {
   .chatroom .box-flyout .occupants .occupants-header .hide-occupants {
     display: block; } }
-
->>>>>>> ui2
 #conversejs .chatbox.headlines .chat-head.chat-head-chatbox {
   background-color: var(--headline-head-color); }
 

@@ -31,7 +31,7 @@ import tpl_user_details_modal from "templates/user_details_modal.html";
 import u from "@converse/headless/utils/emoji";
 import xss from "xss/dist/xss";
 
-const { $msg, Backbone, Promise, Strophe, _, b64_sha1, sizzle, dayjs } = converse.env;
+const { $msg, Backbone, Promise, Strophe, _, sizzle, dayjs } = converse.env;
 
 
 converse.plugins.add('converse-chatview', {
@@ -335,7 +335,7 @@ converse.plugins.add('converse-chatview', {
                 'click .toggle-smiley': 'toggleEmojiMenu',
                 'click .upload-file': 'toggleFileUpload',
                 'input .chat-textarea': 'inputChanged',
-                'keydown .chat-textarea': 'keyPressed',
+                'keydown .chat-textarea': 'onKeyDown',
                 'dragover .chat-textarea': 'onDragOver',
                 'drop .chat-textarea': 'onDrop',
             },
@@ -958,7 +958,7 @@ converse.plugins.add('converse-chatview', {
                 this.setChatState(_converse.ACTIVE, {'silent': true});
             },
 
-            keyPressed (ev) {
+            onKeyDown (ev) {
                 /* Event handler for when a key is pressed in a chat box textarea.
                  */
                 if (ev.ctrlKey) {
@@ -1134,7 +1134,7 @@ converse.plugins.add('converse-chatview', {
                     textarea.value = '';
                     textarea.value = existing+value+' ';
                 }
-                u.putCurserAtEnd(textarea);
+                u.placeCaretAtEnd(textarea);
             },
 
             createEmojiPicker () {
