@@ -3,6 +3,7 @@
 const minimist = require('minimist');
 const path = require('path');
 const webpack = require('webpack');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
 const config = {
     entry: path.resolve(__dirname, 'src/converse.js'),
@@ -14,33 +15,19 @@ const config = {
         filename: 'converse.js'
     },
     devtool: 'source-map',
-    plugins: [
-        new webpack.IgnorePlugin(/^\.\/locale$/, /moment$/)
-    ],
+    plugins: [new MiniCssExtractPlugin({filename: '../dist/converse.css'})],
     module: {
         rules: [
         {
-            test: path.resolve(__dirname, "node_modules/backbone.overview/backbone.orderedlistview"),
-            use: 'imports-loader?backbone.nativeview'
-        },
-        {
-            test: path.resolve(__dirname, "node_modules/backbone.overview/backbone.overview"),
-            use: 'imports-loader?backbone.nativeview'
-        },
-        {
             test: path.resolve(__dirname, "node_modules/backbone.vdomview/backbone.vdomview"),
             use: 'imports-loader?backbone.nativeview'
-        },
-        {
-            test: path.resolve(__dirname, "node_modules/awesomplete-avoid-xss/awesomplete"),
-            use: "exports-loader?Awesomplete"
         },
         {
             test: path.resolve(__dirname, "node_modules/xss/dist/xss"),
             use: "exports-loader?filterXSS,filterCSS"
         },
         {
-            test: /\.(html|svg)$/,
+            test: /templates\/.*\.(html|svg)$/,
             exclude: /node_modules/,
             use: [{
                 loader: 'lodash-template-webpack-loader',
@@ -55,6 +42,36 @@ const config = {
                     // to render.
                     "variable": 'o',
                     "prependFilenameComment": __dirname
+                }
+            }]
+        },
+        {
+            test: /webfonts\/.*\.(woff(2)?|ttf|eot|truetype|svg)(\?v=\d+\.\d+\.\d+)?$/,
+            use: [
+            {
+                loader: 'file-loader',
+                options: {
+                    name: '[path][name].[ext]',
+                    outputPath: '../dist/'
+                }
+            }
+            ]
+        }, {
+            test: /\.scss$/,
+            use: [
+                'style-loader',
+                MiniCssExtractPlugin.loader, {
+                    loader: 'css-loader',
+                    options: {
+                        sourceMap: true
+                    }
+                }, {
+                    loader: 'sass-loader',
+                    options: {
+                    includePaths: [
+                        path.resolve(__dirname, 'node_modules/')
+                    ],
+                    sourceMap: true
                 }
             }]
         }, {
@@ -77,6 +94,7 @@ const config = {
             use: {
                 loader: 'bootstrap.native-loader',
                 options: {
+                    bs_version: 4,
                     ignore: ['carousel', 'scrollspy']
                 }
             }
@@ -91,7 +109,6 @@ const config = {
         alias: {
             "IPv6":                     path.resolve(__dirname, "node_modules/urijs/src/IPv6"),
             "SecondLevelDomains":       path.resolve(__dirname, "node_modules/urijs/src/SecondLevelDomains"),
-            "awesomplete":              path.resolve(__dirname, "node_modules/awesomplete-avoid-xss/awesomplete"),
             "formdata-polyfill":        path.resolve(__dirname, "node_modules/formdata-polyfill/FormData"),
             "jquery":                   path.resolve(__dirname, "src/jquery-stub"),
             "punycode":                 path.resolve(__dirname, "node_modules/urijs/src/punycode"),
@@ -103,8 +120,7 @@ const config = {
             "snabbdom-props":           path.resolve(__dirname, "node_modules/snabbdom/dist/snabbdom-props"),
             "snabbdom-style":           path.resolve(__dirname, "node_modules/snabbdom/dist/snabbdom-style"),
             "tovnode":                  path.resolve(__dirname, "node_modules/snabbdom/dist/tovnode"),
-            "underscore":               path.resolve(__dirname, "src/underscore-shim"),
-            "xss":                      path.resolve(__dirname, "node_modules/xss/dist/xss")
+            "underscore":               path.resolve(__dirname, "src/underscore-shim")
         }
     }
 }
@@ -138,14 +154,15 @@ function parameterize () {
         extend(config, {
             entry: path.resolve(__dirname, 'src/converse.js'),
             externals: [{
-                "awesomplete": "awesomplete",
+                "backbone": "backbone",
+                "backbone.nativeview": "backbone.nativeview",
+                "backbone.vdomview": "backbone.vdomview",
                 "backbone.browserStorage": "backbone.browserStorage",
                 "backbone.overview": "backbone.overview",
                 "es6-promise": "es6-promise",
                 "lodash": "lodash",
                 "lodash.converter": "lodash.converter",
                 "lodash.noconflict": "lodash.noconflict",
-                "moment": "moment",
                 "strophe": "strophe",
                 "strophe.ping": "strophe.ping",
                 "strophe.rsm": "strophe.rsm",
@@ -156,6 +173,15 @@ function parameterize () {
                 filename: 'converse-no-dependencies.js'
             },
         });
+    }
+
+    if (type === 'css') {
+        console.log("Building only CSS");
+        config.entry = path.resolve(__dirname, 'sass/converse.scss');
+        config.output = {
+            path: path.resolve(__dirname, 'tmp'),
+            filename: 'css-builder.js'
+        }
     }
 
     if (mode === 'production') {

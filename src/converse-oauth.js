@@ -38,12 +38,12 @@ converse.plugins.add("converse-oauth", {
         /* For example, the private *_converse* object has a
          * method "onConnected". You can override that method as follows:
          */
-        'LoginPanel': {
+        LoginPanel: {
 
             insertOAuthProviders () {
                 const { _converse } = this.__super__;
                 if (_.isUndefined(this.oauth_providers_view)) {
-                    this.oauth_providers_view = 
+                    this.oauth_providers_view =
                         new _converse.OAuthProvidersView({'model': _converse.oauth_providers});
 
                     this.oauth_providers_view.render();
@@ -82,7 +82,7 @@ converse.plugins.add("converse-oauth", {
 
             initialize () {
                 _.each(_converse.user_settings.oauth_providers, (provider) => {
-                    const item = new Backbone.Model(_.extend(provider, {
+                    const item = new Backbone.Model(Object.assign(provider, {
                         'login_text': __('Log in with %1$s', provider.name)
                     }));
                     this.add(item, {'silent': true});
@@ -99,7 +99,7 @@ converse.plugins.add("converse-oauth", {
 
             toHTML () {
                 return tpl_oauth_providers(
-                    _.extend({
+                    Object.assign({
                         '_': _,
                         '__': _converse.__,
                         'providers': this.model.toJSON()

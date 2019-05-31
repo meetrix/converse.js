@@ -4,9 +4,10 @@
 // Copyright (c) 2013-2019, the Converse.js developers
 // Licensed under the Mozilla Public License (MPLv2)
 
+import BrowserStorage from "backbone.browserStorage";
 import converse from "@converse/headless/converse-core";
 
-const { Backbone, Promise, Strophe, $iq, $pres, moment, sizzle, _ } = converse.env;
+const { Backbone, Promise, Strophe, $iq, $pres, dayjs, sizzle, _ } = converse.env;
 const u = converse.env.utils;
 
 
@@ -35,6 +36,17 @@ converse.plugins.add('converse-roster', {
             'rosterInitialized',
         ]);
 
+        _converse.HEADER_CURRENT_CONTACTS =  __('My contacts');
+        _converse.HEADER_PENDING_CONTACTS = __('Pending contacts');
+        _converse.HEADER_REQUESTING_CONTACTS = __('Contact requests');
+        _converse.HEADER_UNGROUPED = __('Ungrouped');
+
+        const HEADER_WEIGHTS = {};
+        HEADER_WEIGHTS[_converse.HEADER_REQUESTING_CONTACTS] = 0;
+        HEADER_WEIGHTS[_converse.HEADER_CURRENT_CONTACTS]    = 1;
+        HEADER_WEIGHTS[_converse.HEADER_UNGROUPED]           = 2;
+        HEADER_WEIGHTS[_converse.HEADER_PENDING_CONTACTS]    = 3;
+
 
         _converse.registerPresenceHandler = function () {
             _converse.unregisterPresenceHandler();
@@ -45,42 +57,60 @@ converse.plugins.add('converse-roster', {
         };
 
 
+        /**
+         * Initialize the Bakcbone collections that represent the contats
+         * roster and the roster groups.
+         * @private
+         * @method _converse.initRoster
+         */
         _converse.initRoster = function () {
-            /* Initialize the Bakcbone collections that represent the contats
-             * roster and the roster groups.
-             */
             const storage = _converse.config.get('storage');
             _converse.roster = new _converse.RosterContacts();
-            _converse.roster.browserStorage = new Backbone.BrowserStorage[storage](
+            _converse.roster.browserStorage = new BrowserStorage[storage](
                 `converse.contacts-${_converse.bare_jid}`);
 
             _converse.roster.data = new Backbone.Model();
             const id = `converse-roster-model-${_converse.bare_jid}`;
             _converse.roster.data.id = id;
-            _converse.roster.data.browserStorage = new Backbone.BrowserStorage[storage](id);
+            _converse.roster.data.browserStorage = new BrowserStorage[storage](id);
             _converse.roster.data.fetch();
 
             _converse.rostergroups = new _converse.RosterGroups();
-            _converse.rostergroups.browserStorage = new Backbone.BrowserStorage[storage](
+            _converse.rostergroups.browserStorage = new BrowserStorage[storage](
                 `converse.roster.groups${_converse.bare_jid}`);
-            _converse.emit('rosterInitialized');
+            /**
+             * Triggered once the `_converse.RosterContacts` and `_converse.RosterGroups` have
+             * been created, but not yet populated with data.
+             * This event is useful when you want to create views for these collections.
+             * @event _converse#chatBoxMaximized
+             * @example _converse.api.listen.on('rosterInitialized', () => { ... });
+             * @example _converse.api.waitUntil('rosterInitialized').then(() => { ... });
+             */
+            _converse.api.trigger('rosterInitialized');
         };
 
 
+        /**
+         * Fetch all the roster groups, and then the roster contacts.
+         * Emit an event after fetching is done in each case.
+         * @private
+         * @method _converse.populateRoster
+         * @param { Bool } ignore_cache - If set to to true, the local cache
+         *      will be ignored it's guaranteed that the XMPP server
+         *      will be queried for the roster.
+         */
         _converse.populateRoster = async function (ignore_cache=false) {
-            /* Fetch all the roster groups, and then the roster contacts.
-             * Emit an event after fetching is done in each case.
-             *
-             * Parameters:
-             *    (Bool) ignore_cache - If set to to true, the local cache
-             *      will be ignored it's guaranteed that the XMPP server
-             *      will be queried for the roster.
-             */
             if (ignore_cache) {
                 _converse.send_initial_presence = true;
                 try {
                     await _converse.roster.fetchFromServer();
-                    _converse.emit('rosterContactsFetched');
+                    /**
+                     * Triggered once roster contacts have been fetched. Used by the
+                     * `converse-rosterview.js` plugin to know when it can start to show the roster.
+                     * @event _converse#rosterContactsFetched
+                     * @example _converse.api.listen.on('rosterContactsFetched', () => { ... });
+                     */
+                    _converse.api.trigger('rosterContactsFetched');
                 } catch (reason) {
                     _converse.log(reason, Strophe.LogLevel.ERROR);
                 } finally {
@@ -89,9 +119,17 @@ converse.plugins.add('converse-roster', {
             } else {
                 try {
                     await _converse.rostergroups.fetchRosterGroups();
-                    _converse.emit('rosterGroupsFetched');
+                    /**
+                     * Triggered once roster groups have been fetched. Used by the
+                     * `converse-rosterview.js` plugin to know when it can start alphabetically
+                     * position roster groups.
+                     * @event _converse#rosterGroupsFetched
+                     * @example _converse.api.listen.on('rosterGroupsFetched', () => { ... });
+                     * @example _converse.api.waitUntil('rosterGroupsFetched').then(() => { ... });
+                     */
+                    _converse.api.trigger('rosterGroupsFetched');
                     await _converse.roster.fetchRosterContacts();
-                    _converse.emit('rosterContactsFetched');
+                    _converse.api.trigger('rosterContactsFetched');
                 } catch (reason) {
                     _converse.log(reason, Strophe.LogLevel.ERROR);
                 } finally {
@@ -112,7 +150,7 @@ converse.plugins.add('converse-roster', {
             initialize () {
                 this.resources = new Resources();
                 const id = `converse.identities-${this.get('jid')}`;
-                this.resources.browserStorage = new Backbone.BrowserStorage.session(id);
+                this.resources.browserStorage = new BrowserStorage.session(id);
                 this.resources.on('update', this.onResourcesChanged, this);
                 this.resources.on('change', this.onResourcesChanged, this);
             },
@@ -149,7 +187,7 @@ converse.plugins.add('converse-roster', {
                           'name': name,
                           'priority': _.isNaN(parseInt(priority, 10)) ? 0 : parseInt(priority, 10),
                           'show': _.propertyOf(presence.querySelector('show'))('textContent') || 'online',
-                          'timestamp': _.isNil(delay) ? moment().format() : moment(delay.getAttribute('stamp')).format()
+                          'timestamp': _.isNil(delay) ? (new Date()).toISOString() : dayjs(delay.getAttribute('stamp')).toISOString()
                        };
                 if (resource) {
                     resource.save(settings);
@@ -185,6 +223,10 @@ converse.plugins.add('converse-roster', {
             },
 
             setVCard () {
+                if (!_converse.vcards) {
+                    // VCards aren't supported
+                    return;
+                }
                 const jid = this.get('jid');
                 this.vcard = _converse.vcards.findWhere({'jid': jid}) || _converse.vcards.create({'jid': jid});
             },
@@ -203,7 +245,7 @@ converse.plugins.add('converse-roster', {
                 'image': _converse.DEFAULT_IMAGE,
                 'image_type': _converse.DEFAULT_IMAGE_TYPE,
                 'num_unread': 0,
-                'status': '',
+                'status': undefined,
             },
 
             initialize (attributes) {
@@ -220,41 +262,48 @@ converse.plugins.add('converse-roster', {
                     'jid': bare_jid,
                     'user_id': Strophe.getNodeFromJid(jid)
                 }, attributes));
-
-                this.setChatBox();
-
-                this.presence.on('change:show', () => _converse.emit('contactPresenceChanged', this));
+                /**
+                 * When a contact's presence status has changed.
+                 * The presence status is either `online`, `offline`, `dnd`, `away` or `xa`.
+                 * @event _converse#contactPresenceChanged
+                 * @type { _converse.RosterContact }
+                 * @example _converse.api.listen.on('contactPresenceChanged', contact => { ... });
+                 */
+                this.presence.on('change:show', () => _converse.api.trigger('contactPresenceChanged', this));
                 this.presence.on('change:show', () => this.trigger('presenceChanged'));
             },
 
-            setChatBox (chatbox=null) {
-                chatbox = chatbox || _converse.chatboxes.get(this.get('jid'));
-                if (chatbox) {
-                    this.chatbox = chatbox;
-                    this.chatbox.on('change:hidden', this.render, this);
+            getDisplayName () {
+                if (this.get('nickname')) {
+                    return this.get('nickname');
+                } else if (this.vcard) {
+                    return this.vcard.getDisplayName();
+                } else {
+                    return this.get('jid');
                 }
             },
 
-            getDisplayName () {
-                return this.get('nickname') || this.vcard.get('nickname') || this.vcard.get('fullname') || this.get('jid');
-            },
-
             getFullname () {
-                return this.vcard.get('fullname');
+                if (this.vcard) {
+                    return this.vcard.get('fullname');
+                } else {
+                    return this.get('jid');
+                }
             },
 
+            /**
+             * Send a presence subscription request to this roster contact
+             * @private
+             * @method _converse.RosterContacts#subscribe
+             * @param { String } message - An optional message to explain the
+             *      reason for the subscription request.
+             */
             subscribe (message) {
-                /* Send a presence subscription request to this roster contact
-                *
-                * Parameters:
-                *    (String) message - An optional message to explain the
-                *      reason for the subscription request.
-                */
                 const pres = $pres({to: this.get('jid'), type: "subscribe"});
                 if (message && message !== "") {
                     pres.c("status").t(message).up();
                 }
-                const nick = _converse.xmppstatus.vcard.get('nickname') || _converse.xmppstatus.vcard.get('fullname');
+                const nick = _converse.nickname || _converse.xmppstatus.vcard.get('nickname') || _converse.xmppstatus.vcard.get('fullname');
                 if (nick) {
                     pres.c('nick', {'xmlns': Strophe.NS.NICK}).t(nick).up();
                 }
@@ -263,46 +312,55 @@ converse.plugins.add('converse-roster', {
                 return this;
             },
 
+            /**
+             * Upon receiving the presence stanza of type "subscribed",
+             * the user SHOULD acknowledge receipt of that subscription
+             * state notification by sending a presence stanza of type
+             * "subscribe" to the contact
+             * @private
+             * @method _converse.RosterContacts#ackSubscribe
+             */
             ackSubscribe () {
-                /* Upon receiving the presence stanza of type "subscribed",
-                * the user SHOULD acknowledge receipt of that subscription
-                * state notification by sending a presence stanza of type
-                * "subscribe" to the contact
-                */
                 _converse.api.send($pres({
                     'type': 'subscribe',
                     'to': this.get('jid')
                 }));
             },
 
+            /**
+             * Upon receiving the presence stanza of type "unsubscribed",
+             * the user SHOULD acknowledge receipt of that subscription state
+             * notification by sending a presence stanza of type "unsubscribe"
+             * this step lets the user's server know that it MUST no longer
+             * send notification of the subscription state change to the user.
+             * @private
+             * @method _converse.RosterContacts#ackUnsubscribe
+             * @param { String } jid - The Jabber ID of the user who is unsubscribing
+             */
             ackUnsubscribe () {
-                /* Upon receiving the presence stanza of type "unsubscribed",
-                 * the user SHOULD acknowledge receipt of that subscription state
-                 * notification by sending a presence stanza of type "unsubscribe"
-                 * this step lets the user's server know that it MUST no longer
-                 * send notification of the subscription state change to the user.
-                 *  Parameters:
-                 *    (String) jid - The Jabber ID of the user who is unsubscribing
-                 */
                 _converse.api.send($pres({'type': 'unsubscribe', 'to': this.get('jid')}));
                 this.removeFromRoster();
                 this.destroy();
             },
 
+            /**
+             * Unauthorize this contact's presence subscription
+             * @private
+             * @method _converse.RosterContacts#unauthorize
+             * @param { String } message - Optional message to send to the person being unauthorized
+             */
             unauthorize (message) {
-                /* Unauthorize this contact's presence subscription
-                * Parameters:
-                *   (String) message - Optional message to send to the person being unauthorized
-                */
                 _converse.rejectPresenceSubscription(this.get('jid'), message);
                 return this;
             },
 
+            /**
+             * Authorize presence subscription
+             * @private
+             * @method _converse.RosterContacts#authorize
+             * @param { String } message - Optional message to send to the person being authorized
+             */
             authorize (message) {
-                /* Authorize presence subscription
-                 * Parameters:
-                 *   (String) message - Optional message to send to the person being authorized
-                 */
                 const pres = $pres({'to': this.get('jid'), 'type': "subscribed"});
                 if (message && message !== "") {
                     pres.c("status").t(message);
@@ -311,11 +369,13 @@ converse.plugins.add('converse-roster', {
                 return this;
             },
 
+            /**
+             * Instruct the XMPP server to remove this contact from our roster
+             * @private
+             * @method _converse.RosterContacts#
+             * @returns { Promise } 
+             */
             removeFromRoster () {
-                /* Instruct the XMPP server to remove this contact from our roster
-                 * Parameters:
-                 *   (Function) callback
-                 */
                 const iq = $iq({type: 'set'})
                     .c('query', {xmlns: Strophe.NS.ROSTER})
                     .c('item', {jid: this.get('jid'), subscription: "remove"});
@@ -323,11 +383,19 @@ converse.plugins.add('converse-roster', {
             }
         });
 
-
+        /**
+         * @class
+         * @namespace _converse.RosterContacts
+         * @memberOf _converse
+         */
         _converse.RosterContacts = Backbone.Collection.extend({
             model: _converse.RosterContact,
 
             comparator (contact1, contact2) {
+                /* Groups are sorted alphabetically, ignoring case.
+                 * However, Ungrouped, Requesting Contacts and Pending Contacts
+                 * appear last and in that order.
+                 */
                 const status1 = contact1.presence.get('show') || 'offline';
                 const status2 = contact2.presence.get('show') || 'offline';
                 if (_converse.STATUS_WEIGHTS[status1] === _converse.STATUS_WEIGHTS[status2]) {
@@ -404,7 +472,14 @@ converse.plugins.add('converse-roster', {
                     _converse.send_initial_presence = true;
                     return _converse.roster.fetchFromServer();
                 } else {
-                    _converse.emit('cachedRoster', collection);
+                    /**
+                     * The contacts roster has been retrieved from the local cache (`sessionStorage`).
+                     * @event _converse#cachedRoster
+                     * @type { _converse.RosterContacts }
+                     * @example _converse.api.listen.on('cachedRoster', (items) => { ... });
+                     * @example _converse.api.waitUntil('cachedRoster').then(items => { ... });
+                     */
+                    _converse.api.trigger('cachedRoster', collection);
                 }
             },
 
@@ -424,17 +499,18 @@ converse.plugins.add('converse-roster', {
                 return u.isSameBareJID(jid, _converse.connection.jid);
             },
 
+            /**
+             * Add a roster contact and then once we have confirmation from
+             * the XMPP server we subscribe to that contact's presence updates.
+             * @private
+             * @method _converse.RosterContacts#addAndSubscribe
+             * @param { String } jid - The Jabber ID of the user being added and subscribed to.
+             * @param { String } name - The name of that user
+             * @param { Array.String } groups - Any roster groups the user might belong to
+             * @param { String } message - An optional message to explain the reason for the subscription request.
+             * @param { Object } attributes - Any additional attributes to be stored on the user's model.
+             */
             addAndSubscribe (jid, name, groups, message, attributes) {
-                /* Add a roster contact and then once we have confirmation from
-                 * the XMPP server we subscribe to that contact's presence updates.
-                 *  Parameters:
-                 *    (String) jid - The Jabber ID of the user being added and subscribed to.
-                 *    (String) name - The name of that user
-                 *    (Array of Strings) groups - Any roster groups the user might belong to
-                 *    (String) message - An optional message to explain the
-                 *      reason for the subscription request.
-                 *    (Object) attributes - Any additional attributes to be stored on the user's model.
-                 */
                 const handler = (contact) => {
                     if (contact instanceof _converse.RosterContact) {
                         contact.subscribe(message);
@@ -443,17 +519,18 @@ converse.plugins.add('converse-roster', {
                 this.addContactToRoster(jid, name, groups, attributes).then(handler, handler);
             },
 
+            /**
+             * Send an IQ stanza to the XMPP server to add a new roster contact.
+             * @private
+             * @method _converse.RosterContacts#sendContactAddIQ
+             * @param { String } jid - The Jabber ID of the user being added
+             * @param { String } name - The name of that user
+             * @param { Array.String } groups - Any roster groups the user might belong to
+             * @param { Function } callback - A function to call once the IQ is returned
+             * @param { Function } errback - A function to call if an error occurred
+             */
             sendContactAddIQ (jid, name, groups) {
-                /*  Send an IQ stanza to the XMPP server to add a new roster contact.
-                 *
-                 *  Parameters:
-                 *    (String) jid - The Jabber ID of the user being added
-                 *    (String) name - The name of that user
-                 *    (Array of Strings) groups - Any roster groups the user might belong to
-                 *    (Function) callback - A function to call once the IQ is returned
-                 *    (Function) errback - A function to call if an error occurred
-                 */
-                name = _.isEmpty(name)? jid: name;
+                name = _.isEmpty(name) ? null : name;
                 const iq = $iq({'type': 'set'})
                     .c('query', {'xmlns': Strophe.NS.ROSTER})
                     .c('item', { jid, name });
@@ -461,24 +538,24 @@ converse.plugins.add('converse-roster', {
                 return _converse.api.sendIQ(iq);
             },
 
+            /**
+             * Adds a RosterContact instance to _converse.roster and
+             * registers the contact on the XMPP server.
+             * Returns a promise which is resolved once the XMPP server has responded.
+             * @private
+             * @method _converse.RosterContacts#addContactToRoster
+             * @param { String } jid - The Jabber ID of the user being added and subscribed to.
+             * @param { String } name - The name of that user
+             * @param { Array.String } groups - Any roster groups the user might belong to
+             * @param { Object } attributes - Any additional attributes to be stored on the user's model.
+             */
             async addContactToRoster (jid, name, groups, attributes) {
-                /* Adds a RosterContact instance to _converse.roster and
-                 * registers the contact on the XMPP server.
-                 * Returns a promise which is resolved once the XMPP server has
-                 * responded.
-                 *
-                 *  Parameters:
-                 *    (String) jid - The Jabber ID of the user being added and subscribed to.
-                 *    (String) name - The name of that user
-                 *    (Array of Strings) groups - Any roster groups the user might belong to
-                 *    (Object) attributes - Any additional attributes to be stored on the user's model.
-                 */
                 groups = groups || [];
                 try {
                     await this.sendContactAddIQ(jid, name, groups);
                 } catch (e) {
                     _converse.log(e, Strophe.LogLevel.ERROR);
-                    alert(__('Sorry, there was an error while trying to add %1$s as a contact.', name));
+                    alert(__('Sorry, there was an error while trying to add %1$s as a contact.', name || jid));
                     return e;
                 }
                 return this.create(_.assignIn({
@@ -515,13 +592,14 @@ converse.plugins.add('converse-roster', {
                 return _.sum(this.models.filter((model) => !_.includes(ignored, model.presence.get('show'))));
             },
 
+            /**
+             * Handle roster updates from the XMPP server.
+             * See: https://xmpp.org/rfcs/rfc6121.html#roster-syntax-actions-push
+             * @private
+             * @method _converse.RosterContacts#onRosterPush
+             * @param { XMLElement } IQ - The IQ stanza received from the XMPP server.
+             */
             onRosterPush (iq) {
-                /* Handle roster updates from the XMPP server.
-                 * See: https://xmpp.org/rfcs/rfc6121.html#roster-syntax-actions-push
-                 *
-                 * Parameters:
-                 *    (XMLElement) IQ - The IQ stanza received from the XMPP server.
-                 */
                 const id = iq.getAttribute('id');
                 const from = iq.getAttribute('from');
                 if (from && from !== _converse.bare_jid) {
@@ -549,7 +627,13 @@ converse.plugins.add('converse-roster', {
                     return;
                 }
                 this.updateContact(items.pop());
-                _converse.emit('rosterPush', iq);
+                /**
+                 * When the roster receives a push event from server (i.e. new entry in your contacts roster).
+                 * @event _converse#rosterPush
+                 * @type { XMLElement }
+                 * @example _converse.api.listen.on('rosterPush', iq => { ... });
+                 */
+                _converse.api.trigger('rosterPush', iq);
                 return;
             },
 
@@ -590,7 +674,16 @@ converse.plugins.add('converse-roster', {
                     this.data.save('version', query.getAttribute('ver'));
                     _converse.session.save('roster_fetched', true);
                 }
-                _converse.emit('roster', iq);
+                /**
+                 * When the roster has been received from the XMPP server.
+                 * See also the `cachedRoster` event further up, which gets called instead of
+                 * `roster` if its already in `sessionStorage`.
+                 * @event _converse#roster
+                 * @type { XMLElement }
+                 * @example _converse.api.listen.on('roster', iq => { ... });
+                 * @example _converse.api.waitUntil('roster').then(iq => { ... });
+                 */
+                _converse.api.trigger('roster', iq);
             },
 
             updateContact (item) {
@@ -644,7 +737,13 @@ converse.plugins.add('converse-roster', {
                     'requesting': true,
                     'nickname': nickname
                 };
-                _converse.emit('contactRequest', this.create(user_data));
+                /**
+                 * Triggered when someone has requested to subscribe to your presence (i.e. to be your contact).
+                 * @event _converse#contactRequest
+                 * @type { _converse.RosterContact }
+                 * @example _converse.api.listen.on('contactRequest', contact => { ... });
+                 */
+                _converse.api.trigger('contactRequest', this.create(user_data));
             },
 
             handleIncomingSubscription (presence) {
@@ -770,6 +869,23 @@ converse.plugins.add('converse-roster', {
         _converse.RosterGroups = Backbone.Collection.extend({
             model: _converse.RosterGroup,
 
+            comparator (a, b) {
+                a = a.get('name');
+                b = b.get('name');
+                const special_groups = Object.keys(HEADER_WEIGHTS);
+                const a_is_special = _.includes(special_groups, a);
+                const b_is_special = _.includes(special_groups, b);
+                if (!a_is_special && !b_is_special ) {
+                    return a.toLowerCase() < b.toLowerCase() ? -1 : (a.toLowerCase() > b.toLowerCase() ? 1 : 0);
+                } else if (a_is_special && b_is_special) {
+                    return HEADER_WEIGHTS[a] < HEADER_WEIGHTS[b] ? -1 : (HEADER_WEIGHTS[a] > HEADER_WEIGHTS[b] ? 1 : 0);
+                } else if (!a_is_special && b_is_special) {
+                    return (b === _converse.HEADER_REQUESTING_CONTACTS) ? 1 : -1;
+                } else if (a_is_special && !b_is_special) {
+                    return (a === _converse.HEADER_REQUESTING_CONTACTS) ? -1 : 1;
+                }
+            },
+
             fetchRosterGroups () {
                 /* Fetches all the roster groups from sessionStorage.
                 *
@@ -797,30 +913,24 @@ converse.plugins.add('converse-roster', {
 
 
         /********** Event Handlers *************/
-        function addRelatedContactToChatbox (chatbox, contact) {
-            if (!_.isUndefined(contact)) {
-                chatbox.contact = contact;
-                chatbox.trigger('contactAdded', contact);
-            }
-        }
-
         function updateUnreadCounter (chatbox) {
             const contact = _converse.roster.findWhere({'jid': chatbox.get('jid')});
             if (!_.isUndefined(contact)) {
                 contact.save({'num_unread': chatbox.get('num_unread')});
             }
         }
-        _converse.api.listen.on('chatBoxesInitialized', () => {
-            _converse.chatboxes.on('change:num_unread', updateUnreadCounter)
 
-            _converse.chatboxes.on('add', async chatbox => {
-                await _converse.api.waitUntil('rosterContactsFetched');
-                addRelatedContactToChatbox(chatbox, _converse.roster.findWhere({'jid': chatbox.get('jid')}));
+        _converse.api.listen.on('chatBoxesInitialized', () => {
+            _converse.chatboxes.on('change:num_unread', updateUnreadCounter);
+
+            _converse.chatboxes.on('add', chatbox => {
+                if (chatbox.get('type') === _converse.PRIVATE_CHAT_TYPE) {
+                    chatbox.setRosterContact(chatbox.get('jid'));
+                }
             });
         });
 
         _converse.api.listen.on('beforeTearDown', _converse.unregisterPresenceHandler());
-
 
         _converse.api.waitUntil('rosterContactsFetched').then(() => {
             _converse.roster.on('add', (contact) => {
@@ -829,7 +939,7 @@ converse.plugins.add('converse-roster', {
                  */
                 const chatbox = _converse.chatboxes.findWhere({'jid': contact.get('jid')});
                 if (chatbox) {
-                    addRelatedContactToChatbox(chatbox, contact);
+                    chatbox.setRosterContact(contact.get('jid'));
                 }
             });
         });
@@ -854,18 +964,30 @@ converse.plugins.add('converse-roster', {
                 _converse.presences = new _converse.Presences();
             }
             _converse.presences.browserStorage =
-                new Backbone.BrowserStorage.session(`converse.presences-${_converse.bare_jid}`);
+                new BrowserStorage.session(`converse.presences-${_converse.bare_jid}`);
             _converse.presences.fetch();
-            _converse.emit('presencesInitialized', reconnecting);
+            /**
+             * Triggered once the _converse.Presences collection has been
+             * initialized and its cached data fetched.
+             * Returns a boolean indicating whether this event has fired due to
+             * Converse having reconnected.
+             * @event _converse#presencesInitialized
+             * @type { bool }
+             * @example _converse.api.listen.on('presencesInitialized', reconnecting => { ... });
+             */
+            _converse.api.trigger('presencesInitialized', reconnecting);
         });
 
         _converse.api.listen.on('presencesInitialized', (reconnecting) => {
             if (reconnecting) {
-                // No need to recreate the roster, otherwise we lose our
-                // cached data. However we still emit an event, to give
-                // event handlers a chance to register views for the
-                // roster and its groups, before we start populating.
-                _converse.emit('rosterReadyAfterReconnection');
+                /**
+                 * Similar to `rosterInitialized`, but instead pertaining to reconnection.
+                 * This event indicates that the roster and its groups are now again
+                 * available after Converse.js has reconnected.
+                 * @event _converse#rosterReadyAfterReconnection
+                 * @example _converse.api.listen.on('rosterReadyAfterReconnection', () => { ... });
+                 */
+                _converse.api.trigger('rosterReadyAfterReconnection');
             } else {
                 _converse.registerIntervalHandler();
                 _converse.initRoster();
@@ -879,7 +1001,7 @@ converse.plugins.add('converse-roster', {
         /************************ API ************************/
         // API methods only available to plugins
 
-        _.extend(_converse.api, {
+        Object.assign(_converse.api, {
             /**
              * @namespace _converse.api.contacts
              * @memberOf _converse.api
@@ -891,20 +1013,20 @@ converse.plugins.add('converse-roster', {
                  * @method _converse.api.contacts.get
                  * @params {(string[]|string)} jid|jids The JID or JIDs of
                  *      the contacts to be returned.
-                 * @returns {(RosterContact[]|RosterContact)} [Backbone.Model](http://backbonejs.org/#Model)
-                 *      (or an array of them) representing the contact.
+                 * @returns {promise} Promise which resolves with the
+                 *  _converse.RosterContact (or an array of them) representing the contact.
                  *
                  * @example
                  * // Fetch a single contact
                  * _converse.api.listen.on('rosterContactsFetched', function () {
-                 *     const contact = _converse.api.contacts.get('buddy@example.com')
+                 *     const contact = await _converse.api.contacts.get('buddy@example.com')
                  *     // ...
                  * });
                  *
                  * @example
                  * // To get multiple contacts, pass in an array of JIDs:
                  * _converse.api.listen.on('rosterContactsFetched', function () {
-                 *     const contacts = _converse.api.contacts.get(
+                 *     const contacts = await _converse.api.contacts.get(
                  *         ['buddy1@example.com', 'buddy2@example.com']
                  *     )
                  *     // ...
@@ -913,14 +1035,13 @@ converse.plugins.add('converse-roster', {
                  * @example
                  * // To return all contacts, simply call ``get`` without any parameters:
                  * _converse.api.listen.on('rosterContactsFetched', function () {
-                 *     const contacts = _converse.api.contacts.get();
+                 *     const contacts = await _converse.api.contacts.get();
                  *     // ...
                  * });
                  */
-                'get' (jids) {
-                    const _getter = function (jid) {
-                        return _converse.roster.get(Strophe.getBareJidFromJid(jid)) || null;
-                    };
+                async get (jids) {
+                    await _converse.api.waitUntil('rosterContactsFetched');
+                    const _getter = jid => _converse.roster.get(Strophe.getBareJidFromJid(jid));
                     if (_.isUndefined(jids)) {
                         jids = _converse.roster.pluck('jid');
                     } else if (_.isString(jids)) {

@@ -185,20 +185,22 @@
                     }
                     .occupants-heading {
                         font-family: var(--heading-font);
+                        margin-bottom: 0.5em;
+                        padding-left: 0;
                     }
                     .chatroom-features {
                         display: var(--occupants-features-display);
                     }
-                    .awesomplete {
+                    .suggestion-box{
                         ul {
                             padding: 0;
                             li {
-                                padding: .5em;
+                                padding: 0.5em;
                             }
                         }
                     }
                     ul {
-                        padding: 0.5em 0 0 0;
+                        padding: 0;
                         margin-bottom: 0.5em;
                         overflow-x: hidden;
                         overflow-y: auto;
@@ -301,10 +303,31 @@
                         background-color: var(--chatroom-head-button-color);
                     }
                 }
+
+                .chatroom-form {
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: center;
+                    padding: 2em;
+                }
             }
         }
 
+        .muc-bottom-panel {
+            border-top: var(--message-input-border-top);
+            height: 3em;
+            padding: 0.5em;
+            text-align: center;
+            font-size: var(--font-size-small);
+            background-color: var(--chatroom-head-color);
+            color: white;
+        }
+
         .sendXMPPMessage {
+
+            .suggestion-box__results--above {
+                bottom: 4.5em;
+            }
             .chat-toolbar {
                 background-color: white;
                 border-top: var(--message-input-border-top);
@@ -330,7 +353,6 @@
         }
 
         .room-invite {
-            padding-bottom: 1em;
             .invited-contact {
                 margin: -1px 0 0 -1px;
                 width: 100%;
@@ -369,6 +391,9 @@
                     .occupants-heading {
                         padding: 0;
                     }
+                    .occupant-list {
+                        border-bottom: none;
+                    }
                     .chatroom-features {
                         .feature {
                             font-size: var(--font-size-tiny);
@@ -404,6 +429,7 @@
     }
 }
 
+
 #conversejs.converse-fullscreen {
     .chatroom {
         .box-flyout {
@@ -437,6 +463,7 @@
     }
 }
 
+#conversejs.converse-embedded,
 #conversejs.converse-fullscreen,
 #conversejs.converse-mobile {
 
@@ -489,6 +516,45 @@
             span {
                 .invited-contact {
                     margin: 0 0 0.5em -1px;
+                }
+            }
+        }
+    }
+}
+
+#conversejs.converse-embedded {
+    .chatroom {
+        margin: 0;
+        width: 100%;
+        .box-flyout {
+            .occupants-heading {
+                font-size: 120%;
+            }
+            .chat-content {
+                .chat-message {
+                    margin: 0.5em;
+                    font-size: 120%;
+                }
+            }
+            .sendXMPPMessage {
+                .chat-textarea {
+                    padding: 0.5em;
+                    font-size: 110%;
+                }
+            }
+            .chatroom-body {
+                height: 100%;
+                .chatroom-form-container {
+                    height: 100%;
+                    position: relative;
+                }
+            }
+            .occupants {
+                .occupant-list {
+                    padding-left: 0.3em;
+                    li.occupant {
+                        font-size: 120%;
+                    }
                 }
             }
         }

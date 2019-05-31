@@ -4,11 +4,11 @@
 // Copyright (c) 2013-2019, the Converse.js developers
 // Licensed under the Mozilla Public License (MPLv2)
 
-
+import BrowserStorage from "backbone.browserStorage";
 import converse from "./converse-core";
 import tpl_vcard from "./templates/vcard.html";
 
-const { Backbone, Promise, Strophe, _, $iq, $build, moment, sizzle } = converse.env;
+const { Backbone, Promise, Strophe, _, $iq, $build, dayjs, sizzle } = converse.env;
 const u = converse.env.utils;
 
 
@@ -43,6 +43,10 @@ converse.plugins.add('converse-vcard', {
                 } else {
                     return Backbone.Model.prototype.set.apply(this, arguments);
                 }
+            },
+
+            getDisplayName () {
+                return this.get('nickname') || this.get('fullname') || this.get('jid');
             }
         });
 
@@ -69,7 +73,7 @@ converse.plugins.add('converse-vcard', {
                     'url': _.get(vcard.querySelector('URL'), 'textContent'),
                     'role': _.get(vcard.querySelector('ROLE'), 'textContent'),
                     'email': _.get(vcard.querySelector('EMAIL USERID'), 'textContent'),
-                    'vcard_updated': moment().format(),
+                    'vcard_updated': (new Date()).toISOString(),
                     'vcard_error': undefined
                 };
             }
@@ -100,12 +104,6 @@ converse.plugins.add('converse-vcard', {
         }
 
         async function getVCard (_converse, jid) {
-            /* Request the VCard of another user. Returns a promise.
-             *
-             * Parameters:
-             *    (String) jid - The Jabber ID of the user whose VCard
-             *      is being requested.
-             */
             const to = Strophe.getBareJidFromJid(jid) === _converse.bare_jid ? null : jid;
             let iq;
             try {
@@ -114,27 +112,35 @@ converse.plugins.add('converse-vcard', {
                 return {
                     'stanza': iq,
                     'jid': jid,
-                    'vcard_error': moment().format()
+                    'vcard_error': (new Date()).toISOString()
                 }
             }
             return onVCardData(jid, iq);
         }
 
-        /* Event handlers */
+        /************************ BEGIN Event Handlers ************************/
         _converse.initVCardCollection = function () {
             _converse.vcards = new _converse.VCards();
             const id = `${_converse.bare_jid}-converse.vcards`;
-            _converse.vcards.browserStorage = new Backbone.BrowserStorage[_converse.config.get('storage')](id);
+            _converse.vcards.browserStorage = new BrowserStorage[_converse.config.get('storage')](id);
             _converse.vcards.fetch();
         }
-        _converse.api.listen.on('sessionInitialized', _converse.initVCardCollection);
+        _converse.api.listen.on('setUserJID', _converse.initVCardCollection);
 
 
-        _converse.on('addClientFeatures', () => {
+        _converse.api.listen.on('statusInitialized', () => {
+            const vcards = _converse.vcards;
+            const jid = _converse.xmppstatus.get('jid');
+            _converse.xmppstatus.vcard = vcards.findWhere({'jid': jid}) || vcards.create({'jid': jid});
+        });
+
+
+        _converse.api.listen.on('addClientFeatures', () => {
             _converse.api.disco.own.features.add(Strophe.NS.VCARD);
         });
 
-        _.extend(_converse.api, {
+        /************************ BEGIN API ************************/
+        Object.assign(_converse.api, {
             /**
              * The XEP-0054 VCard API
              *
@@ -190,7 +196,7 @@ converse.plugins.add('converse-vcard', {
                         return getVCard(_converse, model);
                     } else if (force ||
                             !model.get('vcard_updated') ||
-                            !moment(model.get('vcard_error')).isSame(new Date(), "day")) {
+                            !dayjs(model.get('vcard_error')).isSame(new Date(), "day")) {
 
                         const jid = model.get('jid');
                         if (!jid) {

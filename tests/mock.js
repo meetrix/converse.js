@@ -4,7 +4,7 @@
     const _ = converse.env._;
     const Promise = converse.env.Promise;
     const Strophe = converse.env.Strophe;
-    const moment = converse.env.moment;
+    const dayjs = converse.env.dayjs;
     const $iq = converse.env.$iq;
     const u = converse.env.utils;
 
@@ -117,6 +117,9 @@
             c.IQ_stanzas = [];
             c.IQ_ids = [];
             c.sendIQ = function (iq, callback, errback) {
+                if (!_.isElement(iq)) {
+                    iq = iq.nodeTree;
+                }
                 this.IQ_stanzas.push(iq);
                 const id = sendIQ.bind(this)(iq, callback, errback);
                 this.IQ_ids.push(id);
@@ -154,6 +157,12 @@
                 c.jid = 'dummy@localhost/resource';
                 c._changeConnectStatus(Strophe.Status.CONNECTED);
             };
+
+            c._proto._disconnect = function () {
+                c._onDisconnectTimeout();
+            }
+
+            c._proto._onDisconnectTimeout = _.noop;
             return c;
         };
     }();
@@ -216,7 +225,7 @@
                     'image': _.get(vcard.querySelector('PHOTO BINVAL'), 'textContent'),
                     'image_type': _.get(vcard.querySelector('PHOTO TYPE'), 'textContent'),
                     'url': _.get(vcard.querySelector('URL'), 'textContent'),
-                    'vcard_updated': moment().format(),
+                    'vcard_updated': dayjs().format(),
                     'vcard_error': undefined
                 };
                 resolve(result);
@@ -239,13 +248,15 @@
             promise_names = null
             settings = null;
         }
-        return done => {
-            initConverse(settings, spies).then(_converse => {
-                const promises = _.map(promise_names, _converse.api.waitUntil);
-                Promise.all(promises)
-                    .then(_.partial(func, done, _converse))
-                    .catch(_.partial(_converse.log, _, Strophe.LogLevel.FATAL));
-            });
+        return async done => {
+            const _converse = await initConverse(settings, spies);
+            function _done () {
+                _converse.api.user.logout();
+                done();
+            }
+            const promises = _.map(promise_names, _converse.api.waitUntil);
+            await Promise.all(promises);
+            func(_done, _converse);
         }
     };
     return mock;

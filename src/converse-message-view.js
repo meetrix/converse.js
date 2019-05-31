@@ -4,6 +4,7 @@
 // Copyright (c) 2013-2019, the Converse.js developers
 // Licensed under the Mozilla Public License (MPLv2)
 
+import URI from "urijs";
 import converse from  "@converse/headless/converse-core";
 import filesize from "filesize";
 import html from "./utils/html";
@@ -13,9 +14,9 @@ import tpl_info from "templates/info.html";
 import tpl_message from "templates/message.html";
 import tpl_message_versions_modal from "templates/message_versions_modal.html";
 import u from "@converse/headless/utils/emoji";
-import xss from "xss";
+import xss from "xss/dist/xss";
 
-const { Backbone, _, moment } = converse.env;
+const { Backbone, _, dayjs } = converse.env;
 
 
 converse.plugins.add('converse-message-view', {
@@ -30,15 +31,46 @@ converse.plugins.add('converse-message-view', {
             { __ } = _converse;
 
 
+        function onTagFoundDuringXSSFilter (tag, html, options) {
+            /* This function gets called by the XSS library whenever it finds
+             * what it thinks is a new HTML tag.
+             *
+             * It thinks that something like <https://example.com> is an HTML
+             * tag and then escapes the <> chars.
+             *
+             * We want to avoid this, because it prevents these URLs from being
+             * shown properly (whithout the trailing &gt;).
+             *
+             * The URI lib correctly trims a trailing >, but not a trailing &gt;
+             */
+            if (options.isClosing) {
+                // Closing tags don't match our use-case
+                return;
+            }
+            const uri = new URI(tag);
+            const protocol = uri.protocol().toLowerCase();
+            if (!_.includes(["https", "http", "xmpp", "ftp"], protocol)) {
+                // Not a URL, the tag will get filtered as usual
+                return;
+            }
+            if (uri.equals(tag) && `<${tag}>` === html.toLocaleLowerCase()) {
+                // We have something like <https://example.com>, and don't want
+                // to filter it.
+                return html;
+            }
+        }
+
+
         _converse.api.settings.update({
             'show_images_inline': true
         });
 
         _converse.MessageVersionsModal = _converse.BootstrapModal.extend({
             toHTML () {
-                return tpl_message_versions_modal(_.extend(
+                return tpl_message_versions_modal(Object.assign(
                     this.model.toJSON(), {
-                    '__': __
+                    '__': __,
+                    'dayjs': dayjs
                 }));
             }
         });
@@ -50,9 +82,20 @@ converse.plugins.add('converse-message-view', {
             },
 
             initialize () {
+                this.debouncedRender = _.debounce(() => {
+                    // If the model gets destroyed in the meantime,
+                    // it no longer has a collection
+                    if (this.model.collection) {
+                        this.render();
+                    }
+                }, 50);
                 if (this.model.vcard) {
-                    this.model.vcard.on('change', this.render, this);
+                    this.model.vcard.on('change', this.debouncedRender, this);
                 }
+                this.model.on('rosterContactAdded', () => {
+                    this.model.contact.on('change:nickname', this.debouncedRender, this);
+                    this.debouncedRender();
+                });
                 this.model.on('change', this.onChanged, this);
                 this.model.on('destroy', this.remove, this);
             },
@@ -88,7 +131,7 @@ converse.plugins.add('converse-message-view', {
                 }
                 if (_.filter(['correcting', 'message', 'type', 'upload', 'received'],
                              prop => Object.prototype.hasOwnProperty.call(this.model.changed, prop)).length) {
-                    await this.render();
+                    await this.debouncedRender();
                 }
                 if (edited) {
                     this.onMessageEdited();
@@ -113,18 +156,18 @@ converse.plugins.add('converse-message-view', {
 
             async renderChatMessage () {
                 const is_me_message = this.isMeCommand(),
-                      moment_time = moment(this.model.get('time')),
+                      time = dayjs(this.model.get('time')),
                       role = this.model.vcard ? this.model.vcard.get('role') : null,
                       roles = role ? role.split(',') : [];
 
                 const msg = u.stringToElement(tpl_message(
-                    _.extend(
+                    Object.assign(
                         this.model.toJSON(), {
                         '__': __,
                         'is_me_message': is_me_message,
                         'roles': roles,
-                        'pretty_time': moment_time.format(_converse.time_format),
-                        'time': moment_time.format(),
+                        'pretty_time': time.format(_converse.time_format),
+                        'time': time.toISOString(),
                         'extra_classes': this.getExtraMessageClasses(),
                         'label_show': __('Show more'),
                         'username': this.model.getDisplayName()
@@ -146,7 +189,7 @@ converse.plugins.add('converse-message-view', {
                     if (is_me_message) {
                         text = text.substring(4);
                     }
-                    text = xss.filterXSS(text, {'whiteList': {}});
+                    text = xss.filterXSS(text, {'whiteList': {}, 'onTag': onTagFoundDuringXSSFilter});
                     msg_content.innerHTML = _.flow(
                         _.partial(u.geoUriToHttp, _, _converse.geouri_replacement),
                         _.partial(u.addMentionsMarkup, _, this.model.get('references'), this.model.collection.chatbox),
@@ -161,16 +204,20 @@ converse.plugins.add('converse-message-view', {
                 }
                 await promise;
                 this.replaceElement(msg);
-                this.model.collection.trigger('rendered', this);
+                if (this.model.collection) {
+                    // If the model gets destroyed in the meantime, it no
+                    // longer has a collection.
+                    this.model.collection.trigger('rendered', this);
+                }
             },
 
             renderErrorMessage () {
-                const moment_time = moment(this.model.get('time')),
-                      msg = u.stringToElement(
-                        tpl_info(_.extend(this.model.toJSON(), {
-                            'extra_classes': 'chat-error',
-                            'isodate': moment_time.format()
-                        })));
+                const msg = u.stringToElement(
+                    tpl_info(Object.assign(this.model.toJSON(), {
+                        'extra_classes': 'chat-error',
+                        'isodate': dayjs(this.model.get('time')).toISOString()
+                    }))
+                );
                 return this.replaceElement(msg);
             },
 
@@ -196,7 +243,7 @@ converse.plugins.add('converse-message-view', {
                 } else {
                     return;
                 }
-                const isodate = moment().format();
+                const isodate = (new Date()).toISOString();
                 this.replaceElement(
                       u.stringToElement(
                         tpl_csn({
@@ -208,7 +255,7 @@ converse.plugins.add('converse-message-view', {
 
             renderFileUploadProgresBar () {
                 const msg = u.stringToElement(tpl_file_progress(
-                    _.extend(this.model.toJSON(), {
+                    Object.assign(this.model.toJSON(), {
                         '__': __,
                         'filename': this.model.file.name,
                         'filesize': filesize(this.model.file.size)

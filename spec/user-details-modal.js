@@ -20,13 +20,12 @@
                 async function (done, _converse) {
 
             test_utils.createContacts(_converse, 'current');
-            _converse.emit('rosterContactsFetched');
+            _converse.api.trigger('rosterContactsFetched');
 
             const contact_jid = mock.cur_names[0].replace(/ /g,'.').toLowerCase() + '@localhost';
             test_utils.openChatBoxFor(_converse, contact_jid);
-            await test_utils.waitUntil(() => _converse.chatboxes.length);
+            await test_utils.waitUntil(() => _converse.chatboxes.length > 1);
             const view = _converse.chatboxviews.get(contact_jid);
-            await new Promise((resolve) => view.model.once('contactAdded', resolve));
             let show_modal_button = view.el.querySelector('.show-user-details-modal');
             expect(u.isVisible(show_modal_button)).toBeTruthy();
             show_modal_button.click();
@@ -54,7 +53,7 @@
                 async function (done, _converse) {
 
             test_utils.createContacts(_converse, 'current');
-            _converse.emit('rosterContactsFetched');
+            _converse.api.trigger('rosterContactsFetched');
 
             const contact_jid = mock.cur_names[0].replace(/ /g,'.').toLowerCase() + '@localhost';
             await test_utils.openChatBoxFor(_converse, contact_jid)

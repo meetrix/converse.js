@@ -28,10 +28,7 @@ const { Strophe, Backbone, sizzle, $iq, _ } = converse.env;
 Strophe.addNamespace('REGISTER', 'jabber:iq:register');
 
 // Add Strophe Statuses
-let i = 0;
-_.each(_.keys(Strophe.Status), function (key) {
-    i = Math.max(i, Strophe.Status[key]);
-});
+const i = Object.keys(Strophe.Status).reduce((max, k) => Math.max(max, Strophe.Status[k]), 0);
 Strophe.Status.REGIFAIL        = i + 1;
 Strophe.Status.REGISTERED      = i + 2;
 Strophe.Status.CONFLICT        = i + 3;
@@ -48,17 +45,6 @@ converse.plugins.add('converse-register', {
         // New functions which don't exist yet can also be added.
 
         LoginPanel: {
-
-            insertRegisterLink () {
-                const { _converse } = this.__super__;
-                if (_.isUndefined(this.registerlinkview)) {
-                    this.registerlinkview = new _converse.RegisterLinkView({'model': this.model});
-                    this.registerlinkview.render();
-                    this.el.querySelector('.buttons').insertAdjacentElement('afterend', this.registerlinkview.el);
-                }
-                this.registerlinkview.render();
-            },
-
             render (cfg) {
                 const { _converse } = this.__super__;
                 this.__super__.render.apply(this, arguments);
@@ -70,43 +56,6 @@ converse.plugins.add('converse-register', {
         },
 
         ControlBoxView: {
-
-            initialize () {
-                this.__super__.initialize.apply(this, arguments);
-                this.model.on('change:active-form', this.showLoginOrRegisterForm.bind(this))
-            },
-
-            showLoginOrRegisterForm () {
-                const { _converse } = this.__super__;
-                if (_.isNil(this.registerpanel)) {
-                    return;
-                }
-                if (this.model.get('active-form') == "register") {
-                    this.loginpanel.el.classList.add('hidden');
-                    this.registerpanel.el.classList.remove('hidden');
-                } else {
-                    this.loginpanel.el.classList.remove('hidden');
-                    this.registerpanel.el.classList.add('hidden');
-                }
-            },
-
-            renderRegistrationPanel () {
-                const { _converse } = this.__super__;
-                if (_converse.allow_registration) {
-                    this.registerpanel = new _converse.RegisterPanel({
-                        'model': this.model
-                    });
-                    this.registerpanel.render();
-                    this.registerpanel.el.classList.add('hidden');
-                    this.el.querySelector('#converse-login-panel').insertAdjacentElement(
-                        'afterend',
-                        this.registerpanel.el
-                    );
-                    this.showLoginOrRegisterForm();
-                }
-                return this;
-            },
-
             renderLoginPanel () {
                 /* Also render a registration panel, when rendering the
                  * login panel.
@@ -138,6 +87,52 @@ converse.plugins.add('converse-register', {
         });
 
 
+        Object.assign(_converse.LoginPanel.prototype, {
+
+            insertRegisterLink () {
+                if (_.isUndefined(this.registerlinkview)) {
+                    this.registerlinkview = new _converse.RegisterLinkView({'model': this.model});
+                    this.registerlinkview.render();
+                    this.el.querySelector('.buttons').insertAdjacentElement('afterend', this.registerlinkview.el);
+                }
+                this.registerlinkview.render();
+            }
+        });
+
+        Object.assign(_converse.ControlBoxView.prototype, {
+
+            showLoginOrRegisterForm () {
+                const { _converse } = this.__super__;
+                if (_.isNil(this.registerpanel)) {
+                    return;
+                }
+                if (this.model.get('active-form') == "register") {
+                    this.loginpanel.el.classList.add('hidden');
+                    this.registerpanel.el.classList.remove('hidden');
+                } else {
+                    this.loginpanel.el.classList.remove('hidden');
+                    this.registerpanel.el.classList.add('hidden');
+                }
+            },
+
+            renderRegistrationPanel () {
+                if (_converse.allow_registration) {
+                    this.registerpanel = new _converse.RegisterPanel({
+                        'model': this.model
+                    });
+                    this.registerpanel.render();
+                    this.registerpanel.el.classList.add('hidden');
+                    this.el.querySelector('#converse-login-panel').insertAdjacentElement(
+                        'afterend',
+                        this.registerpanel.el
+                    );
+                    this.showLoginOrRegisterForm();
+                }
+                return this;
+            }
+        });
+
+
         function setActiveForm (value) {
             _converse.api.waitUntil('controlboxInitialized').then(() => {
                 const controlbox = _converse.chatboxes.get('controlbox')
@@ -151,7 +146,7 @@ converse.plugins.add('converse-register', {
         _converse.RegisterLinkView = Backbone.VDOMView.extend({
             toHTML () {
                 return tpl_register_link(
-                    _.extend(this.model.toJSON(), {
+                    Object.assign(this.model.toJSON(), {
                         '__': _converse.__,
                         '_converse': _converse,
                         'connection_status': _converse.connfeedback.get('connection_status'),
@@ -159,6 +154,11 @@ converse.plugins.add('converse-register', {
             }
         });
 
+        /**
+         * @class
+         * @namespace _converse.RegisterPanel
+         * @memberOf _converse
+         */
         _converse.RegisterPanel = Backbone.NativeView.extend({
             tagName: 'div',
             id: "converse-register-panel",
@@ -200,20 +200,21 @@ converse.plugins.add('converse-register', {
                     if (!this._registering) {
                         connect_cb(req, callback, raw);
                     } else {
-                        if (this.getRegistrationFields(req, callback, raw)) {
+                        if (this.getRegistrationFields(req, callback)) {
                             this._registering = false;
                         }
                     }
                 };
             },
 
-            getRegistrationFields (req, _callback, raw) {
-                /*  Send an IQ stanza to the XMPP server asking for the
-                 *  registration fields.
-                 *  Parameters:
-                 *    (Strophe.Request) req - The current request
-                 *    (Function) callback
-                 */
+            /**
+             * Send an IQ stanza to the XMPP server asking for the registration fields.
+             * @private
+             * @method _converse.RegisterPanel#getRegistrationFields
+             * @param { Strophe.Request } req - The current request
+             * @param { Function } callback - The callback function
+             */
+            getRegistrationFields (req, _callback) {
                 const conn = _converse.connection;
                 conn.connected = true;
 
@@ -248,12 +249,13 @@ converse.plugins.add('converse-register', {
                 return true;
             },
 
+            /**
+             * Handler for {@link _converse.RegisterPanel#getRegistrationFields}
+             * @private
+             * @method _converse.RegisterPanel#onRegistrationFields
+             * @param { XMLElement } stanza - The query stanza.
+             */
             onRegistrationFields (stanza) {
-                /*  Handler for Registration Fields Request.
-                 *
-                 *  Parameters:
-                 *    (XMLElement) elem - The query stanza.
-                 */
                 if (stanza.getAttribute("type") === "error") {
                     _converse.connection._changeConnectStatus(
                         Strophe.Status.REGIFAIL,
@@ -287,9 +289,9 @@ converse.plugins.add('converse-register', {
                     domain: null,
                     form_type: null
                 };
-                _.extend(this, defaults);
+                Object.assign(this, defaults);
                 if (settings) {
-                    _.extend(this, _.pick(settings, _.keys(defaults)));
+                    Object.assign(this, _.pick(settings, Object.keys(defaults)));
                 }
             },
 
@@ -309,13 +311,13 @@ converse.plugins.add('converse-register', {
 
             },
 
+            /**
+             * Callback method that gets called when the user has chosen an XMPP provider
+             * @private
+             * @method _converse.RegisterPanel#onProviderChosen
+             * @param { HTMLElement } form - The form that was submitted
+             */
             onProviderChosen (form) {
-                /* Callback method that gets called when the user has chosen an
-                 * XMPP provider.
-                 *
-                 * Parameters:
-                 *      (HTMLElement) form - The form that was submitted
-                 */
                 const domain_input = form.querySelector('input[name=domain]'),
                     domain = _.get(domain_input, 'value');
                 if (!domain) {
@@ -327,13 +329,13 @@ converse.plugins.add('converse-register', {
                 this.fetchRegistrationForm(domain.trim());
             },
 
+            /**
+             * Fetch a registration form from the requested domain
+             * @private
+             * @method _converse.RegisterPanel#fetchRegistrationForm
+             * @param { String } domain_name - XMPP server domain
+             */
             fetchRegistrationForm (domain_name) {
-                /* This is called with a domain name based on which, it fetches a
-                 * registration form from the requested domain.
-                 *
-                 * Parameters:
-                 *      (String) domain_name - XMPP server domain
-                 */
                 if (!this.model.get('registration_form_rendered')) {
                     this.renderRegistrationRequest();
                 }
@@ -386,16 +388,14 @@ converse.plugins.add('converse-register', {
                 return this;
             },
 
+            /**
+             * Callback function called by Strophe whenever the connection status changes.
+             * Passed to Strophe specifically during a registration attempt.
+             * @private
+             * @method _converse.RegisterPanel#onConnectStatusChanged
+             * @param { integer } status_code - The Strophe.Status status code
+             */
             onConnectStatusChanged(status_code) {
-                /* Callback function called by Strophe whenever the
-                 * connection status changes.
-                 *
-                 * Passed to Strophe specifically during a registration
-                 * attempt.
-                 *
-                 * Parameters:
-                 *      (Integer) status_code - The Stroph.Status status code
-                 */
                 _converse.log('converse-register: onConnectStatusChanged');
                 if (_.includes([
                             Strophe.Status.DISCONNECTED,
@@ -436,7 +436,7 @@ converse.plugins.add('converse-register', {
             },
 
             renderLegacyRegistrationForm (form) {
-                _.each(_.keys(this.fields), (key) => {
+                Object.keys(this.fields).forEach(key => {
                     if (key === "username") {
                         form.insertAdjacentHTML(
                             'beforeend',
@@ -464,21 +464,20 @@ converse.plugins.add('converse-register', {
                     }
                 });
                 // Show urls
-                _.each(this.urls, (url) => {
-                    form.insertAdjacentHTML(
-                        'afterend',
-                        '<a target="blank" rel="noopener" href="'+url+'">'+url+'</a>'
-                    );
-                });
+                this.urls.forEach(u => form.insertAdjacentHTML(
+                    'afterend',
+                    '<a target="blank" rel="noopener" href="'+u+'">'+u+'</a>'
+                ));
             },
 
+            /**
+             * Renders the registration form based on the XForm fields
+             * received from the XMPP server.
+             * @private
+             * @method _converse.RegisterPanel#renderRegistrationForm
+             * @param { XMLElement } stanza - The IQ stanza received from the XMPP server.
+             */
             renderRegistrationForm (stanza) {
-                /* Renders the registration form based on the XForm fields
-                 * received from the XMPP server.
-                 *
-                 * Parameters:
-                 *      (XMLElement) stanza - The IQ stanza received from the XMPP server.
-                 */
                 const form = this.el.querySelector('form');
                 form.innerHTML = tpl_registration_form({
                     '__': _converse.__,
@@ -490,10 +489,10 @@ converse.plugins.add('converse-register', {
 
                 const buttons = form.querySelector('fieldset.buttons');
                 if (this.form_type === 'xform') {
-                    _.each(stanza.querySelectorAll('field'), (field) => {
+                    stanza.querySelectorAll('field').forEach(field => {
                         buttons.insertAdjacentHTML(
                             'beforebegin',
-                            utils.xForm2webForm(field, stanza, this.domain)
+                            utils.xForm2webForm(field, stanza, {'domain': this.domain})
                         );
                     });
                 } else {
@@ -528,18 +527,16 @@ converse.plugins.add('converse-register', {
                 flash.classList.remove('hidden');
             },
 
+            /**
+             * Report back to the user any error messages received from the
+             * XMPP server after attempted registration.
+             * @private
+             * @method _converse.RegisterPanel#reportErrors
+             * @param { XMLElement } stanza - The IQ stanza received from the XMPP server
+             */
             reportErrors (stanza) {
-                /* Report back to the user any error messages received from the
-                 * XMPP server after attempted registration.
-                 *
-                 * Parameters:
-                 *      (XMLElement) stanza - The IQ stanza received from the
-                 *      XMPP server.
-                 */
                 const errors = stanza.querySelectorAll('error');
-                _.each(errors, (error) => {
-                    this.showValidationError(error.textContent);
-                });
+                errors.forEach(e => this.showValidationError(e.textContent));
                 if (!errors.length) {
                     const message = __('The provider rejected your registration attempt. '+
                         'Please check the values you entered for correctness.');
@@ -568,14 +565,14 @@ converse.plugins.add('converse-register', {
                 }
             },
 
+            /**
+             * Handler, when the user submits the registration form.
+             * Provides form error feedback or starts the registration process.
+             * @private
+             * @method _converse.RegisterPanel#submitRegistrationForm
+             * @param { HTMLElement } form - The HTML form that was submitted
+             */
             submitRegistrationForm (form) {
-                /* Handler, when the user submits the registration form.
-                 * Provides form error feedback or starts the registration
-                 * process.
-                 *
-                 * Parameters:
-                 *      (HTMLElement) form - The HTML form that was submitted
-                 */
                 const has_empty_inputs = _.reduce(
                     this.el.querySelectorAll('input.required'),
                     function (result, input) {
@@ -593,26 +590,21 @@ converse.plugins.add('converse-register', {
 
                 if (this.form_type === 'xform') {
                     iq.c("x", {xmlns: Strophe.NS.XFORM, type: 'submit'});
-                    _.each(inputs, (input) => {
-                        iq.cnode(utils.webForm2xForm(input)).up();
-                    });
+                    inputs.forEach(input => iq.cnode(utils.webForm2xForm(input)).up());
                 } else {
-                    _.each(inputs, (input) => {
-                        iq.c(input.getAttribute('name'), {}, input.value);
-                    });
+                    inputs.forEach(input => iq.c(input.getAttribute('name'), {}, input.value));
                 }
                 _converse.connection._addSysHandler(this._onRegisterIQ.bind(this), null, "iq", null, null);
                 _converse.connection.send(iq);
                 this.setFields(iq.tree());
             },
 
+            /* Stores the values that will be sent to the XMPP server during attempted registration.
+             * @private
+             * @method _converse.RegisterPanel#setFields
+             * @param { XMLElement } stanza - the IQ stanza that will be sent to the XMPP server.
+             */
             setFields (stanza) {
-                /* Stores the values that will be sent to the XMPP server
-                 * during attempted registration.
-                 *
-                 * Parameters:
-                 *      (XMLElement) stanza - the IQ stanza that will be sent to the XMPP server.
-                 */
                 const query = stanza.querySelector('query');
                 const xform = sizzle(`x[xmlns="${Strophe.NS.XFORM}"]`, query);
                 if (xform.length > 0) {
@@ -623,7 +615,7 @@ converse.plugins.add('converse-register', {
             },
 
             _setFieldsFromLegacy (query) {
-                _.each(query.children, (field) => {
+                [].forEach.call(query.children, field => {
                     if (field.tagName.toLowerCase() === 'instructions') {
                         this.instructions = Strophe.getText(field);
                         return;
@@ -641,7 +633,7 @@ converse.plugins.add('converse-register', {
             _setFieldsFromXForm (xform) {
                 this.title = _.get(xform.querySelector('title'), 'textContent');
                 this.instructions = _.get(xform.querySelector('instructions'), 'textContent');
-                _.each(xform.querySelectorAll('field'), (field) => {
+                xform.querySelectorAll('field').forEach(field => {
                     const _var = field.getAttribute('var');
                     if (_var) {
                         this.fields[_var.toLowerCase()] = _.get(field.querySelector('value'), 'textContent', '');
@@ -653,14 +645,15 @@ converse.plugins.add('converse-register', {
                 this.form_type = 'xform';
             },
 
+            /**
+             * Callback method that gets called when a return IQ stanza
+             * is received from the XMPP server, after attempting to
+             * register a new user.
+             * @private
+             * @method _converse.RegisterPanel#reportErrors
+             * @param { XMLElement } stanza - The IQ stanza.
+             */
             _onRegisterIQ (stanza) {
-                /* Callback method that gets called when a return IQ stanza
-                 * is received from the XMPP server, after attempting to
-                 * register a new user.
-                 *
-                 * Parameters:
-                 *      (XMLElement) stanza - The IQ stanza.
-                 */
                 if (stanza.getAttribute("type") === "error") {
                     _converse.log("Registration failed.", Strophe.LogLevel.ERROR);
                     this.reportErrors(stanza);
@@ -684,6 +677,12 @@ converse.plugins.add('converse-register', {
                 return false;
             }
         });
+
+        /************************ BEGIN Event Handlers ************************/
+        _converse.api.listen.on('controlboxInitialized', view => {
+            view.model.on('change:active-form', view.showLoginOrRegisterForm, view);
+        });
+        /************************ END Event Handlers ************************/
     }
 });
 

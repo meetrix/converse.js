@@ -115,15 +115,11 @@
 
         it("is highlighted if its currently open", mock.initConverse(
             null, ['rosterGroupsFetched', 'chatBoxesFetched'],
-            { whitelisted_plugins: ['converse-roomslist'],
-              allow_bookmarks: false // Makes testing easier, otherwise we
-                                     // have to mock stanza traffic.
+            { view_mode: 'fullscreen',
+              allow_bookmarks: false // Makes testing easier, otherwise we have to mock stanza traffic.
             }, async function (done, _converse) {
 
-            spyOn(_converse, 'isUniView').and.callFake(() => true);
-
             let room_els, item;
-            test_utils.openControlBox();
             await _converse.api.rooms.open('coven@chat.shakespeare.lit', {'nick': 'some1'});
             room_els = _converse.rooms_list_view.el.querySelectorAll(".available-chatroom");
             expect(room_els.length).toBe(1);
@@ -139,6 +135,8 @@
             expect(room_els.length).toBe(1);
             item = room_els[0];
             expect(item.textContent.trim()).toBe('balcony@chat.shakespeare.lit');
+            const conv_el = document.querySelector('#conversejs');
+            conv_el.parentElement.removeChild(conv_el);
             done();
         }));
 
@@ -153,11 +151,11 @@
             const room_jid = 'coven@chat.shakespeare.lit';
             test_utils.openControlBox();
             await _converse.api.rooms.open(room_jid, {'nick': 'some1'});
-            const last_stanza = await test_utils.waitUntil(() => _.get(_.filter(
+            const last_stanza = await test_utils.waitUntil(() => _.filter(
                 IQ_stanzas,
-                iq => iq.nodeTree.querySelector(
+                iq => iq.querySelector(
                     `iq[to="${room_jid}"] query[xmlns="http://jabber.org/protocol/disco#info"]`
-                )).pop(), 'nodeTree'));
+                )).pop());
             const view = _converse.chatboxviews.get(room_jid);
             const IQ_id = last_stanza.getAttribute('id');
             const features_stanza = $iq({
@@ -208,7 +206,7 @@
             info_el.click();
 
             const  modal = view.model.room_details_modal;
-            await test_utils.waitUntil(() => u.isVisible(modal.el), 2000);
+            await test_utils.waitUntil(() => u.isVisible(modal.el), 1000);
             let els = modal.el.querySelectorAll('p.room-info');
             expect(els[0].textContent).toBe("Name: A Dark Cave")
             expect(els[1].textContent).toBe("Groupchat address (JID): coven@chat.shakespeare.lit")

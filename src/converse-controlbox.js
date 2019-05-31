@@ -12,14 +12,13 @@ import "converse-rosterview";
 import _FormData from "formdata-polyfill";
 import bootstrap from "bootstrap.native";
 import converse from "@converse/headless/converse-core";
-import fp from "@converse/headless/lodash.fp";
 import tpl_brand_heading from "templates/converse_brand_heading.html";
 import tpl_controlbox from "templates/controlbox.html";
 import tpl_controlbox_toggle from "templates/controlbox_toggle.html";
 import tpl_login_panel from "templates/login_panel.html";
 
 const CHATBOX_TYPE = 'chatbox';
-const { Strophe, Backbone, Promise, _, moment } = converse.env;
+const { Strophe, Backbone, Promise, _, dayjs } = converse.env;
 const u = converse.env.utils;
 
 const CONNECTION_STATUS_CSS_CLASS = {
@@ -74,7 +73,7 @@ converse.plugins.add('converse-controlbox', {
     dependencies: ["converse-modal", "converse-chatboxes", "converse-rosterview", "converse-chatview"],
 
     enabled (_converse) {
-        return _converse.view_mode !== 'embedded';
+        return !_converse.singleton;
     },
 
     overrides: {
@@ -92,18 +91,13 @@ converse.plugins.add('converse-controlbox', {
                 } else {
                     return this.__super__.model.apply(this, arguments);
                 }
-            },
-
-            chatBoxMayBeShown (chatbox) {
-                return this.__super__.chatBoxMayBeShown.apply(this, arguments) &&
-                       chatbox.get('id') !== 'controlbox';
-            },
+            }
         },
 
         ChatBoxViews: {
             closeAllChatBoxes () {
                 const { _converse } = this.__super__;
-                this.each(function (view) {
+                this.forEach(function (view) {
                     if (view.model.get('id') === 'controlbox' &&
                             (_converse.disconnection_cause !== _converse.LOGOUT || _converse.show_controlbox_by_default)) {
                         return;
@@ -111,23 +105,6 @@ converse.plugins.add('converse-controlbox', {
                     view.close();
                 });
                 return this;
-            },
-
-            getChatBoxWidth (view) {
-                const { _converse } = this.__super__;
-                const controlbox = this.get('controlbox');
-                if (view.model.get('id') === 'controlbox') {
-                    /* We return the width of the controlbox or its toggle,
-                     * depending on which is visible.
-                     */
-                    if (!controlbox || !u.isVisible(controlbox.el)) {
-                        return u.getOuterWidth(_converse.controlboxtoggle.el, true);
-                    } else {
-                        return u.getOuterWidth(controlbox.el, true);
-                    }
-                } else {
-                    return this.__super__.getChatBoxWidth.apply(this, arguments);
-                }
             }
         },
 
@@ -135,7 +112,7 @@ converse.plugins.add('converse-controlbox', {
             validate (attrs, options) {
                 const { _converse } = this.__super__;
                 if (attrs.type === _converse.CONTROLBOX_TYPE) {
-                    if (_converse.view_mode === 'embedded')  {
+                    if (_converse.view_mode === 'embedded' && _converse.singleton)  {
                         return 'Controlbox not relevant in embedded view mode';
                     }
                     return;
@@ -143,9 +120,17 @@ converse.plugins.add('converse-controlbox', {
                 return this.__super__.validate.apply(this, arguments);
             },
 
+            maybeShow (force) {
+                if (!force && this.get('id') === 'controlbox') {
+                   // Must return the chatbox
+                   return this;
+                }
+                return this.__super__.maybeShow.apply(this, arguments);
+            },
+
             initialize () {
                 if (this.get('id') === 'controlbox') {
-                    this.set({'time_opened': moment(0).valueOf()});
+                    this.set({'time_opened': dayjs(0).valueOf()});
                 } else {
                     this.__super__.initialize.apply(this, arguments);
                 }
@@ -185,19 +170,21 @@ converse.plugins.add('converse-controlbox', {
         const addControlBox = () => _converse.chatboxes.add({'id': 'controlbox'});
 
         _converse.ControlBox = _converse.ChatBox.extend({
-            defaults: {
-                'bookmarked': false,
-                'box_id': 'controlbox',
-                'chat_state': undefined,
-                'closed': !_converse.show_controlbox_by_default,
-                'num_unread': 0,
-                'type': _converse.CONTROLBOX_TYPE,
-                'url': ''
+
+            defaults () {
+                return {
+                    'bookmarked': false,
+                    'box_id': 'controlbox',
+                    'chat_state': undefined,
+                    'closed': !_converse.show_controlbox_by_default,
+                    'num_unread': 0,
+                    'time_opened': this.get('time_opened') || (new Date()).getTime(),
+                    'type': _converse.CONTROLBOX_TYPE,
+                    'url': ''
+                }
             },
 
-            initialize () {
-                u.safeSave(this, {'time_opened': this.get('time_opened') || moment().valueOf()});
-            }
+            onReconnection: _.noop
         });
 
 
@@ -224,7 +211,16 @@ converse.plugins.add('converse-controlbox', {
                 if (this.model.get('connected')) {
                     this.insertRoster();
                 }
-                _converse.emit('controlboxInitialized', this);
+                /**
+                 * Triggered when the _converse.ControlBoxView has been initialized and therefore
+                 * exists. The controlbox contains the login and register forms when the user is
+                 * logged out and a list of the user's contacts and group chats when logged in.
+                 * @event _converse#controlboxInitialized
+                 * @type { _converse.ControlBoxView }
+                 * @example _converse.api.listen.on('controlboxInitialized', view => { ... });
+                 */
+                _converse.api.trigger('controlboxInitialized', this);
+                _converse.api.trigger('chatBoxInitialized', this);
             },
 
             render () {
@@ -233,7 +229,7 @@ converse.plugins.add('converse-controlbox', {
                         this.model.set('closed', !_converse.show_controlbox_by_default);
                     }
                 }
-                this.el.innerHTML = tpl_controlbox(_.extend(this.model.toJSON()));
+                this.el.innerHTML = tpl_controlbox(Object.assign(this.model.toJSON()));
 
                 if (!this.model.get('closed')) {
                     this.show();
@@ -331,7 +327,7 @@ converse.plugins.add('converse-controlbox', {
                 } else {
                     this.model.trigger('hide');
                 }
-                _converse.emit('controlBoxClosed', this);
+                _converse.api.trigger('controlBoxClosed', this);
                 return this;
             },
 
@@ -348,7 +344,7 @@ converse.plugins.add('converse-controlbox', {
                     return;
                 }
                 u.addClass('hidden', this.el);
-                _converse.emit('chatBoxClosed', this);
+                _converse.api.trigger('chatBoxClosed', this);
                 if (!_converse.connection.connected) {
                     _converse.controlboxtoggle.render();
                 }
@@ -359,7 +355,7 @@ converse.plugins.add('converse-controlbox', {
             onControlBoxToggleHidden () {
                 this.model.set('closed', false);
                 this.el.classList.remove('hidden');
-                _converse.emit('controlBoxOpened', this);
+                _converse.api.trigger('controlBoxOpened', this);
             },
 
             show () {
@@ -370,11 +366,6 @@ converse.plugins.add('converse-controlbox', {
             },
 
             showHelpMessages () {
-                /* Override showHelpMessages in ChatBoxView, for now do nothing.
-                 *
-                 * Parameters:
-                 *  (Array) msgs: Array of messages
-                 */
                 return;
             }
         });
@@ -410,7 +401,7 @@ converse.plugins.add('converse-controlbox', {
                     feedback_class = CONNECTION_STATUS_CSS_CLASS[pretty_status];
                 }
                 return tpl_login_panel(
-                    _.extend(this.model.toJSON(), {
+                    Object.assign(this.model.toJSON(), {
                         '__': __,
                         '_converse': _converse,
                         'ANONYMOUS': _converse.ANONYMOUS,
@@ -570,7 +561,7 @@ converse.plugins.add('converse-controlbox', {
                     controlbox = addControlBox();
                 }
                 if (_converse.connection.connected) {
-                    controlbox.save({closed: false});
+                    controlbox.save({'closed': false});
                 } else {
                     controlbox.trigger('show');
                 }
@@ -591,7 +582,7 @@ converse.plugins.add('converse-controlbox', {
             }
         });
 
-        _converse.on('chatBoxViewsInitialized', () => {
+        _converse.api.listen.on('chatBoxViewsInitialized', () => {
             const that = _converse.chatboxviews;
             _converse.chatboxes.on('add', item => {
                 if (item.get('type') === _converse.CONTROLBOX_TYPE) {
@@ -606,7 +597,7 @@ converse.plugins.add('converse-controlbox', {
             });
         });
 
-        _converse.on('clearSession', () => {
+        _converse.api.listen.on('clearSession', () => {
             if (_converse.config.get('trusted')) {
                 const chatboxes = _.get(_converse, 'chatboxes', null);
                 if (!_.isNil(chatboxes)) {
@@ -625,7 +616,7 @@ converse.plugins.add('converse-controlbox', {
             _converse.api.waitUntil('chatBoxViewsInitialized')
         ]).then(addControlBox).catch(_.partial(_converse.log, _, Strophe.LogLevel.FATAL));
 
-        _converse.on('chatBoxesFetched', () => {
+        _converse.api.listen.on('chatBoxesFetched', () => {
             const controlbox = _converse.chatboxes.get('controlbox') || addControlBox();
             controlbox.save({connected:true});
         });
@@ -652,7 +643,7 @@ converse.plugins.add('converse-controlbox', {
 
 
         /************************ BEGIN API ************************/
-        _.extend(_converse.api, {
+        Object.assign(_converse.api, {
             /**
              * The "controlbox" namespace groups methods pertaining to the
              * controlbox view
@@ -663,6 +654,8 @@ converse.plugins.add('converse-controlbox', {
             'controlbox': {
                 /**
                  * Retrieves the controlbox view.
+                 *
+                 * @method _converse.api.controlbox.get
                  *
                  * @example
                  * const view = _converse.api.controlbox.get();

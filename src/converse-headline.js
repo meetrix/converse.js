@@ -1,14 +1,14 @@
 // Converse.js (A browser based XMPP chat client)
 // https://conversejs.org
 //
-// Copyright (c) 2012-2017, Jan-Carel Brand <jc@opkode.com>
+// Copyright (c) 2019, Jan-Carel Brand <jc@opkode.com>
 // Licensed under the Mozilla Public License (MPLv2)
 
 import "converse-chatview";
 import converse from "@converse/headless/converse-core";
 import tpl_chatbox from "templates/chatbox.html";
 
-const { _, utils } = converse.env;
+const { _, dayjs, utils } = converse.env;
 
 
 converse.plugins.add('converse-headline', {
@@ -52,13 +52,21 @@ converse.plugins.add('converse-headline', {
             { __ } = _converse;
 
         _converse.HeadlinesBox = _converse.ChatBox.extend({
-            defaults: {
-                'type': _converse.HEADLINES_TYPE,
-                'bookmarked': false,
-                'chat_state': undefined,
-                'num_unread': 0,
-                'url': ''
+            defaults () {
+                return {
+                    'bookmarked': false,
+                    'hidden': _.includes(['mobile', 'fullscreen'], _converse.view_mode),
+                    'message_type': 'headline',
+                    'num_unread': 0,
+                    'time_opened': this.get('time_opened') || (new Date()).getTime(),
+                    'type': _converse.HEADLINES_TYPE
+                }
             },
+
+            initialize () {
+                this.initMessages();
+                this.set({'box_id': `box-${btoa(this.get('jid'))}`});
+            }
         });
 
 
@@ -68,27 +76,28 @@ converse.plugins.add('converse-headline', {
             events: {
                 'click .close-chatbox-button': 'close',
                 'click .toggle-chatbox-button': 'minimize',
-                'keypress textarea.chat-textarea': 'keyPressed'
+                'keypress textarea.chat-textarea': 'onKeyDown'
             },
 
             initialize () {
                 this.initDebounced();
 
-                this.disable_mam = true; // Don't do MAM queries for this box
+                this.model.disable_mam = true; // Don't do MAM queries for this box
                 this.model.messages.on('add', this.onMessageAdded, this);
                 this.model.on('show', this.show, this);
                 this.model.on('destroy', this.hide, this);
                 this.model.on('change:minimized', this.onMinimizedChanged, this);
 
-                this.render().insertHeading().fetchMessages().insertIntoDOM().hide();
-                _converse.emit('chatBoxOpened', this);
-                _converse.emit('chatBoxInitialized', this);
+                this.render().insertHeading()
+                this.updateAfterMessagesFetched();
+                this.insertIntoDOM().hide();
+                _converse.api.trigger('chatBoxInitialized', this);
             },
 
             render () {
                 this.el.setAttribute('id', this.model.get('box_id'))
                 this.el.innerHTML = tpl_chatbox(
-                    _.extend(this.model.toJSON(), {
+                    Object.assign(this.model.toJSON(), {
                             info_close: '',
                             label_personal_message: '',
                             show_send_button: false,
@@ -109,8 +118,8 @@ converse.plugins.add('converse-headline', {
             /* Handler method for all incoming messages of type "headline". */
             if (utils.isHeadlineMessage(_converse, message)) {
                 const from_jid = message.getAttribute('from');
-                if (_.includes(from_jid, '@') && 
-                        !_converse.api.contacts.get(from_jid) &&
+                if (_.includes(from_jid, '@') &&
+                        !_converse.roster.get(from_jid) &&
                         !_converse.allow_non_roster_messaging) {
                     return;
                 }
@@ -127,7 +136,7 @@ converse.plugins.add('converse-headline', {
                 });
                 const attrs = await chatbox.getMessageAttributesFromStanza(message, message);
                 await chatbox.messages.create(attrs);
-                _converse.emit('message', {'chatbox': chatbox, 'stanza': message});
+                _converse.api.trigger('message', {'chatbox': chatbox, 'stanza': message});
             }
         }
 
@@ -137,15 +146,15 @@ converse.plugins.add('converse-headline', {
                 return true
             }, null, 'message');
         }
-        _converse.on('connected', registerHeadlineHandler);
-        _converse.on('reconnected', registerHeadlineHandler);
+        _converse.api.listen.on('connected', registerHeadlineHandler);
+        _converse.api.listen.on('reconnected', registerHeadlineHandler);
 
 
-        _converse.on('chatBoxViewsInitialized', () => {
-            const that = _converse.chatboxviews;
+        _converse.api.listen.on('chatBoxViewsInitialized', () => {
+            const views = _converse.chatboxviews;
             _converse.chatboxes.on('add', item => {
-                if (!that.get(item.get('id')) && item.get('type') === _converse.HEADLINES_TYPE) {
-                    that.add(item.get('id'), new _converse.HeadlinesBoxView({model: item}));
+                if (!views.get(item.get('id')) && item.get('type') === _converse.HEADLINES_TYPE) {
+                    views.add(item.get('id'), new _converse.HeadlinesBoxView({model: item}));
                 }
             });
         });

@@ -1,4 +1,9 @@
 #conversejs {
+    .older-msg {
+        time {
+            font-weight: bold;
+        }
+    }
     .message {
         .mention {
             font-weight: bold;
@@ -65,6 +70,10 @@
         }
         &.chat-msg--action {
             font-style: italic;
+
+            .chat-msg__author {
+                padding-right: 0.2em;
+            }
         }
 
         &.chat-msg {
@@ -72,7 +81,7 @@
             width: 100%;
             flex-direction: row;
             overflow: auto; // Ensures that content stays inside
-            padding: 0.25rem 1rem;
+            padding: 0.125rem 1rem;
 
             &.onload {
                 animation: colorchange-chatmessage 1s;
@@ -178,8 +187,9 @@
             }
 
             .chat-msg__text--larger {
-                font-size: 2em;
+                font-size: 1.6em;
                 padding-top: 0.25em;
+                padding-bottom: 0.25em;
             }
 
             .chat-msg__media {

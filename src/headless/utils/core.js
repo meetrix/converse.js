@@ -14,6 +14,11 @@ import { Strophe } from "strophe.js";
 import _ from "../lodash.noconflict";
 import sizzle from "sizzle";
 
+
+/**
+ * The utils object
+ * @namespace u
+ */
 const u = {};
 
 u.toStanza = function (string) {
@@ -139,7 +144,7 @@ u.applyUserSettings = function applyUserSettings (context, settings, user_settin
         if (_.isUndefined(user_settings[k])) {
             continue;
         }
-        if (_.isObject(settings[k]) && !_.isArray(settings[k])) {
+        if (_.isObject(settings[k]) && !Array.isArray(settings[k])) {
             applyUserSettings(context[k], settings[k], user_settings[k]);
         } else {
             context[k] = user_settings[k];
@@ -147,14 +152,15 @@ u.applyUserSettings = function applyUserSettings (context, settings, user_settin
     }
 };
 
+/**
+ * Converts an HTML string into a DOM Node.
+ * Expects that the HTML string has only one top-level element,
+ * i.e. not multiple ones.
+ * @private
+ * @method u#stringToNode
+ * @param { String } s - The HTML string
+ */
 u.stringToNode = function (s) {
-    /* Converts an HTML string into a DOM Node.
-     * Expects that the HTML string has only one top-level element,
-     * i.e. not multiple ones.
-     *
-     * Parameters:
-     *      (String) s - The HTML string
-     */
     var div = document.createElement('div');
     div.innerHTML = s;
     return div.firstElementChild;
@@ -170,26 +176,28 @@ u.getOuterWidth = function (el, include_margin=false) {
     return width;
 };
 
+/**
+ * Converts an HTML string into a DOM element.
+ * Expects that the HTML string has only one top-level element,
+ * i.e. not multiple ones.
+ * @private
+ * @method u#stringToElement
+ * @param { String } s - The HTML string
+ */
 u.stringToElement = function (s) {
-    /* Converts an HTML string into a DOM element.
-     * Expects that the HTML string has only one top-level element,
-     * i.e. not multiple ones.
-     *
-     * Parameters:
-     *      (String) s - The HTML string
-     */
     var div = document.createElement('div');
     div.innerHTML = s;
     return div.firstElementChild;
 };
 
+/**
+ * Checks whether the DOM element matches the given selector.
+ * @private
+ * @method u#matchesSelector
+ * @param { DOMElement } el - The DOM element
+ * @param { String } selector - The selector
+ */
 u.matchesSelector = function (el, selector) {
-    /* Checks whether the DOM element matches the given selector.
-     *
-     * Parameters:
-     *      (DOMElement) el - The DOM element
-     *      (String) selector - The selector
-     */
     const match = (
         el.matches ||
         el.matchesSelector ||
@@ -201,15 +209,14 @@ u.matchesSelector = function (el, selector) {
     return match ? match.call(el, selector) : false;
 };
 
+/**
+ * Returns a list of children of the DOM element that match the selector.
+ * @private
+ * @method u#queryChildren
+ * @param { DOMElement } el - the DOM element
+ * @param { String } selector - the selector they should be matched against
+ */
 u.queryChildren = function (el, selector) {
-    /* Returns a list of children of the DOM element that match the
-     * selector.
-     *
-     *  Parameters:
-     *      (DOMElement) el - the DOM element
-     *      (String) selector - the selector they should be matched
-     *          against.
-     */
     return _.filter(el.childNodes, _.partial(u.matchesSelector, _, selector));
 };
 
@@ -296,16 +303,17 @@ u.interpolate = function (string, o) {
         });
 };
 
+/**
+ * Call the callback once all the events have been triggered
+ * @private
+ * @method u#onMultipleEvents
+ * @param { Array } events: An array of objects, with keys `object` and
+ *   `event`, representing the event name and the object it's
+ *    triggered upon.
+ * @param { Function } callback: The function to call once all events have
+ *    been triggered.
+ */
 u.onMultipleEvents = function (events=[], callback) {
-    /* Call the callback once all the events have been triggered
-     *
-     * Parameters:
-     *  (Array) events: An array of objects, with keys `object` and
-     *      `event`, representing the event name and the object it's
-     *      triggered upon.
-     *  (Function) callback: The function to call once all events have
-     *      been triggered.
-     */
     let triggered = [];
 
     function handler (result) {
@@ -340,11 +348,11 @@ u.getCurrentWord = function (input, index) {
 };
 
 u.replaceCurrentWord = function (input, new_value) {
-    const cursor = input.selectionEnd || undefined,
-          current_word = _.last(input.value.slice(0, cursor).split(' ')),
+    const caret = input.selectionEnd || undefined,
+          current_word = _.last(input.value.slice(0, caret).split(' ')),
           value = input.value;
-    input.value = value.slice(0, cursor - current_word.length) + `${new_value} ` + value.slice(cursor);
-    input.selectionEnd = cursor - current_word.length + new_value.length + 1;
+    input.value = value.slice(0, caret - current_word.length) + `${new_value} ` + value.slice(caret);
+    input.selectionEnd = caret - current_word.length + new_value.length + 1;
 };
 
 u.triggerEvent = function (el, name, type="Event", bubbles=true, cancelable=true) {
@@ -425,7 +433,7 @@ u.getRandomInt = function (max) {
     return Math.floor(Math.random() * Math.floor(max));
 };
 
-u.putCurserAtEnd = function (textarea) {
+u.placeCaretAtEnd = function (textarea) {
     if (textarea !== document.activeElement) {
         textarea.focus();
     }

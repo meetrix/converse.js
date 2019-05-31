@@ -68,7 +68,6 @@ Example:
 .. code-block:: javascript
 
     converse.initialize({
-            allow_otr: true,
             auto_list_rooms: false,
             auto_subscribe: false,
             bosh_service_url: 'https://bind.example.com',
@@ -141,7 +140,7 @@ For example:
 
 .. code-block:: javascript
 
-    _converse.emit('foo-completed');
+    _converse.api.trigger('foo-completed');
 
 Additionally, if a promise has been registered under the same name
 (via ``_converse.api.promises.add``), then that promise will also be resolved
@@ -1152,7 +1151,7 @@ For example:
 
 .. code-block:: javascript
 
-    _converse.api.emit('foo-completed');
+    _converse.api.trigger('foo-completed');
 
 
 The **settings** grouping

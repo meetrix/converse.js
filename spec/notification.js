@@ -1,6 +1,6 @@
 (function (root, factory) {
-    define(["jquery", "jasmine", "mock", "test-utils"], factory);
-} (this, function ($, jasmine, mock, test_utils) {
+    define(["jasmine", "mock", "test-utils"], factory);
+} (this, function (jasmine, mock, test_utils) {
     "use strict";
     const Strophe = converse.env.Strophe,
           _ = converse.env._,
@@ -156,7 +156,7 @@
                 it("an HTML5 Notification is received", mock.initConverse((done, _converse) => {
                     spyOn(_converse, 'areDesktopNotificationsEnabled').and.returnValue(true);
                     spyOn(_converse, 'showContactRequestNotification');
-                    _converse.emit('contactRequest', {'fullname': 'Peter Parker', 'jid': 'peter@parker.com'});
+                    _converse.api.trigger('contactRequest', {'fullname': 'Peter Parker', 'jid': 'peter@parker.com'});
                     expect(_converse.areDesktopNotificationsEnabled).toHaveBeenCalled();
                     expect(_converse.showContactRequestNotification).toHaveBeenCalled();
                     done();

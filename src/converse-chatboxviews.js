@@ -6,7 +6,7 @@
 
 import "@converse/headless/converse-chatboxes";
 import "backbone.nativeview";
-import "backbone.overview";
+import { Overview } from "backbone.overview";
 import converse from "@converse/headless/converse-core";
 import tpl_avatar from "templates/avatar.svg";
 import tpl_background_logo from "templates/background_logo.html";
@@ -23,22 +23,24 @@ const AvatarMixin = {
         if (_.isNull(canvas_el)) {
             return;
         }
-        const image_type = this.model.vcard.get('image_type'),
-                image = this.model.vcard.get('image');
-
-        canvas_el.outerHTML = tpl_avatar({
-            'classes': canvas_el.getAttribute('class'),
-            'width': canvas_el.width,
-            'height': canvas_el.height,
-            'image': "data:" + image_type + ";base64," + image,
-        });
+        if (this.model.vcard) {
+            const data = {
+                'classes': canvas_el.getAttribute('class'),
+                'width': canvas_el.width,
+                'height': canvas_el.height,
+            }
+            const image_type = this.model.vcard.get('image_type'),
+                  image = this.model.vcard.get('image');
+            data['image'] = "data:" + image_type + ";base64," + image;
+            canvas_el.outerHTML = tpl_avatar(data);
+        }
     },
 };
 
 
 converse.plugins.add('converse-chatboxviews', {
 
-    dependencies: ["converse-chatboxes"],
+    dependencies: ["converse-chatboxes", "converse-vcard"],
 
     overrides: {
         // Overrides mentioned here will be picked up by converse.js's
@@ -47,7 +49,7 @@ converse.plugins.add('converse-chatboxviews', {
 
         initStatus: function (reconnecting) {
             const { _converse } = this.__super__;
-            if (!reconnecting) {
+            if (!reconnecting && _converse.chatboxviews) {
                 _converse.chatboxviews.closeAllChatBoxes();
             }
             return this.__super__.initStatus.apply(this, arguments);
@@ -77,7 +79,7 @@ converse.plugins.add('converse-chatboxviews', {
         _converse.VDOMViewWithAvatar = Backbone.VDOMView.extend(AvatarMixin);
 
 
-        _converse.ChatBoxViews = Backbone.Overview.extend({
+        _converse.ChatBoxViews = Overview.extend({
 
             _ensureElement () {
                 /* Override method from backbone.js
@@ -113,6 +115,9 @@ converse.plugins.add('converse-chatboxviews', {
                 const body = document.querySelector('body');
                 body.classList.add(`converse-${_converse.view_mode}`);
                 this.el.classList.add(`converse-${_converse.view_mode}`);
+                if (_converse.singleton) {
+                    this.el.classList.add(`converse-singleton`);
+                }
                 this.render();
             },
 
@@ -141,37 +146,34 @@ converse.plugins.add('converse-chatboxviews', {
                 /* This method gets overridden in src/converse-controlbox.js if
                  * the controlbox plugin is active.
                  */
-                this.each(function (view) { view.close(); });
+                this.forEach(v => v.close());
                 return this;
-            },
-
-            chatBoxMayBeShown (chatbox) {
-                return this.model.chatBoxMayBeShown(chatbox);
             }
         });
 
 
         /************************ BEGIN Event Handlers ************************/
-        _converse.api.waitUntil('rosterContactsFetched').then(() => {
-            _converse.roster.on('add', (contact) => {
-                /* When a new contact is added, check if we already have a
-                 * chatbox open for it, and if so attach it to the chatbox.
-                 */
-                const chatbox = _converse.chatboxes.findWhere({'jid': contact.get('jid')});
-                if (chatbox) {
-                    chatbox.addRelatedContact(contact);
-                }
-            });
-        });
-
         _converse.api.listen.on('chatBoxesInitialized', () => {
             _converse.chatboxviews = new _converse.ChatBoxViews({
                 'model': _converse.chatboxes
             });
-            _converse.emit('chatBoxViewsInitialized');
+            /**
+             * Triggered once the _converse.ChatBoxViews view-colleciton has been initialized
+             * @event _converse#chatBoxViewsInitialized
+             * @example _converse.api.listen.on('chatBoxViewsInitialized', () => { ... });
+             */
+            _converse.api.trigger('chatBoxViewsInitialized');
         });
 
         _converse.api.listen.on('clearSession', () => _converse.chatboxviews.closeAllChatBoxes());
+
+
+        function calculateViewportHeightUnit () {
+            const vh = window.innerHeight * 0.01;
+            document.documentElement.style.setProperty('--vh', `${vh}px`);
+        }
+        _converse.api.listen.on('chatBoxViewsInitialized', () => calculateViewportHeightUnit());
+        window.addEventListener('resize', () => calculateViewportHeightUnit());
         /************************ END Event Handlers ************************/
     }
 });

@@ -7,8 +7,9 @@
     const Strophe = converse.env.Strophe;
     const $iq = converse.env.$iq;
     const $msg = converse.env.$msg;
-    const moment = converse.env.moment;
+    const dayjs = converse.env.dayjs;
     const u = converse.env.utils;
+    const sizzle = converse.env.sizzle;
     // See: https://xmpp.org/rfcs/rfc3921.html
 
     describe("Message Archive Management", function () {
@@ -162,18 +163,17 @@
            it("can be used to query for all archived messages",
                 mock.initConverse(
                     null, ['discoInitialized'], {},
-                    function (done, _converse) {
+                    async function (done, _converse) {
 
-                let sent_stanza, IQ_id;
                 const sendIQ = _converse.connection.sendIQ;
+                await test_utils.waitUntilDiscoConfirmed(_converse, _converse.bare_jid, null, [Strophe.NS.MAM]);
+                let sent_stanza, IQ_id;
                 spyOn(_converse.connection, 'sendIQ').and.callFake(function (iq, callback, errback) {
                     sent_stanza = iq;
                     IQ_id = sendIQ.bind(this)(iq, callback, errback);
                 });
-                if (!_converse.disco_entities.get(_converse.domain).features.findWhere({'var': Strophe.NS.MAM})) {
-                    _converse.disco_entities.get(_converse.domain).features.create({'var': Strophe.NS.MAM});
-                }
                 _converse.api.archive.query();
+                await test_utils.waitUntil(() => sent_stanza);
                 const queryid = sent_stanza.nodeTree.querySelector('query').getAttribute('queryid');
                 expect(sent_stanza.toString()).toBe(
                     `<iq id="${IQ_id}" type="set" xmlns="jabber:client"><query queryid="${queryid}" xmlns="urn:xmpp:mam:2"/></iq>`);
@@ -185,10 +185,7 @@
                     null, [], {},
                     async function (done, _converse) {
 
-                const entity = await _converse.api.disco.entities.get(_converse.domain);
-                if (!entity.features.findWhere({'var': Strophe.NS.MAM})) {
-                    _converse.disco_entities.get(_converse.domain).features.create({'var': Strophe.NS.MAM});
-                }
+                await test_utils.waitUntilDiscoConfirmed(_converse, _converse.bare_jid, null, [Strophe.NS.MAM]);
                 let sent_stanza, IQ_id;
                 const sendIQ = _converse.connection.sendIQ;
                 spyOn(_converse.connection, 'sendIQ').and.callFake(function (iq, callback, errback) {
@@ -196,6 +193,7 @@
                     IQ_id = sendIQ.bind(this)(iq, callback, errback);
                 });
                 _converse.api.archive.query({'with':'juliet@capulet.lit'});
+                await test_utils.waitUntil(() => sent_stanza);
                 const queryid = sent_stanza.nodeTree.querySelector('query').getAttribute('queryid');
                 expect(sent_stanza.toString()).toBe(
                     `<iq id="${IQ_id}" type="set" xmlns="jabber:client">`+
@@ -218,24 +216,17 @@
                     null, [], {},
                     async function (done, _converse) {
 
-                const entity = await _converse.api.disco.entities.get(_converse.domain);
-                if (!entity.features.findWhere({'var': Strophe.NS.MAM})) {
-                    _converse.disco_entities.get(_converse.domain).features.create({'var': Strophe.NS.MAM});
-                }
+                const room_jid = 'coven@chat.shakespeare.lit';
+                _converse.api.archive.query({'with': room_jid, 'groupchat': true});
+                await test_utils.waitUntilDiscoConfirmed(_converse, room_jid, null, [Strophe.NS.MAM]);
 
-                let sent_stanza, IQ_id;
-                const sendIQ = _converse.connection.sendIQ;
-                spyOn(_converse.connection, 'sendIQ').and.callFake(function (iq, callback, errback) {
-                    sent_stanza = iq;
-                    IQ_id = sendIQ.bind(this)(iq, callback, errback);
-                });
-                const callback = jasmine.createSpy('callback');
+                const sent_stanzas = _converse.connection.sent_stanzas;
+                const stanza = await test_utils.waitUntil(
+                    () => sent_stanzas.filter(s => sizzle(`[xmlns="${Strophe.NS.MAM}"]`, s).length).pop());
 
-                _converse.api.archive.query({'with': 'coven@chat.shakespeare.lit', 'groupchat': true}, callback);
-                const queryid = sent_stanza.nodeTree.querySelector('query').getAttribute('queryid');
-
-                expect(sent_stanza.toString()).toBe(
-                    `<iq id="${IQ_id}" to="coven@chat.shakespeare.lit" type="set" xmlns="jabber:client">`+
+                const queryid = stanza.querySelector('query').getAttribute('queryid');
+                expect(Strophe.serialize(stanza)).toBe(
+                    `<iq id="${stanza.getAttribute('id')}" to="coven@chat.shakespeare.lit" type="set" xmlns="jabber:client">`+
                         `<query queryid="${queryid}" xmlns="urn:xmpp:mam:2">`+
                             `<x type="submit" xmlns="jabber:x:data">`+
                                 `<field type="hidden" var="FORM_TYPE">`+
@@ -252,20 +243,15 @@
                     null, [], {},
                     async function (done, _converse) {
 
-                const entity = await _converse.api.disco.entities.get(_converse.domain);
-                if (!entity.features.findWhere({'var': Strophe.NS.MAM})) {
-                    _converse.disco_entities.get(_converse.domain).features.create({'var': Strophe.NS.MAM});
-                }
-                let sent_stanza, IQ_id;
-                const sendIQ = _converse.connection.sendIQ;
-                spyOn(_converse.connection, 'sendIQ').and.callFake(function (iq, callback, errback) {
-                    sent_stanza = iq;
-                    IQ_id = sendIQ.bind(this)(iq, callback, errback);
-                });
-                const callback = jasmine.createSpy('callback');
+                const room_jid = 'coven@chat.shakespeare.lit';
+                const promise = _converse.api.archive.query({'with': room_jid, 'groupchat': true, 'max':'10'});
 
-                _converse.api.archive.query({'with': 'coven@chat.shakespear.lit', 'groupchat': true, 'max':'10'}, callback);
-                const queryid = sent_stanza.nodeTree.querySelector('query').getAttribute('queryid');
+                await test_utils.waitUntilDiscoConfirmed(_converse, room_jid, null, [Strophe.NS.MAM]);
+
+                const sent_stanzas = _converse.connection.sent_stanzas;
+                const sent_stanza = await test_utils.waitUntil(
+                    () => sent_stanzas.filter(s => sizzle(`[xmlns="${Strophe.NS.MAM}"]`, s).length).pop());
+                const queryid = sent_stanza.querySelector('query').getAttribute('queryid');
 
                 /* <message id='iasd207' from='coven@chat.shakespeare.lit' to='hag66@shakespeare.lit/pda'>
                  *     <result xmlns='urn:xmpp:mam:2' queryid='g27' id='34482-21985-73620'>
@@ -310,7 +296,7 @@
                  *     </set>
                  * </iq>
                  */
-                const stanza = $iq({'type': 'result', 'id': IQ_id})
+                const stanza = $iq({'type': 'result', 'id': sent_stanza.getAttribute('id')})
                     .c('fin', {'xmlns': 'urn:xmpp:mam:2'})
                         .c('set',  {'xmlns': 'http://jabber.org/protocol/rsm'})
                             .c('first', {'index': '0'}).t('23452-4534-1').up()
@@ -318,10 +304,8 @@
                             .c('count').t('16');
                 _converse.connection._dataRecv(test_utils.createRequest(stanza));
 
-                await test_utils.waitUntil(() => callback.calls.count());
-                expect(callback).toHaveBeenCalled();
-                const args = callback.calls.argsFor(0);
-                expect(args[0].length).toBe(0);
+                const result = await promise;
+                expect(result.messages.length).toBe(0);
                 done();
            }));
 
@@ -330,23 +314,20 @@
                     null, [], {},
                     async function (done, _converse) {
 
+                await test_utils.waitUntilDiscoConfirmed(_converse, _converse.bare_jid, null, [Strophe.NS.MAM]);
                 let sent_stanza, IQ_id;
                 const sendIQ = _converse.connection.sendIQ;
                 spyOn(_converse.connection, 'sendIQ').and.callFake(function (iq, callback, errback) {
                     sent_stanza = iq;
                     IQ_id = sendIQ.bind(this)(iq, callback, errback);
                 });
-                const entities = await _converse.api.disco.entities.get();
-                if (!entities.get(_converse.domain).features.findWhere({'var': Strophe.NS.MAM})) {
-                    _converse.disco_entities.get(_converse.domain).features.create({'var': Strophe.NS.MAM});
-                }
                 const start = '2010-06-07T00:00:00Z';
                 const end = '2010-07-07T13:23:54Z';
                 _converse.api.archive.query({
                     'start': start,
                     'end': end
-
                 });
+                await test_utils.waitUntil(() => sent_stanza);
                 const queryid = sent_stanza.nodeTree.querySelector('query').getAttribute('queryid');
                 expect(sent_stanza.toString()).toBe(
                     `<iq id="${IQ_id}" type="set" xmlns="jabber:client">`+
@@ -356,10 +337,10 @@
                                 `<value>urn:xmpp:mam:2</value>`+
                             `</field>`+
                             `<field var="start">`+
-                                `<value>${moment(start).format()}</value>`+
+                                `<value>${dayjs(start).toISOString()}</value>`+
                             `</field>`+
                             `<field var="end">`+
-                                `<value>${moment(end).format()}</value>`+
+                                `<value>${dayjs(end).toISOString()}</value>`+
                             `</field>`+
                             `</x>`+
                         `</query>`+
@@ -373,13 +354,12 @@
                     null, [], {},
                     async function (done, _converse) {
 
-                const entity = await _converse.api.disco.entities.get(_converse.domain);
-                if (!entity.features.findWhere({'var': Strophe.NS.MAM})) {
-                    _converse.disco_entities.get(_converse.domain).features.create({'var': Strophe.NS.MAM});
+                await test_utils.waitUntilDiscoConfirmed(_converse, _converse.bare_jid, null, [Strophe.NS.MAM]);
+                try {
+                    await _converse.api.archive.query({'start': 'not a real date'});
+                } catch (e) {
+                    expect(() => {throw e}).toThrow(new TypeError('archive.query: invalid date provided for: start'));
                 }
-                expect(_.partial(_converse.api.archive.query, {'start': 'not a real date'})).toThrow(
-                    new TypeError('archive.query: invalid date provided for: start')
-                );
                 done();
            }));
 
@@ -388,10 +368,7 @@
                     null, [], {},
                     async function (done, _converse) {
 
-                const entity = await _converse.api.disco.entities.get(_converse.domain);
-                if (!entity.features.findWhere({'var': Strophe.NS.MAM})) {
-                    _converse.disco_entities.get(_converse.domain).features.create({'var': Strophe.NS.MAM});
-                }
+                await test_utils.waitUntilDiscoConfirmed(_converse, _converse.bare_jid, null, [Strophe.NS.MAM]);
                 let sent_stanza, IQ_id;
                 const sendIQ = _converse.connection.sendIQ;
                 spyOn(_converse.connection, 'sendIQ').and.callFake(function (iq, callback, errback) {
@@ -403,6 +380,7 @@
                 }
                 const start = '2010-06-07T00:00:00Z';
                 _converse.api.archive.query({'start': start});
+                await test_utils.waitUntil(() => sent_stanza);
                 const queryid = sent_stanza.nodeTree.querySelector('query').getAttribute('queryid');
                 expect(sent_stanza.toString()).toBe(
                     `<iq id="${IQ_id}" type="set" xmlns="jabber:client">`+
@@ -412,7 +390,7 @@
                                 `<value>urn:xmpp:mam:2</value>`+
                             `</field>`+
                             `<field var="start">`+
-                                `<value>${moment(start).format()}</value>`+
+                                `<value>${dayjs(start).toISOString()}</value>`+
                             `</field>`+
                             `</x>`+
                         `</query>`+
@@ -426,10 +404,7 @@
                     null, [], {},
                     async function (done, _converse) {
 
-                const entity = await _converse.api.disco.entities.get(_converse.domain);
-                if (!entity.features.findWhere({'var': Strophe.NS.MAM})) {
-                    _converse.disco_entities.get(_converse.domain).features.create({'var': Strophe.NS.MAM});
-                }
+                await test_utils.waitUntilDiscoConfirmed(_converse, _converse.bare_jid, null, [Strophe.NS.MAM]);
                 let sent_stanza, IQ_id;
                 const sendIQ = _converse.connection.sendIQ;
                 spyOn(_converse.connection, 'sendIQ').and.callFake(function (iq, callback, errback) {
@@ -438,6 +413,7 @@
                 });
                 const start = '2010-06-07T00:00:00Z';
                 _converse.api.archive.query({'start': start, 'max':10});
+                await test_utils.waitUntil(() => sent_stanza);
                 const queryid = sent_stanza.nodeTree.querySelector('query').getAttribute('queryid');
                 expect(sent_stanza.toString()).toBe(
                     `<iq id="${IQ_id}" type="set" xmlns="jabber:client">`+
@@ -447,7 +423,7 @@
                                     `<value>urn:xmpp:mam:2</value>`+
                                 `</field>`+
                                 `<field var="start">`+
-                                    `<value>${moment(start).format()}</value>`+
+                                    `<value>${dayjs(start).toISOString()}</value>`+
                                 `</field>`+
                             `</x>`+
                             `<set xmlns="http://jabber.org/protocol/rsm">`+
@@ -464,10 +440,7 @@
                     null, [], {},
                     async function (done, _converse) {
 
-                const entity = await _converse.api.disco.entities.get(_converse.domain);
-                if (!entity.features.findWhere({'var': Strophe.NS.MAM})) {
-                    _converse.disco_entities.get(_converse.domain).features.create({'var': Strophe.NS.MAM});
-                }
+                await test_utils.waitUntilDiscoConfirmed(_converse, _converse.bare_jid, null, [Strophe.NS.MAM]);
                 let sent_stanza, IQ_id;
                 const sendIQ = _converse.connection.sendIQ;
                 spyOn(_converse.connection, 'sendIQ').and.callFake(function (iq, callback, errback) {
@@ -480,6 +453,7 @@
                     'after': '09af3-cc343-b409f',
                     'max':10
                 });
+                await test_utils.waitUntil(() => sent_stanza);
                 const queryid = sent_stanza.nodeTree.querySelector('query').getAttribute('queryid');
                 expect(sent_stanza.toString()).toBe(
                     `<iq id="${IQ_id}" type="set" xmlns="jabber:client">`+
@@ -489,7 +463,7 @@
                                     `<value>urn:xmpp:mam:2</value>`+
                                 `</field>`+
                                 `<field var="start">`+
-                                    `<value>${moment(start).format()}</value>`+
+                                    `<value>${dayjs(start).toISOString()}</value>`+
                                 `</field>`+
                             `</x>`+
                             `<set xmlns="http://jabber.org/protocol/rsm">`+
@@ -506,10 +480,7 @@
                     null, [], {},
                     async function (done, _converse) {
 
-                const entity = await _converse.api.disco.entities.get(_converse.domain);
-                if (!entity.features.findWhere({'var': Strophe.NS.MAM})) {
-                    _converse.disco_entities.get(_converse.domain).features.create({'var': Strophe.NS.MAM});
-                }
+                await test_utils.waitUntilDiscoConfirmed(_converse, _converse.bare_jid, null, [Strophe.NS.MAM]);
                 let sent_stanza, IQ_id;
                 const sendIQ = _converse.connection.sendIQ;
                 spyOn(_converse.connection, 'sendIQ').and.callFake(function (iq, callback, errback) {
@@ -517,6 +488,7 @@
                     IQ_id = sendIQ.bind(this)(iq, callback, errback);
                 });
                 _converse.api.archive.query({'before': '', 'max':10});
+                await test_utils.waitUntil(() => sent_stanza);
                 const queryid = sent_stanza.nodeTree.querySelector('query').getAttribute('queryid');
                 expect(sent_stanza.toString()).toBe(
                     `<iq id="${IQ_id}" type="set" xmlns="jabber:client">`+
@@ -535,30 +507,27 @@
                 done();
            }));
 
-           it("accepts a Strophe.RSM object for the query options",
+           it("accepts a _converse.RSM object for the query options",
                 mock.initConverse(
                     null, [], {},
                     async function (done, _converse) {
 
-                const entity = await _converse.api.disco.entities.get(_converse.domain);
-                if (!entity.features.findWhere({'var': Strophe.NS.MAM})) {
-                    _converse.disco_entities.get(_converse.domain).features.create({'var': Strophe.NS.MAM});
-                }
+                await test_utils.waitUntilDiscoConfirmed(_converse, _converse.bare_jid, null, [Strophe.NS.MAM]);
                 let sent_stanza, IQ_id;
                 const sendIQ = _converse.connection.sendIQ;
                 spyOn(_converse.connection, 'sendIQ').and.callFake(function (iq, callback, errback) {
                     sent_stanza = iq;
                     IQ_id = sendIQ.bind(this)(iq, callback, errback);
                 });
-                // Normally the user wouldn't manually make a Strophe.RSM object
+                // Normally the user wouldn't manually make a _converse.RSM object
                 // and pass it in. However, in the callback method an RSM object is
                 // returned which can be reused for easy paging. This test is
                 // more for that usecase.
-                const rsm =  new Strophe.RSM({'max': '10'});
+                const rsm =  new _converse.RSM({'max': '10'});
                 rsm['with'] = 'romeo@montague.lit'; // eslint-disable-line dot-notation
                 rsm.start = '2010-06-07T00:00:00Z';
                 _converse.api.archive.query(rsm);
-
+                await test_utils.waitUntil(() => sent_stanza);
                 const queryid = sent_stanza.nodeTree.querySelector('query').getAttribute('queryid');
                 expect(sent_stanza.toString()).toBe(
                     `<iq id="${IQ_id}" type="set" xmlns="jabber:client">`+
@@ -571,7 +540,7 @@
                                     `<value>romeo@montague.lit</value>`+
                                 `</field>`+
                                 `<field var="start">`+
-                                    `<value>${moment(rsm.start).format()}</value>`+
+                                    `<value>${dayjs(rsm.start).toISOString()}</value>`+
                                 `</field>`+
                             `</x>`+
                             `<set xmlns="http://jabber.org/protocol/rsm">`+
@@ -582,24 +551,20 @@
                 done();
            }));
 
-           it("accepts a callback function, which it passes the messages and a Strophe.RSM object",
+           it("returns an object which includes the messages and a _converse.RSM object",
                 mock.initConverse(
                     null, [], {},
                     async function (done, _converse) {
 
-                const entity = await _converse.api.disco.entities.get(_converse.domain);
-                if (!entity.features.findWhere({'var': Strophe.NS.MAM})) {
-                    _converse.disco_entities.get(_converse.domain).features.create({'var': Strophe.NS.MAM});
-                }
+                await test_utils.waitUntilDiscoConfirmed(_converse, _converse.bare_jid, null, [Strophe.NS.MAM]);
                 let sent_stanza, IQ_id;
                 const sendIQ = _converse.connection.sendIQ;
                 spyOn(_converse.connection, 'sendIQ').and.callFake(function (iq, callback, errback) {
                     sent_stanza = iq;
                     IQ_id = sendIQ.bind(this)(iq, callback, errback);
                 });
-                const callback = jasmine.createSpy('callback');
-
-                _converse.api.archive.query({'with': 'romeo@capulet.lit', 'max':'10'}, callback);
+                const promise = _converse.api.archive.query({'with': 'romeo@capulet.lit', 'max':'10'});
+                await test_utils.waitUntil(() => sent_stanza);
                 const queryid = sent_stanza.nodeTree.querySelector('query').getAttribute('queryid');
 
                 /*  <message id='aeb213' to='juliet@capulet.lit/chamber'>
@@ -659,17 +624,15 @@
                             .c('count').t('16');
                 _converse.connection._dataRecv(test_utils.createRequest(stanza));
 
-                await test_utils.waitUntil(() => callback.calls.count());
-                expect(callback).toHaveBeenCalled();
-                const args = callback.calls.argsFor(0);
-                expect(args[0].length).toBe(2);
-                expect(args[0][0].outerHTML).toBe(msg1.nodeTree.outerHTML);
-                expect(args[0][1].outerHTML).toBe(msg2.nodeTree.outerHTML);
-                expect(args[1]['with']).toBe('romeo@capulet.lit'); // eslint-disable-line dot-notation
-                expect(args[1].max).toBe('10');
-                expect(args[1].count).toBe('16');
-                expect(args[1].first).toBe('23452-4534-1');
-                expect(args[1].last).toBe('09af3-cc343-b409f');
+                const result = await promise;
+                expect(result.messages.length).toBe(2);
+                expect(result.messages[0].outerHTML).toBe(msg1.nodeTree.outerHTML);
+                expect(result.messages[1].outerHTML).toBe(msg2.nodeTree.outerHTML);
+                expect(result.rsm['with']).toBe('romeo@capulet.lit'); // eslint-disable-line dot-notation
+                expect(result.rsm.max).toBe('10');
+                expect(result.rsm.count).toBe('16');
+                expect(result.rsm.first).toBe('23452-4534-1');
+                expect(result.rsm.last).toBe('09af3-cc343-b409f');
                 done()
            }));
         });
@@ -751,6 +714,74 @@
                 await test_utils.waitUntil(() => feature.save.calls.count());
                 expect(feature.save).toHaveBeenCalled();
                 expect(feature.get('preferences')['default']).toBe('never'); // eslint-disable-line dot-notation
+                done();
+            }));
+        });
+    });
+
+    describe("Chatboxes", function () {
+        describe("A Chatbox", function () {
+
+            it("will fetch archived messages once it's opened",
+                mock.initConverse(
+                    null, ['discoInitialized'], {},
+                    async function (done, _converse) {
+
+                await test_utils.waitForRoster(_converse, 'current', 1);
+                const contact_jid = mock.cur_names[0].replace(/ /g,'.').toLowerCase() + '@localhost';
+                await test_utils.openChatBoxFor(_converse, contact_jid);
+                await test_utils.waitUntilDiscoConfirmed(_converse, _converse.bare_jid, null, [Strophe.NS.MAM]);
+
+                let sent_stanza, IQ_id;
+                const sendIQ = _converse.connection.sendIQ;
+                spyOn(_converse.connection, 'sendIQ').and.callFake(function (iq, callback, errback) {
+                    sent_stanza = iq;
+                    IQ_id = sendIQ.bind(this)(iq, callback, errback);
+                });
+                const view = _converse.chatboxviews.get(contact_jid);
+                await test_utils.waitUntil(() => sent_stanza);
+                const stanza_el = sent_stanza.root().nodeTree;
+                const queryid = stanza_el.querySelector('query').getAttribute('queryid');
+                expect(sent_stanza.toString()).toBe(
+                    `<iq id="${stanza_el.getAttribute('id')}" type="set" xmlns="jabber:client">`+
+                        `<query queryid="${queryid}" xmlns="urn:xmpp:mam:2">`+
+                            `<x type="submit" xmlns="jabber:x:data">`+
+                                `<field type="hidden" var="FORM_TYPE"><value>urn:xmpp:mam:2</value></field>`+
+                                `<field var="with"><value>max.frankfurter@localhost</value></field>`+
+                            `</x>`+
+                            `<set xmlns="http://jabber.org/protocol/rsm"><max>50</max><before></before></set>`+
+                        `</query>`+
+                    `</iq>`
+                );
+                const msg1 = $msg({'id':'aeb213', 'to': contact_jid})
+                            .c('result',  {'xmlns': 'urn:xmpp:mam:2', 'queryid':queryid, 'id':'28482-98726-73623'})
+                                .c('forwarded', {'xmlns':'urn:xmpp:forward:0'})
+                                    .c('delay', {'xmlns':'urn:xmpp:delay', 'stamp':'2010-07-10T23:08:25Z'}).up()
+                                    .c('message', {
+                                        'xmlns':'jabber:client',
+                                        'to': contact_jid,
+                                        'from': _converse.bare_jid,
+                                        'type':'chat' })
+                                    .c('body').t("Call me but love, and I'll be new baptized;");
+                _converse.connection._dataRecv(test_utils.createRequest(msg1));
+                const msg2 = $msg({'id':'aeb213', 'to': contact_jid})
+                            .c('result',  {'xmlns': 'urn:xmpp:mam:2', 'queryid':queryid, 'id':'28482-98726-73624'})
+                                .c('forwarded', {'xmlns':'urn:xmpp:forward:0'})
+                                    .c('delay', {'xmlns':'urn:xmpp:delay', 'stamp':'2010-07-10T23:08:25Z'}).up()
+                                    .c('message', {
+                                        'xmlns':'jabber:client',
+                                        'to': contact_jid,
+                                        'from': _converse.bare_jid,
+                                        'type':'chat' })
+                                    .c('body').t("Henceforth I never will be Romeo.");
+                _converse.connection._dataRecv(test_utils.createRequest(msg2));
+                const stanza = $iq({'type': 'result', 'id': IQ_id})
+                    .c('fin', {'xmlns': 'urn:xmpp:mam:2'})
+                        .c('set',  {'xmlns': 'http://jabber.org/protocol/rsm'})
+                            .c('first', {'index': '0'}).t('23452-4534-1').up()
+                            .c('last').t('09af3-cc343-b409f').up()
+                            .c('count').t('16');
+                _converse.connection._dataRecv(test_utils.createRequest(stanza));
                 done();
             }));
         });

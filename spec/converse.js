@@ -9,7 +9,7 @@
           u = converse.env.utils;
 
     describe("Converse", function() {
-        
+
         describe("Authentication", function () {
 
             it("needs either a bosh_service_url a websocket_url or both", mock.initConverse((done, _converse) => {
@@ -25,7 +25,8 @@
             }));
 
             describe("with prebind", function () {
-                it("needs a jid when also using keepalive", mock.initConverse((done, _converse) => {
+
+                it("needs a jid when also using keepalive", mock.initConverse([], null, {'auto_login': false}, (done, _converse) => {
                     const authentication = _converse.authentication;
                     const jid = _converse.jid;
                     delete _converse.jid;
@@ -247,23 +248,24 @@
 
         describe("The \"contacts\" API", function () {
 
-            it("has a method 'get' which returns wrapped contacts", mock.initConverse((done, _converse) => {
+            it("has a method 'get' which returns wrapped contacts", mock.initConverse(async (done, _converse) => {
                 // Check that it returns nothing if a non-existing JID is given
                 test_utils.createContacts(_converse, 'current');
-                expect(_converse.api.contacts.get('non-existing@jabber.org')).toBeFalsy();
+                let contact = await _converse.api.contacts.get('non-existing@jabber.org');
+                expect(contact).toBeFalsy();
                 // Check when a single jid is given
                 const jid = mock.cur_names[0].replace(/ /g,'.').toLowerCase() + '@localhost';
-                const contact = _converse.api.contacts.get(jid);
+                contact = await _converse.api.contacts.get(jid);
                 expect(contact.get('fullname')).toBe(mock.cur_names[0]);
                 expect(contact.get('jid')).toBe(jid);
                 // You can retrieve multiple contacts by passing in an array
                 const jid2 = mock.cur_names[1].replace(/ /g,'.').toLowerCase() + '@localhost';
-                let list = _converse.api.contacts.get([jid, jid2]);
-                expect(_.isArray(list)).toBeTruthy();
+                let list = await _converse.api.contacts.get([jid, jid2]);
+                expect(Array.isArray(list)).toBeTruthy();
                 expect(list[0].get('fullname')).toBe(mock.cur_names[0]);
                 expect(list[1].get('fullname')).toBe(mock.cur_names[1]);
                 // Check that all JIDs are returned if you call without any parameters
-                list = _converse.api.contacts.get();
+                list = await _converse.api.contacts.get();
                 expect(list.length).toBe(mock.cur_names.length);
                 done();
             }));
@@ -288,7 +290,7 @@
 
                 test_utils.openControlBox();
                 test_utils.createContacts(_converse, 'current', 2);
-                _converse.emit('rosterContactsFetched');
+                _converse.api.trigger('rosterContactsFetched');
 
                 // Test on chat that doesn't exist.
                 expect(_converse.api.chats.get('non-existing@jabber.org')).toBeFalsy();
@@ -301,21 +303,19 @@
                 expect(_converse.chatboxes.length).toBe(1);
 
                 // Test for one JID
-                test_utils.openChatBoxFor(_converse, jid);
-                await test_utils.waitUntil(() => _converse.chatboxes.length == 1);
-                box = _converse.api.chats.get(jid);
+                box = await _converse.api.chats.open(jid);
                 expect(box instanceof Object).toBeTruthy();
-                expect(box.get('box_id')).toBe(b64_sha1(jid));
+                expect(box.get('box_id')).toBe(`box-${btoa(jid)}`);
 
-                const chatboxview = _converse.chatboxviews.get(jid);
-                expect(u.isVisible(chatboxview.el)).toBeTruthy();
+                const view = _converse.chatboxviews.get(jid);
+                await test_utils.waitUntil(() => u.isVisible(view.el));
                 // Test for multiple JIDs
                 test_utils.openChatBoxFor(_converse, jid2);
                 await test_utils.waitUntil(() => _converse.chatboxes.length == 2);
                 const list = _converse.api.chats.get([jid, jid2]);
-                expect(_.isArray(list)).toBeTruthy();
-                expect(list[0].get('box_id')).toBe(b64_sha1(jid));
-                expect(list[1].get('box_id')).toBe(b64_sha1(jid2));
+                expect(Array.isArray(list)).toBeTruthy();
+                expect(list[0].get('box_id')).toBe(`box-${btoa(jid)}`);
+                expect(list[1].get('box_id')).toBe(`box-${btoa(jid2)}`);
                 done();
             }));
 
@@ -325,7 +325,7 @@
 
                 test_utils.openControlBox();
                 test_utils.createContacts(_converse, 'current', 2);
-                _converse.emit('rosterContactsFetched');
+                _converse.api.trigger('rosterContactsFetched');
 
                 const jid = mock.cur_names[0].replace(/ /g,'.').toLowerCase() + '@localhost';
                 const jid2 = mock.cur_names[1].replace(/ /g,'.').toLowerCase() + '@localhost';
@@ -334,25 +334,25 @@
 
                 const box = await _converse.api.chats.open(jid);
                 expect(box instanceof Object).toBeTruthy();
-                expect(box.get('box_id')).toBe(b64_sha1(jid));
+                expect(box.get('box_id')).toBe(`box-${btoa(jid)}`);
                 expect(
                     _.keys(box),
                     ['close', 'endOTR', 'focus', 'get', 'initiateOTR', 'is_chatroom', 'maximize', 'minimize', 'open', 'set']
                 );
-                const chatboxview = _converse.chatboxviews.get(jid);
-                expect(u.isVisible(chatboxview.el)).toBeTruthy();
+                const view = _converse.chatboxviews.get(jid);
+                await test_utils.waitUntil(() => u.isVisible(view.el));
                 // Test for multiple JIDs
                 const list = await _converse.api.chats.open([jid, jid2]);
-                expect(_.isArray(list)).toBeTruthy();
-                expect(list[0].get('box_id')).toBe(b64_sha1(jid));
-                expect(list[1].get('box_id')).toBe(b64_sha1(jid2));
+                expect(Array.isArray(list)).toBeTruthy();
+                expect(list[0].get('box_id')).toBe(`box-${btoa(jid)}`);
+                expect(list[1].get('box_id')).toBe(`box-${btoa(jid2)}`);
                 done();
             }));
         });
 
         describe("The \"settings\" API", function() {
             it("has methods 'get' and 'set' to set configuration settings", mock.initConverse(
-                    null, null, {'play_sounds': true}, 
+                    null, null, {'play_sounds': true},
                     (done, _converse) => {
 
                 expect(_.keys(_converse.api.settings)).toEqual(["update", "get", "set"]);

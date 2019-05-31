@@ -5,7 +5,6 @@
     const $iq = converse.env.$iq;
     const Strophe = converse.env.Strophe;
     const _ = converse.env._;
-    const f = converse.env.f;
 
     describe("XEP-0357 Push Notifications", function () {
 
@@ -30,11 +29,10 @@
                     _converse.bare_jid,
                     [{'category': 'account', 'type':'registered'}],
                     ['urn:xmpp:push:0'], [], 'info');
-            const node = await test_utils.waitUntil(() => 
-                _.filter(IQ_stanzas, iq => iq.nodeTree.querySelector('iq[type="set"] enable[xmlns="urn:xmpp:push:0"]')).pop()
+            const stanza = await test_utils.waitUntil(() =>
+                _.filter(IQ_stanzas, iq => iq.querySelector('iq[type="set"] enable[xmlns="urn:xmpp:push:0"]')).pop()
             );
-            const stanza = node.nodeTree;
-            expect(node.toLocaleString()).toEqual(
+            expect(Strophe.serialize(stanza)).toEqual(
                 `<iq id="${stanza.getAttribute('id')}" type="set" xmlns="jabber:client">`+
                     '<enable jid="push-5@client.example" node="yxs32uqsflafdk3iuqo" xmlns="urn:xmpp:push:0"/>'+
                 '</iq>'
@@ -72,19 +70,19 @@
                 [{'category': 'account', 'type':'registered'}],
                 ['urn:xmpp:push:0'], [], 'info');
             const stanza = await test_utils.waitUntil(
-                () => _.filter(IQ_stanzas, (iq) => iq.nodeTree.querySelector('iq[type="set"] enable[xmlns="urn:xmpp:push:0"]')).pop()
+                () => _.filter(IQ_stanzas, (iq) => iq.querySelector('iq[type="set"] enable[xmlns="urn:xmpp:push:0"]')).pop()
             );
-            expect(stanza.toLocaleString()).toEqual(
-                `<iq id="${stanza.nodeTree.getAttribute('id')}" to="chat.shakespeare.lit" type="set" xmlns="jabber:client">`+
+            expect(Strophe.serialize(stanza)).toEqual(
+                `<iq id="${stanza.getAttribute('id')}" to="chat.shakespeare.lit" type="set" xmlns="jabber:client">`+
                     '<enable jid="push-5@client.example" node="yxs32uqsflafdk3iuqo" xmlns="urn:xmpp:push:0"/>'+
                 '</iq>'
             );
             _converse.connection._dataRecv(test_utils.createRequest($iq({
                 'to': _converse.connection.jid,
                 'type': 'result',
-                'id': stanza.nodeTree.getAttribute('id')
+                'id': stanza.getAttribute('id')
             })));
-            await test_utils.waitUntil(() => f.includes('chat.shakespeare.lit', _converse.session.get('push_enabled')));
+            await test_utils.waitUntil(() => _.includes(_converse.session.get('push_enabled'), 'chat.shakespeare.lit'));
             done();
         }));
 
@@ -106,11 +104,10 @@
                 _converse.bare_jid,
                 [{'category': 'account', 'type':'registered'}],
                 ['urn:xmpp:push:0'], [], 'info');
-            const node = await test_utils.waitUntil(
-                () => _.filter(IQ_stanzas, iq => iq.nodeTree.querySelector('iq[type="set"] disable[xmlns="urn:xmpp:push:0"]')).pop()
+            const stanza = await test_utils.waitUntil(
+                () => _.filter(IQ_stanzas, iq => iq.querySelector('iq[type="set"] disable[xmlns="urn:xmpp:push:0"]')).pop()
             );
-            const stanza = node.nodeTree;
-            expect(node.toLocaleString()).toEqual(
+            expect(Strophe.serialize(stanza)).toEqual(
                 `<iq id="${stanza.getAttribute('id')}" type="set" xmlns="jabber:client">`+
                     '<disable jid="push-5@client.example" node="yxs32uqsflafdk3iuqo" xmlns="urn:xmpp:push:0"/>'+
                 '</iq>'
@@ -148,11 +145,10 @@
                     [{'category': 'account', 'type':'registered'}],
                     ['urn:xmpp:push:0'], [], 'info');
 
-            const node = await test_utils.waitUntil(
-                () => _.filter(IQ_stanzas, iq => iq.nodeTree.querySelector('iq[type="set"] enable[xmlns="urn:xmpp:push:0"]')).pop()
+            const stanza = await test_utils.waitUntil(
+                () => _.filter(IQ_stanzas, iq => iq.querySelector('iq[type="set"] enable[xmlns="urn:xmpp:push:0"]')).pop()
             );
-            const stanza = node.nodeTree;
-            expect(node.toLocaleString()).toEqual(
+            expect(Strophe.serialize(stanza)).toEqual(
                 `<iq id="${stanza.getAttribute('id')}" type="set" xmlns="jabber:client">`+
                     '<enable jid="push-5@client.example" node="yxs32uqsflafdk3iuqo" xmlns="urn:xmpp:push:0">'+
                         '<x type="submit" xmlns="jabber:x:data">'+

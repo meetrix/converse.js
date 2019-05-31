@@ -192,13 +192,6 @@ federated server), while setting it to `false` means that people not on your
 roster can't contact you unless one (or both) of you subscribe to one another's
 presence (i.e. adding as a roster contact).
 
-allow_otr
----------
-
-* Default:  ``true``
-
-Allow Off-the-record encryption of single-user chat messages.
-
 allow_public_bookmarks
 ----------------------
 
@@ -226,13 +219,6 @@ Support for `XEP-0077: In band registration <https://xmpp.org/extensions/xep-007
 
 Allow XMPP account registration showing the corresponding UI register form interface.
 
-animate
--------
-
-* Default:  ``true``
-
-Show animations, for example when opening and closing chatboxes.
-
 archived_messages_page_size
 ---------------------------
 
@@ -249,6 +235,13 @@ available) and the amount returned will be no more than the page size.
 
 You will be able to query for even older messages by scrolling upwards in the chatbox or room
 (the so-called infinite scrolling pattern).
+
+autocomplete_add_contact
+------------------------
+
+* Default: ``true``
+
+Determines whether search suggestions are shown in the "Add Contact" modal.
 
 auto_list_rooms
 ---------------
@@ -363,6 +356,7 @@ auto_join_on_invite
 * Default:  ``false``
 
 If true, the user will automatically join a chatroom on invite without any confirm.
+Also inviting users won't be prompted for a reason.
 
 
 auto_join_private_chats
@@ -427,7 +421,6 @@ The core, and by default whitelisted, plugins are::
     converse-muc
     converse-muc-embedded
     converse-notification
-    converse-otr
     converse-ping
     converse-profile
     converse-register
@@ -470,29 +463,6 @@ For more information, read this blog post: `Which BOSH server do you need? <http
 
 A more modern alternative to BOSH is to use `websockets <https://developer.mozilla.org/en/docs/WebSockets>`_.
 Please see the :ref:`websocket-url` configuration setting.
-
-cache_otr_key
--------------
-
-* Default:  ``false``
-
-Let the `OTR (Off-the-record encryption) <https://otr.cypherpunks.ca>`_ private
-key be cached in your browser's session storage.
-
-The browser's session storage persists across page loads but is deleted once
-the tab or window is closed.
-
-If this option is set to ``false``, a new OTR private key will be generated
-for each page load. While more inconvenient, this is a much more secure option.
-
-This setting can only be used together with ``allow_otr = true``.
-
-.. note::
-    A browser window's session storage is accessible by all javascript that
-    is served from the same domain. So if there is malicious javascript served by
-    the same server (or somehow injected via an attacker), then they will be able
-    to retrieve your private key and read your all the chat messages in your
-    current session. Previous sessions however cannot be decrypted.
 
 chatstate_notification_blacklist
 --------------------------------
@@ -555,9 +525,12 @@ It allows you to specify a URL which Converse will call when it needs to get
 the username and password (or authentication token) which Converse will use
 to automatically log the user in.
 
-If ``auto_reconnect`` is also set to true, then Converse will automatically
+If ``auto_reconnect`` is also set to ``true``, then Converse will automatically
 fetch new credentials from the ``credentials_url`` whenever the connection or
 session drops, and then attempt to reconnect and establish a new session.
+
+If the request to the ``credentials_url`` URL fails for whatever reason,
+Converse will continuously retry to fetch the credentials every 2 seconds.
 
 The server behind ``credentials_url`` should return a JSON encoded object::
 
@@ -582,6 +555,8 @@ Afterwards, ss soon as there is any activity (for example, the mouse moves),
 a chat state indication of ``active`` will be sent out.
 
 A value of ``0`` means that this feature is disabled.
+
+.. _`debug`:
 
 debug
 -----
@@ -756,7 +731,7 @@ The translations for that locale must be available in JSON format at the
 `locales_url`_
 
 If an explicit locale is specified via the ``i18n`` setting and the
-translations for that locale are not found at the `locales_url``, then 
+translations for that locale are not found at the `locales_url``, then
 then Converse will fall back to trying to determine the browser's language
 and fetching those translations, or if that fails the default English texts
 will be used.
@@ -881,10 +856,30 @@ locked_muc_domain
 -----------------
 
 * Default: ``false``
+* Allowed values: ``false``, ``true``, ``'hidden'``
 
-This setting allows you to restrict the multi-user chat (MUC) domain to only the value
+By setting this value to something truthy, you restrict the multi-user chat (MUC) domain to only the value
 specified in `muc_domain`_.
 
+If the value is set to `'hidden'` (which is also truthy), then the MUC domain
+will not be shown to users.
+
+locked_muc_nickname
+-------------------
+
+* Default: ``false``
+
+This setting allows you to restrict the multi-user chat (MUC) nickname that a
+user uses to a particular value.
+
+Where the nickname value comes from depends on other settings.
+
+The `nickname`_ configuration setting takes precedence ahead of any other
+nickname value. If that's not set, then the "nickname" value from the user's
+VCard is taken, and if that is not set but `muc_nickname_from_jid`_ is set to
+``true``, then the node of the user's JID (the part before the ``@``) is used.
+
+If no nickame value is found, then an error will be raised.
 
 message_archiving
 -----------------
@@ -936,8 +931,8 @@ Message carbons is the XEP (Jabber protocol extension) specifically drafted to
 solve this problem, while `forward_messages`_ uses
 `stanza forwarding <http://www.xmpp.org/extensions/xep-0297.html>`_
 
-muc_disable_moderator_commands
-------------------------------
+muc_disable_slash_commands
+--------------------------
 
 * Default: ``false``
 
@@ -951,7 +946,7 @@ The following example will disable 'mute' and 'voice' command:
 
 .. code-block:: javascript
 
-    muc_disable_moderator_commands: ['mute', 'voice'],
+    muc_disable_slash_commands: ['mute', 'voice'],
 
 muc_domain
 ----------
@@ -1032,6 +1027,19 @@ muc_show_join_leave
 Determines whether Converse will show info messages inside a chatroom
 whenever a user joins or leaves it.
 
+muc_show_join_leave_status
+--------------------------
+
+* Default; ``true``
+
+Determines whether Converse shows the optionally included status message when a
+user joins or leaves the MUC. This setting only has an effect if
+``muc_show_join_leave`` is set to ``true``.
+
+See https://xmpp.org/extensions/xep-0045.html#changepres
+
+.. _`nickname`:
+
 nickname
 --------
 
@@ -1040,6 +1048,10 @@ nickname
 This setting allows you to specify the nickname for the current user.
 The nickname will be included in presence requests to other users and will also
 be used as the default nickname when entering MUC chatrooms.
+
+This value will have first preference ahead of other nickname sources, such as
+the VCard `nickname` value.
+
 
 notify_all_room_messages
 ------------------------
@@ -1371,6 +1383,21 @@ show_send_button
 
 If set to ``true``, a button will be visible which can be clicked to send a message.
 
+singleton
+---------
+
+* Default:  ``false``
+
+If set to ``true``, then only one chat (one-on-one or groupchat) will be allowed.
+
+The chat must be specified with the `auto_join_rooms`_ or `auto_join_private_chats`_ options.
+
+This setting is useful together with `view_mode`_ set to ``embedded``, when you
+want to embed a chat into the page.
+
+Alternatively you could use it with `view_mode`_ set to ``overlayed`` to create
+a single helpdesk-type chat.
+
 sounds_path
 -----------
 
@@ -1494,17 +1521,11 @@ time_format
 
 Examples: ``HH:mm``, ``hh:mm``, ``hh:mm a``.
 
-This option makes the time format for the time shown, for each message, configurable. Converse uses `moment.js <https://momentjs.com/>`_
-for showing time. This option allows the configuration of the format in which `moment` will display the time for the messages. For detailed
-description of time-format options available for `moment` you can check this `link <https://momentjs.com/docs/#/parsing/string-format/>`_.
-
-use_otr_by_default
-------------------
-
-* Default:  ``false``
-
-If set to ``true``, Converse will automatically try to initiate an OTR (off-the-record)
-encrypted chat session every time you open a chatbox.
+This option makes the time format for the time shown, for each message, configurable. Converse uses `DayJS <https://github.com/iamkun/dayjs>`_
+for showing time. This option allows the configuration of the format in which `DayJS` will display the time for the messages. For detailed
+description of time-format options available for `DayJS` you can check the
+`default formatting options <https://github.com/iamkun/dayjs/blob/dev/docs/en/API-reference.md#displaying>`_ and the
+`advanced options <https://github.com/iamkun/dayjs/blob/master/docs/en/Plugin.md#advancedformat>`_.
 
 visible_toolbar_buttons
 -----------------------
@@ -1662,7 +1683,6 @@ These are::
     converse-muc
     converse-muc-embedded
     converse-notification
-    converse-otr
     converse-ping
     converse-profile
     converse-register

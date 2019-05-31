@@ -26,6 +26,13 @@ import u from "../headless/utils/core";
 
 const URL_REGEX = /\b(https?:\/\/|www\.|https?:\/\/www\.)[^\s<>]{2,200}\b\/?/g;
 
+function getAutoCompleteProperty (name, options) {
+    return {
+        'muc#roomconfig_lang': 'language',
+        'muc#roomconfig_roomsecret': options.new_password ? 'new-password' : 'current-password'
+    }[name];
+}
+
 const logger = _.assign({
     'debug': _.get(console, 'log') ? console.log.bind(console) : _.noop,
     'error': _.get(console, 'log') ? console.log.bind(console) : _.noop,
@@ -137,7 +144,6 @@ u.renderFileURL = function (_converse, url) {
         'label_download': __('Download file "%1$s"', decodeURI(filename))
     })
 };
-
 
 u.renderImageURL = function (_converse, url) {
     if (!_converse.show_images_inline) {
@@ -305,13 +311,14 @@ u.nextUntil = function (el, selector, include_self=false) {
     return matches;
 }
 
+/**
+ * Helper method that replace HTML-escaped symbols with equivalent characters
+ * (e.g. transform occurrences of '&amp;' to '&')
+ * @private
+ * @method u#unescapeHTML
+ * @param { String } string - a String containing the HTML-escaped symbols.
+ */
 u.unescapeHTML = function (string) {
-    /* Helper method that replace HTML-escaped symbols with equivalent characters
-     * (e.g. transform occurrences of '&amp;' to '&')
-     *
-     * Parameters:
-     *  (String) string: a String containing the HTML-escaped symbols.
-     */
     var div = document.createElement('div');
     div.innerHTML = string;
     return div.innerText;
@@ -382,13 +389,14 @@ u.slideToggleElement = function (el, duration) {
 };
 
 
+/**
+ * Shows/expands an element by sliding it out of itself
+ * @private
+ * @method u#slideOut
+ * @param { HTMLElement } el - The HTML string
+ * @param { Number } duration - The duration amount in milliseconds
+ */
 u.slideOut = function (el, duration=200) {
-    /* Shows/expands an element by sliding it out of itself
-     *
-     * Parameters:
-     *      (HTMLElement) el - The HTML string
-     *      (Number) duration - The duration amount in milliseconds
-     */
     return new Promise((resolve, reject) => {
         if (_.isNil(el)) {
             const err = "Undefined or null element passed into slideOut"
@@ -529,16 +537,15 @@ u.fadeIn = function (el, callback) {
 };
 
 
-u.xForm2webForm = function (field, stanza, domain) {
-    /* Takes a field in XMPP XForm (XEP-004: Data Forms) format
-     * and turns it into an HTML field.
-     *
-     * Returns either text or a DOM element (which is not ideal, but fine
-     * for now).
-     *
-     *  Parameters:
-     *      (XMLElement) field - the field to convert
-     */
+/**
+ * Takes a field in XMPP XForm (XEP-004: Data Forms) format
+ * and turns it into an HTML field.
+ * Returns either text or a DOM element (which is not ideal, but fine for now).
+ * @private
+ * @method u#xForm2webForm
+ * @param { XMLElement } field - the field to convert
+ */
+u.xForm2webForm = function (field, stanza, options) {
     if (field.getAttribute('type') === 'list-single' ||
         field.getAttribute('type') === 'list-multi') {
 
@@ -591,7 +598,7 @@ u.xForm2webForm = function (field, stanza, domain) {
         });
     } else if (field.getAttribute('var') === 'username') {
         return tpl_form_username({
-            'domain': ' @'+domain,
+            'domain': ' @'+options.domain,
             'name': field.getAttribute('var'),
             'type': XFORM_TYPE_MAP[field.getAttribute('type')],
             'label': field.getAttribute('label') || '',
@@ -609,10 +616,13 @@ u.xForm2webForm = function (field, stanza, domain) {
             'required': !_.isNil(field.querySelector('required'))
         });
     } else {
+        const name = field.getAttribute('var');
         return tpl_form_input({
             'id': u.getUniqueId(),
             'label': field.getAttribute('label') || '',
-            'name': field.getAttribute('var'),
+            'name': name,
+            'fixed_username': options.fixed_username,
+            'autocomplete': getAutoCompleteProperty(name, options),
             'placeholder': null,
             'required': !_.isNil(field.querySelector('required')),
             'type': XFORM_TYPE_MAP[field.getAttribute('type')],

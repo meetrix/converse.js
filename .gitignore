@@ -1,9 +1,13 @@
+# Distribution directory
+dist
+
+# Editor fluff
 *~
 .sw?
 *.mo
 *.kpf
 .*.sw?
-.*.cfg
+
 .hg/
 .bzr/
 .svn/
@@ -16,26 +20,26 @@ pip-selfcheck.json
 
 3rdparty/libsignal-protocol-javascript/
 *.map
-dist/converse-no-dependencies-es2015.js
 
 locale.zip
-css/webfonts.zip
-css/font-awesome.css
+sounds.zip
 
 analytics.js
-inverse-analytics.js
 
-# python/buildout
+# virtualenv/python/buildout
+.*.cfg
 eggs
 .Python
 build
+share
 parts
 *.pyc
 *.egg-info
+lib
+include
+bin
+develop-eggs
 
-dev-jc.html
-inverse-dev.html
-inverse-dev-jc.html
 converse-logs/*.html
 
 Backbone.Overview
@@ -49,12 +53,6 @@ docs/doctrees
 
 # Node.js
 node_modules
-
-# Virtualenv/Buildout
-lib
-include
-bin
-develop-eggs
 
 # OSX
 .DS_Store

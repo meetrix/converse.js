@@ -4,10 +4,12 @@
 // Copyright (c) 2013-2019, the Converse.js developers
 // Licensed under the Mozilla Public License (MPLv2)
 
-import "@converse/headless/converse-roster";
 import "@converse/headless/converse-chatboxes";
+import "@converse/headless/converse-roster";
 import "converse-modal";
-import Awesomplete from "awesomplete";
+import BrowserStorage from "backbone.browserStorage";
+import { OrderedListView } from "backbone.overview";
+import SHA1 from 'strophe.js/src/sha1';
 import _FormData from "formdata-polyfill";
 import converse from "@converse/headless/converse-core";
 import tpl_add_contact_modal from "templates/add_contact_modal.html";
@@ -19,34 +21,13 @@ import tpl_roster_filter from "templates/roster_filter.html";
 import tpl_roster_item from "templates/roster_item.html";
 import tpl_search_contact from "templates/search_contact.html";
 
-const { Backbone, Strophe, $iq, b64_sha1, sizzle, _ } = converse.env;
+const { Backbone, Strophe, $iq, sizzle, _ } = converse.env;
 const u = converse.env.utils;
 
 
 converse.plugins.add('converse-rosterview', {
 
     dependencies: ["converse-roster", "converse-modal"],
-
-    overrides: {
-        // Overrides mentioned here will be picked up by converse.js's
-        // plugin architecture they will replace existing methods on the
-        // relevant objects or classes.
-        //
-        // New functions which don't exist yet can also be added.
-        afterReconnected () {
-            this.__super__.afterReconnected.apply(this, arguments);
-        },
-
-        RosterGroups: {
-            comparator () {
-                // RosterGroupsComparator only gets set later (once i18n is
-                // set up), so we need to wrap it in this nameless function.
-                const { _converse } = this.__super__;
-                return _converse.RosterGroupsComparator.apply(this, arguments);
-            }
-        }
-    },
-
 
     initialize () {
         /* The initialize function gets called as soon as the plugin is
@@ -56,13 +37,14 @@ converse.plugins.add('converse-rosterview', {
               { __ } = _converse;
 
         _converse.api.settings.update({
+            'autocomplete_add_contact': true,
             'allow_chat_pending_contacts': true,
             'allow_contact_removal': true,
             'hide_offline_users': false,
             'roster_groups': true,
             'show_only_online_users': false,
             'show_toolbar': true,
-            'xhr_user_search_url': null
+            'xhr_user_search_url': null,
         });
         _converse.api.promises.add('rosterViewInitialized');
 
@@ -75,36 +57,6 @@ converse.plugins.add('converse-rosterview', {
             'away': __('This contact is away')
         };
         const LABEL_GROUPS = __('Groups');
-        const HEADER_CURRENT_CONTACTS =  __('My contacts');
-        const HEADER_PENDING_CONTACTS = __('Pending contacts');
-        const HEADER_REQUESTING_CONTACTS = __('Contact requests');
-        const HEADER_UNGROUPED = __('Ungrouped');
-        const HEADER_WEIGHTS = {};
-        HEADER_WEIGHTS[HEADER_REQUESTING_CONTACTS] = 0;
-        HEADER_WEIGHTS[HEADER_CURRENT_CONTACTS]    = 1;
-        HEADER_WEIGHTS[HEADER_UNGROUPED]           = 2;
-        HEADER_WEIGHTS[HEADER_PENDING_CONTACTS]    = 3;
-
-        _converse.RosterGroupsComparator = function (a, b) {
-            /* Groups are sorted alphabetically, ignoring case.
-             * However, Ungrouped, Requesting Contacts and Pending Contacts
-             * appear last and in that order.
-             */
-            a = a.get('name');
-            b = b.get('name');
-            const special_groups = _.keys(HEADER_WEIGHTS);
-            const a_is_special = _.includes(special_groups, a);
-            const b_is_special = _.includes(special_groups, b);
-            if (!a_is_special && !b_is_special ) {
-                return a.toLowerCase() < b.toLowerCase() ? -1 : (a.toLowerCase() > b.toLowerCase() ? 1 : 0);
-            } else if (a_is_special && b_is_special) {
-                return HEADER_WEIGHTS[a] < HEADER_WEIGHTS[b] ? -1 : (HEADER_WEIGHTS[a] > HEADER_WEIGHTS[b] ? 1 : 0);
-            } else if (!a_is_special && b_is_special) {
-                return (b === HEADER_REQUESTING_CONTACTS) ? 1 : -1;
-            } else if (a_is_special && !b_is_special) {
-                return (a === HEADER_REQUESTING_CONTACTS) ? -1 : 1;
-            }
-        };
 
 
         _converse.AddContactModal = _converse.BootstrapModal.extend({
@@ -119,7 +71,7 @@ converse.plugins.add('converse-rosterview', {
 
             toHTML () {
                 const label_nickname = _converse.xhr_user_search_url ? __('Contact name') : __('Optional nickname');
-                return  tpl_add_contact_modal(_.extend(this.model.toJSON(), {
+                return tpl_add_contact_modal(Object.assign(this.model.toJSON(), {
                     '_converse': _converse,
                     'heading_new_contact': __('Add a Contact'),
                     'label_xmpp_address': __('XMPP Address'),
@@ -132,67 +84,117 @@ converse.plugins.add('converse-rosterview', {
 
             afterRender () {
                 if (_converse.xhr_user_search_url && _.isString(_converse.xhr_user_search_url)) {
-                    this.initXHRAutoComplete(this.el);
-                    this.el.addEventListener('awesomplete-selectcomplete', ev => {
-                        this.el.querySelector('input[name="name"]').value = ev.text.label;
-                        this.el.querySelector('input[name="jid"]').value = ev.text.value;
-                    });
+                    this.initXHRAutoComplete();
                 } else {
-                    this.initJIDAutoComplete(this.el);
+                    this.initJIDAutoComplete();
                 }
                 const jid_input = this.el.querySelector('input[name="jid"]');
                 this.el.addEventListener('shown.bs.modal', () => jid_input.focus(), false);
             },
 
-            initJIDAutoComplete (root) {
-                const jid_input = root.querySelector('input[name="jid"]');
-                const list = _.uniq(_converse.roster.map((item) => Strophe.getDomainFromJid(item.get('jid'))));
-                new Awesomplete(jid_input, {
-                    'list': list,
+            initJIDAutoComplete () {
+                if (!_converse.autocomplete_add_contact) {
+                    return;
+                }
+                const el = this.el.querySelector('.suggestion-box__jid').parentElement;
+                this.jid_auto_complete = new _converse.AutoComplete(el, {
                     'data': (text, input) => `${input.slice(0, input.indexOf("@"))}@${text}`,
-                    'filter': Awesomplete.FILTER_STARTSWITH
+                    'filter': _converse.FILTER_STARTSWITH,
+                    'list': _.uniq(_converse.roster.map(item => Strophe.getDomainFromJid(item.get('jid'))))
                 });
             },
 
-            initXHRAutoComplete (root) {
-                const name_input = this.el.querySelector('input[name="name"]');
-                const jid_input = this.el.querySelector('input[name="jid"]');
-                const awesomplete = new Awesomplete(name_input, {
-                    'minChars': 1,
+            initXHRAutoComplete () {
+                if (!_converse.autocomplete_add_contact) {
+                    return this.initXHRFetch();
+                }
+                const el = this.el.querySelector('.suggestion-box__name').parentElement;
+                this.name_auto_complete = new _converse.AutoComplete(el, {
+                    'auto_evaluate': false,
+                    'filter': _converse.FILTER_STARTSWITH,
                     'list': []
                 });
                 const xhr = new window.XMLHttpRequest();
                 // `open` must be called after `onload` for mock/testing purposes.
-                xhr.onload = function () {
+                xhr.onload = () => {
                     if (xhr.responseText) {
-                        awesomplete.list = JSON.parse(xhr.responseText).map((i) => { //eslint-disable-line arrow-body-style
-                            return {'label': i.fullname || i.jid, 'value': i.jid};
-                        });
-                        awesomplete.evaluate();
+                        const r = xhr.responseText;
+                        this.name_auto_complete.list = JSON.parse(r).map(i => ({'label': i.fullname || i.jid, 'value': i.jid}));
+                        this.name_auto_complete.auto_completing = true;
+                        this.name_auto_complete.evaluate();
                     }
                 };
-                name_input.addEventListener('input', _.debounce(() => {
-                    xhr.open("GET", `${_converse.xhr_user_search_url}q=${name_input.value}`, true);
+                const input_el = this.el.querySelector('input[name="name"]');
+                input_el.addEventListener('input', _.debounce(() => {
+                    xhr.open("GET", `${_converse.xhr_user_search_url}q=${input_el.value}`, true);
                     xhr.send()
                 } , 300));
+                this.name_auto_complete.on('suggestion-box-selectcomplete', ev => {
+                    this.el.querySelector('input[name="name"]').value = ev.text.label;
+                    this.el.querySelector('input[name="jid"]').value = ev.text.value;
+                });
+            },
+
+            initXHRFetch () {
+                this.xhr = new window.XMLHttpRequest();
+                this.xhr.onload = () => {
+                    if (this.xhr.responseText) {
+                        const r = this.xhr.responseText;
+                        const list = JSON.parse(r).map(i => ({'label': i.fullname || i.jid, 'value': i.jid}));
+                        if (list.length !== 1) {
+                            const el = this.el.querySelector('.invalid-feedback');
+                            el.textContent = __('Sorry, could not find a contact with that name')
+                            u.addClass('d-block', el);
+                            return;
+                        }
+                        const jid = list[0].value;
+                        if (this.validateSubmission(jid)) {
+                            const form = this.el.querySelector('form');
+                                const name = list[0].label;
+                            this.afterSubmission(form, jid, name);
+                        }
+                    }
+                };
+            },
+
+            validateSubmission (jid) {
+                const el = this.el.querySelector('.invalid-feedback');
+                if (!jid || _.compact(jid.split('@')).length < 2) {
+                    u.addClass('is-invalid', this.el.querySelector('input[name="jid"]'));
+                    u.addClass('d-block', el);
+                    return false;
+                } else if (Strophe.getBareJidFromJid(jid) === _converse.bare_jid) {
+                    el.textContent = __('You cannot add yourself as a contact')
+                    u.addClass('d-block', el);
+                    return false;
+                } else if (_converse.roster.get(Strophe.getBareJidFromJid(jid))) {
+                    el.textContent = __('This contact has already been added')
+                    u.addClass('d-block', el);
+                    return false;
+                }
+                u.removeClass('d-block', el);
+                return true;
+            },
+
+            afterSubmission (form, jid, name) {
+                _converse.roster.addAndSubscribe(jid, name);
+                this.model.clear();
+                this.modal.hide();
             },
 
             addContactFromForm (ev) {
                 ev.preventDefault();
                 const data = new FormData(ev.target),
-                      jid = data.get('jid'),
-                      name = data.get('name');
-                if (!jid || _.compact(jid.split('@')).length < 2) {
-                    // XXX: we have to do this manually, instead of via
-                    // toHTML because Awesomplete messes things up and
-                    // confuses Snabbdom
-                    u.addClass('is-invalid', this.el.querySelector('input[name="jid"]'));
-                    u.addClass('d-block', this.el.querySelector('.invalid-feedback'));
-                } else {
-                    ev.target.reset();
-                    _converse.roster.addAndSubscribe(jid, name);
-                    this.model.clear();
-                    this.modal.hide();
+                      jid = data.get('jid');
+
+                if (!jid && _converse.xhr_user_search_url && _.isString(_converse.xhr_user_search_url)) {
+                    const input_el = this.el.querySelector('input[name="name"]');
+                    this.xhr.open("GET", `${_converse.xhr_user_search_url}q=${input_el.value}`, true);
+                    this.xhr.send()
+                    return;
+                }
+                if (this.validateSubmission(jid)) {
+                    this.afterSubmission(ev.target, jid, data.get('name'));
                 }
             }
         });
@@ -213,7 +215,7 @@ converse.plugins.add('converse-rosterview', {
             className: 'roster-filter-form',
             events: {
                 "keydown .roster-filter": "liveFilter",
-                "submit form.roster-filter-form": "submitFilter",
+                "submit": "submitFilter",
                 "click .clear-input": "clearFilter",
                 "click .filter-by span": "changeTypeFilter",
                 "change .state-type": "changeChatStateFilter"
@@ -226,7 +228,7 @@ converse.plugins.add('converse-rosterview', {
 
             toHTML () {
                 return tpl_roster_filter(
-                    _.extend(this.model.toJSON(), {
+                    Object.assign(this.model.toJSON(), {
                         visible: this.shouldBeVisible(),
                         placeholder: __('Filter'),
                         title_contact_filter: __('Filter by contact name'),
@@ -352,7 +354,6 @@ converse.plugins.add('converse-rosterview', {
             },
 
             render () {
-                const that = this;
                 if (!this.mayBeShown()) {
                     u.hideElement(this.el);
                     return this;
@@ -366,14 +367,9 @@ converse.plugins.add('converse-rosterview', {
                     'current-xmpp-contact',
                     'pending-xmpp-contact',
                     'requesting-xmpp-contact'
-                    ].concat(_.keys(STATUSES));
+                    ].concat(Object.keys(STATUSES));
+                classes_to_remove.forEach(c => u.removeClass(c, this.el));
 
-                _.each(classes_to_remove,
-                    function (cls) {
-                        if (_.includes(that.el.className, cls)) {
-                            that.el.classList.remove(cls);
-                        }
-                    });
                 this.el.classList.add(show);
                 this.el.setAttribute('data-status', show);
                 this.highlight();
@@ -404,7 +400,7 @@ converse.plugins.add('converse-rosterview', {
                     const display_name = this.model.getDisplayName();
                     this.el.classList.add('pending-xmpp-contact');
                     this.el.innerHTML = tpl_pending_contact(
-                        _.extend(this.model.toJSON(), {
+                        Object.assign(this.model.toJSON(), {
                             'display_name': display_name,
                             'desc_remove': __('Click to remove %1$s as a contact', display_name),
                             'allow_chat_pending_contacts': _converse.allow_chat_pending_contacts
@@ -414,7 +410,7 @@ converse.plugins.add('converse-rosterview', {
                     const display_name = this.model.getDisplayName();
                     this.el.classList.add('requesting-xmpp-contact');
                     this.el.innerHTML = tpl_requesting_contact(
-                        _.extend(this.model.toJSON(), {
+                        Object.assign(this.model.toJSON(), {
                             'display_name': display_name,
                             'desc_accept': __("Click to accept the contact request from %1$s", display_name),
                             'desc_decline': __("Click to decline the contact request from %1$s", display_name),
@@ -435,12 +431,10 @@ converse.plugins.add('converse-rosterview', {
                  */
                 if (_converse.isUniView()) {
                     const chatbox = _converse.chatboxes.get(this.model.get('jid'));
-                    if (chatbox) {
-                        if (chatbox.get('hidden')) {
-                            this.el.classList.remove('open');
-                        } else {
-                            this.el.classList.add('open');
-                        }
+                    if ((chatbox && chatbox.get('hidden')) || !chatbox) {
+                        this.el.classList.remove('open');
+                    } else {
+                        this.el.classList.add('open');
                     }
                 }
             },
@@ -459,7 +453,7 @@ converse.plugins.add('converse-rosterview', {
                 }
                 const display_name = item.getDisplayName();
                 this.el.innerHTML = tpl_roster_item(
-                    _.extend(item.toJSON(), {
+                    Object.assign(item.toJSON(), {
                         'display_name': display_name,
                         'desc_status': STATUSES[show],
                         'status_icon': status_icon,
@@ -496,7 +490,7 @@ converse.plugins.add('converse-rosterview', {
             openChat (ev) {
                 if (ev && ev.preventDefault) { ev.preventDefault(); }
                 const attrs = this.model.attributes;
-                _converse.api.chats.open(attrs.jid, attrs);
+                _converse.api.chats.open(attrs.jid, attrs, true);
             },
 
             async removeContact (ev) {
@@ -517,7 +511,7 @@ converse.plugins.add('converse-rosterview', {
                     _converse.log(e, Strophe.LogLevel.ERROR);
                     _converse.api.alert.show(
                         Strophe.LogLevel.ERROR,
-                        __('Sorry, there was an error while trying to remove %1$s as a contact.', name)
+                        __('Sorry, there was an error while trying to remove %1$s as a contact.', this.model.getDisplayName())
                     );
                 }
             },
@@ -543,7 +537,7 @@ converse.plugins.add('converse-rosterview', {
             }
         });
 
-        _converse.RosterGroupView = Backbone.OrderedListView.extend({
+        _converse.RosterGroupView = OrderedListView.extend({
             tagName: 'div',
             className: 'roster-group hidden',
             events: {
@@ -556,7 +550,7 @@ converse.plugins.add('converse-rosterview', {
             sortEvent: 'presenceChanged',
 
             initialize () {
-                Backbone.OrderedListView.prototype.initialize.apply(this, arguments);
+                OrderedListView.prototype.initialize.apply(this, arguments);
                 this.model.contacts.on("change:subscription", this.onContactSubscriptionChange, this);
                 this.model.contacts.on("change:requesting", this.onContactRequestChange, this);
                 this.model.contacts.on("remove", this.onRemove, this);
@@ -586,11 +580,11 @@ converse.plugins.add('converse-rosterview', {
 
             show () {
                 u.showElement(this.el);
-                _.each(this.getAll(), (contact_view) => {
-                    if (contact_view.mayBeShown() && this.model.get('state') === _converse.OPENED) {
-                        u.showElement(contact_view.el);
-                    }
-                });
+                if (this.model.get('state') === _converse.OPENED) {
+                    Object.values(this.getAll())
+                        .filter(v => v.mayBeShown())
+                        .forEach(v => u.showElement(v.el));
+                }
                 return this;
             },
 
@@ -633,7 +627,7 @@ converse.plugins.add('converse-rosterview', {
                 let matches;
                 q = q.toLowerCase();
                 if (type === 'state') {
-                    if (this.model.get('name') === HEADER_REQUESTING_CONTACTS) {
+                    if (this.model.get('name') === _converse.HEADER_REQUESTING_CONTACTS) {
                         // When filtering by chat state, we still want to
                         // show requesting contacts, even though they don't
                         // have the state in question.
@@ -702,13 +696,13 @@ converse.plugins.add('converse-rosterview', {
             },
 
             onContactSubscriptionChange (contact) {
-                if ((this.model.get('name') === HEADER_PENDING_CONTACTS) && contact.get('subscription') !== 'from') {
+                if ((this.model.get('name') === _converse.HEADER_PENDING_CONTACTS) && contact.get('subscription') !== 'from') {
                     this.removeContact(contact);
                 }
             },
 
             onContactRequestChange (contact) {
-                if ((this.model.get('name') === HEADER_REQUESTING_CONTACTS) && !contact.get('requesting')) {
+                if ((this.model.get('name') === _converse.HEADER_REQUESTING_CONTACTS) && !contact.get('requesting')) {
                     this.removeContact(contact);
                 }
             },
@@ -730,7 +724,7 @@ converse.plugins.add('converse-rosterview', {
         });
 
 
-        _converse.RosterView = Backbone.OrderedListView.extend({
+        _converse.RosterView = OrderedListView.extend({
             tagName: 'div',
             id: 'converse-roster',
             className: 'controlbox-section',
@@ -747,7 +741,7 @@ converse.plugins.add('converse-rosterview', {
             },
 
             initialize () {
-                Backbone.OrderedListView.prototype.initialize.apply(this, arguments);
+                OrderedListView.prototype.initialize.apply(this, arguments);
 
                 _converse.roster.on("add", this.onContactAdded, this);
                 _converse.roster.on('change:groups', this.onContactAdded, this);
@@ -765,9 +759,9 @@ converse.plugins.add('converse-rosterview', {
                 // just this group's) have been fetched from browser
                 // storage or the XMPP server and once they've been
                 // assigned to their various groups.
-                _converse.on('rosterGroupsFetched', this.sortAndPositionAllItems.bind(this));
+                _converse.api.listen.on('rosterGroupsFetched', this.sortAndPositionAllItems.bind(this));
 
-                _converse.on('rosterContactsFetched', () => {
+                _converse.api.listen.on('rosterContactsFetched', () => {
                     _converse.roster.each((contact) => this.addRosterContact(contact, {'silent': true}));
                     this.update();
                     this.updateFilter();
@@ -800,7 +794,7 @@ converse.plugins.add('converse-rosterview', {
                 // Create a model on which we can store filter properties
                 const model = new _converse.RosterFilter();
                 model.id = `_converse.rosterfilter${_converse.bare_jid}`;
-                model.browserStorage = new Backbone.BrowserStorage.local(this.filter.id);
+                model.browserStorage = new BrowserStorage.local(this.filter.id);
                 this.filter_view = new _converse.RosterFilterView({'model': model});
                 this.filter_view.model.on('change', this.updateFilter, this);
                 this.filter_view.model.fetch();
@@ -822,13 +816,13 @@ converse.plugins.add('converse-rosterview', {
                 }
             }, 100),
 
-            update: _.debounce(function () {
+            update () {
                 if (!u.isVisible(this.roster_el)) {
                     u.showElement(this.roster_el);
                 }
                 this.filter_view.showOrHide();
                 return this;
-            }, _converse.animate ? 100 : 0),
+            },
 
             filter (query, type) {
                 // First we make sure the filter is restored to its
@@ -878,34 +872,21 @@ converse.plugins.add('converse-rosterview', {
             },
 
             onContactChange (contact) {
-                this.updateChatBox(contact)
                 this.update();
                 if (_.has(contact.changed, 'subscription')) {
                     if (contact.changed.subscription === 'from') {
-                        this.addContactToGroup(contact, HEADER_PENDING_CONTACTS);
+                        this.addContactToGroup(contact, _converse.HEADER_PENDING_CONTACTS);
                     } else if (_.includes(['both', 'to'], contact.get('subscription'))) {
                         this.addExistingContact(contact);
                     }
                 }
                 if (_.has(contact.changed, 'ask') && contact.changed.ask === 'subscribe') {
-                    this.addContactToGroup(contact, HEADER_PENDING_CONTACTS);
+                    this.addContactToGroup(contact, _converse.HEADER_PENDING_CONTACTS);
                 }
                 if (_.has(contact.changed, 'subscription') && contact.changed.requesting === 'true') {
-                    this.addContactToGroup(contact, HEADER_REQUESTING_CONTACTS);
+                    this.addContactToGroup(contact, _converse.HEADER_REQUESTING_CONTACTS);
                 }
                 this.updateFilter();
-            },
-
-            updateChatBox (contact) {
-                if (!this.model.chatbox) {
-                    return this;
-                }
-                const changes = {};
-                if (_.has(contact.changed, 'status')) {
-                    changes.status = contact.get('status');
-                }
-                this.model.chatbox.save(changes);
-                return this;
             },
 
             getGroup (name) {
@@ -916,7 +897,7 @@ converse.plugins.add('converse-rosterview', {
                 if (view) {
                     return view.model;
                 }
-                return this.model.create({name, 'id': b64_sha1(name)});
+                return this.model.create({name, 'id': SHA1.b64_sha1(name)});
             },
 
             addContactToGroup (contact, name, options) {
@@ -929,10 +910,10 @@ converse.plugins.add('converse-rosterview', {
                 if (_converse.roster_groups) {
                     groups = contact.get('groups');
                     if (groups.length === 0) {
-                        groups = [HEADER_UNGROUPED];
+                        groups = [_converse.HEADER_UNGROUPED];
                     }
                 } else {
-                    groups = [HEADER_CURRENT_CONTACTS];
+                    groups = [_converse.HEADER_CURRENT_CONTACTS];
                 }
                 _.each(groups, _.bind(this.addContactToGroup, this, contact, _, options));
             },
@@ -950,25 +931,25 @@ converse.plugins.add('converse-rosterview', {
                         return;
                     }
                     if ((contact.get('ask') === 'subscribe') || (contact.get('subscription') === 'from')) {
-                        this.addContactToGroup(contact, HEADER_PENDING_CONTACTS, options);
+                        this.addContactToGroup(contact, _converse.HEADER_PENDING_CONTACTS, options);
                     } else if (contact.get('requesting') === true) {
-                        this.addContactToGroup(contact, HEADER_REQUESTING_CONTACTS, options);
+                        this.addContactToGroup(contact, _converse.HEADER_REQUESTING_CONTACTS, options);
                     }
                 }
                 return this;
             }
         });
 
-
         /* -------- Event Handlers ----------- */
         _converse.api.listen.on('chatBoxesInitialized', () => {
-
-            _converse.chatboxes.on('change:hidden', (chatbox) => {
+            function highlightRosterItem (chatbox) {
                 const contact = _converse.roster.findWhere({'jid': chatbox.get('jid')});
                 if (!_.isUndefined(contact)) {
-                    contact.trigger('highlight', contact);
+                    contact.trigger('highlight');
                 }
-            });
+            }
+            _converse.chatboxes.on('destroy', chatbox => highlightRosterItem(chatbox));
+            _converse.chatboxes.on('change:hidden', chatbox => highlightRosterItem(chatbox));
         });
 
         function initRoster () {
@@ -982,7 +963,12 @@ converse.plugins.add('converse-rosterview', {
                 'model': _converse.rostergroups
             });
             _converse.rosterview.render();
-            _converse.emit('rosterViewInitialized');
+            /**
+             * Triggered once the _converse.RosterView instance has been created and initialized.
+             * @event _converse#rosterViewInitialized
+             * @example _converse.api.listen.on('rosterViewInitialized', () => { ... });
+             */
+            _converse.api.trigger('rosterViewInitialized');
         }
         _converse.api.listen.on('rosterInitialized', initRoster);
         _converse.api.listen.on('rosterReadyAfterReconnection', initRoster);

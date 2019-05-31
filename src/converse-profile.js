@@ -18,7 +18,7 @@ import tpl_profile_view from "templates/profile_view.html";
 import tpl_status_option from "templates/status_option.html";
 
 
-const { Strophe, Backbone, Promise, utils, _, moment } = converse.env;
+const { Strophe, Backbone, Promise, utils, _, dayjs, sizzle } = converse.env;
 const u = converse.env.utils;
 
 
@@ -48,11 +48,17 @@ converse.plugins.add('converse-profile', {
             initialize () {
                 this.model.on('change', this.render, this);
                 _converse.BootstrapModal.prototype.initialize.apply(this, arguments);
-                _converse.emit('profileModalInitialized', this.model);
+                /**
+                 * Triggered when the _converse.ProfileModal has been created and initialized.
+                 * @event _converse#profileModalInitialized
+                 * @type { _converse.XMPPStatus }
+                 * @example _converse.api.listen.on('profileModalInitialized', status => { ... });
+                 */
+                _converse.api.trigger('profileModalInitialized', this.model);
             },
 
             toHTML () {
-                return tpl_profile_modal(_.extend(
+                return tpl_profile_modal(Object.assign(
                     this.model.toJSON(),
                     this.model.vcard.toJSON(), {
                     '_': _,
@@ -66,7 +72,9 @@ converse.plugins.add('converse-profile', {
                     'label_jid': __('XMPP Address (JID)'),
                     'label_nickname': __('Nickname'),
                     'label_role': __('Role'),
-                    'label_role_help': __('Use commas to separate multiple roles. Your roles are shown next to your name on your chat messages.'),
+                    'label_role_help': __(
+                        'Use commas to separate multiple roles. '+
+                        'Your roles are shown next to your name on your chat messages.'),
                     'label_url': __('URL'),
                     'utils': u,
                     'view': this
@@ -74,7 +82,7 @@ converse.plugins.add('converse-profile', {
             },
 
             afterRender () {
-                this.tabs = _.map(this.el.querySelectorAll('.nav-item'), (tab) => new bootstrap.Tab(tab));
+                this.tabs = sizzle('.nav-item .nav-link', this.el).map(e => new bootstrap.Tab(e));
             },
 
             openFileSelection (ev) {
@@ -120,14 +128,14 @@ converse.plugins.add('converse-profile', {
                     'url': form_data.get('url'),
                 };
                 if (!image_file.size) {
-                    _.extend(data, {
+                    Object.assign(data, {
                         'image': this.model.vcard.get('image'),
                         'image_type': this.model.vcard.get('image_type')
                     });
                     this.setVCard(data);
                 } else {
                     reader.onloadend = () => {
-                        _.extend(data, {
+                        Object.assign(data, {
                             'image': btoa(reader.result),
                             'image_type': image_file.type
                         });
@@ -147,7 +155,7 @@ converse.plugins.add('converse-profile', {
 
             toHTML () {
                 return tpl_chat_status_modal(
-                    _.extend(
+                    Object.assign(
                         this.model.toJSON(),
                         this.model.vcard.toJSON(), {
                         'label_away': __('Away'),
@@ -194,7 +202,7 @@ converse.plugins.add('converse-profile', {
 
             toHTML () {
                 return tpl_client_info_modal(
-                    _.extend(
+                    Object.assign(
                         this.model.toJSON(),
                         this.model.vcard.toJSON(), {
                             '__': __,
@@ -231,7 +239,7 @@ converse.plugins.add('converse-profile', {
 
             toHTML () {
                 const chat_status = this.model.get('status') || 'offline';
-                return tpl_profile_view(_.extend(
+                return tpl_profile_view(Object.assign(
                     this.model.toJSON(),
                     this.model.vcard.toJSON(), {
                     '__': __,
