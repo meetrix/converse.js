@@ -38213,21 +38213,7 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
           'auto_evaluate': false,
           'min_chars': 1,
           'match_current_word': true,
-          'list': () => this.getAutoCompleteList(),
-          'filter': _converse.FILTER_STARTSWITH,
-          'ac_triggers': ["Tab", "@"],
-          'include_triggers': []
-        });
-        this.mention_auto_complete.on('suggestion-box-selectcomplete', () => this.auto_completing = false);
-      },
-
       onKeyDown(ev) {
-        if (this.mention_auto_complete.onKeyDown(ev)) {
-          return;
-        }
-
-        return _converse.ChatBoxView.prototype.onKeyDown.apply(this, arguments);
-      },
 
       onKeyUp(ev) {
         this.mention_auto_complete.evaluate(ev);
