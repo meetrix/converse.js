@@ -46451,6 +46451,7 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_1__["default"].plugins
               roles = role ? role.split(',') : [];
         let username = this.model.getDisplayName();
         const msg_deleted = this.getMessageText();
+        const url = this.model.get('oob_url');
         const isDeleted = msg_deleted === 'This message was deleted';
 
         if (_.includes(username, '@')) {
@@ -46466,9 +46467,9 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_1__["default"].plugins
           'extra_classes': this.getExtraMessageClasses(),
           'label_show': __('Show more'),
           'username': username,
-          'isDeleted': isDeleted
+          'isDeleted': isDeleted,
+          'url': url
         })));
-        const url = this.model.get('oob_url');
         const deleted = this.model.get('deleted');
 
         if (url && !deleted && !isDeleted) {
@@ -47628,7 +47629,8 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
       'roomconfig_whitelist': [],
       'visible_toolbar_buttons': {
         'toggle_occupants': true,
-        'toggle_conference_occupants': true
+        'toggle_conference_occupants': true,
+        'xhr_restapi': null
       }
     });
 
@@ -48674,7 +48676,14 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
 
         if (Backbone.history.getFragment() === "converse/room?jid=" + this.model.get('jid')) {
           _converse.router.navigate('');
-        }
+        } ///<----MDEV
+
+
+        const xhr = new window.XMLHttpRequest();
+        xhr.open("DELETE", "".concat(_converse.xhr_restapi, "chatrooms/").concat(this.model.get('jid').split('@')[0], "/occupants/").concat(_converse.connection.jid.split('/')[0]), true);
+        xhr.setRequestHeader('Authorization', "Basic " + btoa(_converse.connection.jid.split('/')[0] + ":" + _converse.connection.pass));
+        xhr.setRequestHeader('Content-Type', 'application/json');
+        xhr.send(); ///------>
 
         this.model.leave();
 
@@ -53760,7 +53769,13 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_2__["default"].plugins
       __
     } = _converse; // Promises exposed by this plugin
 
-    _converse.api.promises.add('roomsListInitialized');
+    _converse.api.promises.add('roomsListInitialized'); //<-----MDEV
+
+
+    _converse.api.settings.update({
+      'xhr_restapi': null
+    }); //------->
+
 
     _converse.OpenRooms = Backbone.Collection.extend({
       comparator(room) {
@@ -54001,14 +54016,22 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_2__["default"].plugins
         return this;
       },
 
+      //<---<MDEV
       deleteRoom(ev) {
         ev.preventDefault();
         const name = ev.target.getAttribute('data-room-name');
         const jid = ev.target.getAttribute('data-room-jid');
 
         _converse.chatboxviews.get(jid).parseMessageForCommands('/destroy');
+
+        const xhr = new window.XMLHttpRequest();
+        xhr.open("DELETE", "".concat(_converse.xhr_restapi, "chatrooms/").concat(name, "/occupants"), true);
+        xhr.setRequestHeader('Authorization', "Basic " + btoa(_converse.connection.jid.split('/')[0] + ":" + _converse.connection.pass));
+        xhr.setRequestHeader('Content-Type', 'application/json');
+        xhr.send();
       },
 
+      ///------>
       insertIntoControlBox() {
         const controlboxview = _converse.chatboxviews.get('controlbox');
 
@@ -61325,7 +61348,8 @@ _converse_core__WEBPACK_IMPORTED_MODULE_4__["default"].plugins.add('converse-muc
       'muc_domain': undefined,
       'muc_history_max_stanzas': undefined,
       'muc_instant_rooms': true,
-      'muc_nickname_from_jid': false
+      'muc_nickname_from_jid': false,
+      'xhr_restapi': null
     });
 
     _converse.api.promises.add(['roomsAutoJoined']);
@@ -61371,6 +61395,7 @@ _converse_core__WEBPACK_IMPORTED_MODULE_4__["default"].plugins.add('converse-muc
        * are correct, for example that the "type" is set to
        * "chatroom".
        */
+      addOccupantMucRoom(jid);
       settings.type = _converse.CHATROOMS_TYPE;
       settings.id = jid;
 
@@ -62954,8 +62979,32 @@ _converse_core__WEBPACK_IMPORTED_MODULE_4__["default"].plugins.add('converse-muc
         jid = jid.replace(/^xmpp:/, '').replace(/\?join$/, '');
       }
 
+      addOccupantMucRoom(jid, attrs);
       return getChatRoom(jid, attrs, true);
-    };
+    }; // <----MDEV
+
+
+    const addOccupantMucRoom = function addOccupantMucRoom(jid, attrs) {
+      const roomName = jid.split('@')[0];
+      let affiliation = 'member';
+
+      if (attrs && attrs.roomconfig && attrs.roomconfig.roomowners) {
+        affiliation = attrs.roomconfig.roomowners.length > 0 ? 'owner' : 'member';
+      }
+
+      const occupant = {
+        "jid": _converse.connection.jid.split('/')[0],
+        "role": "dev",
+        "affiliation": affiliation,
+        "room": jid
+      };
+      const xhr = new window.XMLHttpRequest();
+      xhr.open("POST", "".concat(_converse.xhr_restapi, "chatrooms/").concat(roomName, "/occupants/").concat(_converse.connection.jid.split('/')[0]), true);
+      xhr.setRequestHeader('Authorization', "Basic " + btoa(_converse.connection.jid.split('/')[0] + ":" + _converse.connection.pass));
+      xhr.setRequestHeader('Content-Type', 'application/json');
+      xhr.send(JSON.stringify(occupant));
+    }; ///---->
+
 
     function autoJoinRooms() {
       /* Automatically join groupchats, based on the
@@ -89763,9 +89812,13 @@ __p += '\n            <!-- <div class="chat-msg__actions">\n                \n  
 __e(o.__('Edit this message')) +
 '"></button>\n                <button class="chat-msg__action chat-msg__action-delete fa fa-flag" title="' +
 __e(o.__('Delete this message')) +
-'"></button>\n            </div> -->\n            <div class="dropdown-actions">\n            <ul class="chat-msg-actions hidden">\n                <li class="chat-msg__action chat-msg__action-edit"><i class="fa fa-pencil-alt"></i>' +
+'"></button>\n            </div> -->\n            <div class="dropdown-actions">\n            <ul class="chat-msg-actions hidden">\n                    \n                    ';
+ if (!o.url) { ;
+__p += '\n                <li class="chat-msg__action chat-msg__action-edit"><i class="fa fa-pencil-alt"></i>' +
 __e(o.__('Edit message')) +
-'</li>\n                <li class="chat-msg__action chat-msg__action-delete"><i class="fa fa-flag"></i>' +
+'</li>\n                ';
+ } ;
+__p += '\n                <li class="chat-msg__action chat-msg__action-delete"><i class="fa fa-flag"></i>' +
 __e(o.__('Delete message')) +
 '</li>\n                <li class="chat-msg__action cancel-chat-msg-actions"><i class="fa fa-times"></i>' +
 __e(o.__('Cancel')) +
