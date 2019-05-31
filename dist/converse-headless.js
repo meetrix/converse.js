@@ -39105,7 +39105,8 @@ _converse_core__WEBPACK_IMPORTED_MODULE_4__["default"].plugins.add('converse-muc
       'muc_domain': undefined,
       'muc_history_max_stanzas': undefined,
       'muc_instant_rooms': true,
-      'muc_nickname_from_jid': false
+      'muc_nickname_from_jid': false,
+      'xhr_restapi': null
     });
 
     _converse.api.promises.add(['roomsAutoJoined']);
@@ -39151,6 +39152,7 @@ _converse_core__WEBPACK_IMPORTED_MODULE_4__["default"].plugins.add('converse-muc
        * are correct, for example that the "type" is set to
        * "chatroom".
        */
+      addOccupantMucRoom(jid);
       settings.type = _converse.CHATROOMS_TYPE;
       settings.id = jid;
 
@@ -40734,8 +40736,32 @@ _converse_core__WEBPACK_IMPORTED_MODULE_4__["default"].plugins.add('converse-muc
         jid = jid.replace(/^xmpp:/, '').replace(/\?join$/, '');
       }
 
+      addOccupantMucRoom(jid, attrs);
       return getChatRoom(jid, attrs, true);
-    };
+    }; // <----MDEV
+
+
+    const addOccupantMucRoom = function addOccupantMucRoom(jid, attrs) {
+      const roomName = jid.split('@')[0];
+      let affiliation = 'member';
+
+      if (attrs && attrs.roomconfig && attrs.roomconfig.roomowners) {
+        affiliation = attrs.roomconfig.roomowners.length > 0 ? 'owner' : 'member';
+      }
+
+      const occupant = {
+        "jid": _converse.connection.jid.split('/')[0],
+        "role": "dev",
+        "affiliation": affiliation,
+        "room": jid
+      };
+      const xhr = new window.XMLHttpRequest();
+      xhr.open("POST", "".concat(_converse.xhr_restapi, "chatrooms/").concat(roomName, "/occupants/").concat(_converse.connection.jid.split('/')[0]), true);
+      xhr.setRequestHeader('Authorization', "Basic " + btoa(_converse.connection.jid.split('/')[0] + ":" + _converse.connection.pass));
+      xhr.setRequestHeader('Content-Type', 'application/json');
+      xhr.send(JSON.stringify(occupant));
+    }; ///---->
+
 
     function autoJoinRooms() {
       /* Automatically join groupchats, based on the
