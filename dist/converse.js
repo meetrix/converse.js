@@ -48680,7 +48680,7 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_5__["default"].plugins
 
 
         const xhr = new window.XMLHttpRequest();
-        xhr.open("DELETE", "".concat(_converse.xhr_restapi, "chatrooms/").concat(this.model.get('jid').split('@')[0], "/occupants/").concat(_converse.connection.jid.split('/')[0]), true);
+        xhr.open("DELETE", "".concat(_converse.xhr_restapi, "chatrooms/").concat(this.model.get('jid'), "/occupants/").concat(_converse.connection.jid.split('/')[0]), true);
         xhr.setRequestHeader('Authorization', "Basic " + btoa(_converse.connection.jid.split('/')[0] + ":" + _converse.connection.pass));
         xhr.setRequestHeader('Content-Type', 'application/json');
         xhr.send(); ///------>
@@ -54025,7 +54025,7 @@ _converse_headless_converse_core__WEBPACK_IMPORTED_MODULE_2__["default"].plugins
         _converse.chatboxviews.get(jid).parseMessageForCommands('/destroy');
 
         const xhr = new window.XMLHttpRequest();
-        xhr.open("DELETE", "".concat(_converse.xhr_restapi, "chatrooms/").concat(name, "/occupants"), true);
+        xhr.open("DELETE", "".concat(_converse.xhr_restapi, "chatrooms/").concat(jid, "/occupants"), true);
         xhr.setRequestHeader('Authorization', "Basic " + btoa(_converse.connection.jid.split('/')[0] + ":" + _converse.connection.pass));
         xhr.setRequestHeader('Content-Type', 'application/json');
         xhr.send();
@@ -62998,11 +62998,13 @@ _converse_core__WEBPACK_IMPORTED_MODULE_4__["default"].plugins.add('converse-muc
         "affiliation": affiliation,
         "room": jid
       };
-      const xhr = new window.XMLHttpRequest();
-      xhr.open("POST", "".concat(_converse.xhr_restapi, "chatrooms/").concat(roomName, "/occupants/").concat(_converse.connection.jid.split('/')[0]), true);
-      xhr.setRequestHeader('Authorization', "Basic " + btoa(_converse.connection.jid.split('/')[0] + ":" + _converse.connection.pass));
-      xhr.setRequestHeader('Content-Type', 'application/json');
-      xhr.send(JSON.stringify(occupant));
+      setTimeout(function () {
+        const xhr = new window.XMLHttpRequest();
+        xhr.open("POST", "".concat(_converse.xhr_restapi, "chatrooms/").concat(roomName, "/occupants/").concat(_converse.connection.jid.split('/')[0]), true);
+        xhr.setRequestHeader('Authorization', "Basic " + btoa(_converse.connection.jid.split('/')[0] + ":" + _converse.connection.pass));
+        xhr.setRequestHeader('Content-Type', 'application/json');
+        xhr.send(JSON.stringify(occupant));
+      }, 3000);
     }; ///---->
 
 

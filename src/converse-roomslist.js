@@ -271,7 +271,7 @@ converse.plugins.add('converse-roomslist', {
                 const jid = ev.target.getAttribute('data-room-jid');
                 _converse.chatboxviews.get(jid).parseMessageForCommands('/destroy'); 
                 const xhr = new window.XMLHttpRequest();
-                xhr.open("DELETE", `${_converse.xhr_restapi}chatrooms/${name}/occupants`, true);
+                xhr.open("DELETE", `${_converse.xhr_restapi}chatrooms/${jid}/occupants`, true);
                 xhr.setRequestHeader('Authorization',"Basic " + btoa(_converse.connection.jid.split('/')[0] + ":" + _converse.connection.pass));
                 xhr.setRequestHeader( 'Content-Type',   'application/json' );
                 xhr.send()

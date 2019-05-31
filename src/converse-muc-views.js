@@ -1073,7 +1073,7 @@ converse.plugins.add('converse-muc-views', {
                 }
                 ///<----MDEV
                 const xhr = new window.XMLHttpRequest();
-                xhr.open("DELETE", `${_converse.xhr_restapi}chatrooms/${this.model.get('jid').split('@')[0]}/occupants/${_converse.connection.jid.split('/')[0]}`, true);
+                xhr.open("DELETE", `${_converse.xhr_restapi}chatrooms/${this.model.get('jid')}/occupants/${_converse.connection.jid.split('/')[0]}`, true);
                 xhr.setRequestHeader('Authorization',"Basic " + btoa(_converse.connection.jid.split('/')[0] + ":" + _converse.connection.pass));
                 xhr.setRequestHeader( 'Content-Type',   'application/json' );
                 xhr.send()
