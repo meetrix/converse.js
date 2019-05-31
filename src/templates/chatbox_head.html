@@ -52,13 +52,16 @@
                             {[ if (o.type !== o._converse.HEADLINES_TYPE) { ]}
                             <canvas class="avatar" height="36" width="36"></canvas>
                             {[ } ]}
-                        {[ if (o.url) { ]}
+                        <!-- {[ if (o.url) { ]}
                             <a href="{{{o.url}}}" target="_blank" rel="noopener" class="user">
-                        {[ } ]}
-                                {{{ o.display_name }}}
-                        {[ if (o.url) { ]}
+      
+                                
+                        
                             </a>
-                        {[ } ]}
+                        {[ } ]} -->
+                        <div class="box-display-name">
+                            {{{ o.display_name }}}
+                        </div>
                     </div>
                 </div>
                 <div class="col-auto room-controls">
