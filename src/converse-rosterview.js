@@ -531,6 +531,16 @@ converse.plugins.add('converse-rosterview', {
                 if (ev && ev.preventDefault) { ev.preventDefault(); }
                 const attrs = this.model.attributes;
                 _converse.api.chats.open(attrs.jid, attrs, true);
+                this.hidemobileviewbox();
+            },
+            hidemobileviewbox(){
+                var x = window.matchMedia("(max-width: 600px)")
+                this.myFunction(x) // Call listener function at run time
+            },
+            myFunction(x) {
+                if (x.matches) {
+                     u.addClass('hidden', document.getElementById('controlbox'));
+                }
             },
 
             async removeContact (ev) {

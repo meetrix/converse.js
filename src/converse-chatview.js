@@ -364,13 +364,10 @@ converse.plugins.add('converse-chatview', {
                  */
                 _converse.api.trigger('chatBoxInitialized', this);
             },
-
             initDebounced () {
                 this.scrollDown = _.debounce(this._scrollDown, 100);
                 this.markScrolled = _.debounce(this._markScrolled, 100);
                 this.show = _.debounce(this._show, 250, {'leading': true});
-            },
-            videoCall(){
             },
             render () {
                 this.el.innerHTML = tpl_chatbox(
@@ -1267,8 +1264,19 @@ converse.plugins.add('converse-chatview', {
                  * @example _converse.api.listen.on('chatBoxClosed', view => { ... });
                  */
                 _converse.api.trigger('chatBoxClosed', this);
+                this.hidemobileviewbox();
                 return this;
             },
+            hidemobileviewbox(){
+                var x = window.matchMedia("(max-width: 600px)")
+                this.myFunction(x) // Call listener function at run time
+            },
+            myFunction(x) {
+                if (x.matches) {
+                     u.removeClass('hidden', document.getElementById('controlbox'));
+                }
+            },
+
 
             renderEmojiPicker () {
                 this.emoji_picker_view.render();

@@ -772,7 +772,6 @@ converse.plugins.add('converse-muc-views', {
                 'input .chat-textarea': 'inputChanged',
                 'dragover .chat-textarea': 'onDragOver',
                 'drop .chat-textarea': 'onDrop',
-                'click .top-toolbar-video-cal': 'videoCall',
                 'keyup .chatapp-filter-all': 'channelContentSearch',
             },
 
@@ -823,8 +822,7 @@ converse.plugins.add('converse-muc-views', {
                  */
                 _converse.api.trigger('chatRoomOpened', this);
                 _converse.api.trigger('chatBoxInitialized', this);
-            },
-            videoCall(){
+                this.hideOccupants()
             },
             channelContentSearch(ev){
 

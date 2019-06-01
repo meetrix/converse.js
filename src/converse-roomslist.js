@@ -304,7 +304,18 @@ converse.plugins.add('converse-roomslist', {
                 }
                 await _converse.api.rooms.open(jid, data, true);
                 _converse.api.chatviews.get(jid).focus();
+                this.hidemobileviewbox()
             },
+            hidemobileviewbox(){
+                var x = window.matchMedia("(max-width: 600px)")
+                this.myFunction(x) // Call listener function at run time
+            },
+            myFunction(x) {
+                if (x.matches) {
+                     u.addClass('hidden', document.getElementById('controlbox'));
+                }
+            },
+
 
             closeRoom (ev) {
                 ev.preventDefault();
