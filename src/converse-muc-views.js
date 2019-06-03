@@ -787,7 +787,7 @@ converse.plugins.add('converse-muc-views', {
 
                 this.model.on('change:affiliation', this.renderHeading, this);
                 this.model.on('change:connection_status', this.onConnectionStatusChanged, this);
-                this.model.on('change:hidden_occupants', this.updateOccupantsToggle, this);
+                // this.model.on('change:hidden_occupants', this.updateOccupantsToggle, this);
                 this.model.on('change:description', this.renderHeading, this);
                 this.model.on('change:jid', this.renderHeading, this);
                 this.model.on('change:name', this.renderHeading, this);
@@ -822,7 +822,7 @@ converse.plugins.add('converse-muc-views', {
                  */
                 _converse.api.trigger('chatRoomOpened', this);
                 _converse.api.trigger('chatBoxInitialized', this);
-                this.hideOccupants()
+                
             },
             channelContentSearch(ev){
 
@@ -2061,7 +2061,7 @@ converse.plugins.add('converse-muc-views', {
                     this.renderPasswordForm();
                 } else {
                     u.showElement(this.el.querySelector('.chat-area'));
-                    u.showElement(this.el.querySelector('.occupants'));
+                    // u.showElement(this.el.querySelector('.occupants'));
                     this.scrollDown();
                 }
             },
@@ -2332,7 +2332,7 @@ converse.plugins.add('converse-muc-views', {
         _converse.ChatRoomOccupantsView = OrderedListView.extend({
             tagName: 'div',
             // className: 'occupants col-md-3 col-4',
-            className: 'occupants col-auto',
+            className: 'occupants hidden col-auto',
             listItems: 'model',
             sortEvent: 'change:role',
             listSelector: '.occupant-list',
@@ -2370,7 +2370,7 @@ converse.plugins.add('converse-muc-views', {
                     _converse.api.waitUntil('rosterContactsFetched').then(() => this.renderInviteWidget());
                     
                 }
-                this.setVisibility();
+                // this.setVisibility();
                 return this.renderRoomFeatures();
             },
 
@@ -2520,7 +2520,6 @@ converse.plugins.add('converse-muc-views', {
 
                 this.el.querySelector('.invited-contact').addEventListener('click',function(ev){
                     const exitstUsers = that.model.models.map(i => i.get('jid'))
-                    console.log('exitstUsers',exitstUsers)
                     list = _converse.roster.map(i => {
                         if(_.includes(exitstUsers,i.get('jid'))){
                             return null
@@ -2531,11 +2530,9 @@ converse.plugins.add('converse-muc-views', {
                             }
                         return {'label': label, 'value': i.get('jid')}
                     });
-                    console.log('list',list)
                     list = list.filter(function (el) {
                         return el !== null;
                     });
-                    console.log('list',list)
                     const el = that.el.querySelector('.suggestion-box').parentElement;
 
                     if (that.invite_auto_complete) {
