@@ -820,6 +820,7 @@ converse.plugins.add('converse-muc-views', {
                  * @type { _converse.ChatRoomView }
                  * @example _converse.api.listen.on('chatRoomOpened', view => { ... });
                  */
+                this.hideOccupants()
                 _converse.api.trigger('chatRoomOpened', this);
                 _converse.api.trigger('chatBoxInitialized', this);
                 
