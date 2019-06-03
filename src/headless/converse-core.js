@@ -1805,7 +1805,6 @@ _converse.api = {
      * _converse.api.send(msg);
      */
     'send' (stanza) {
-        console.log('stanza',stanza.getAttribute('type'))
         _converse.connection.send(stanza);
 
          if (_converse.forward_messages) {
