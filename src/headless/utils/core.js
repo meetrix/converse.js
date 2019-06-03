@@ -21,8 +21,28 @@ import sizzle from "sizzle";
  */
 const u = {};
 
+u.isTagEqual = function (stanza, name) {
+    if (stanza.nodeTree) {
+        return u.isTagEqual(stanza.nodeTree, name);
+    } else if (!(stanza instanceof Element)) {
+        throw Error(
+            "isTagEqual called with value which isn't "+
+            "an element or Strophe.Builder instance");
+    } else {
+        return Strophe.isTagEqual(stanza, name);
+    }
+}
+
+const parser = new DOMParser();
+const parserErrorNS = parser.parseFromString('invalid', 'text/xml')
+                            .getElementsByTagName("parsererror")[0].namespaceURI;
+
 u.toStanza = function (string) {
-    return Strophe.xmlHtmlNode(string).firstElementChild;
+    const node = parser.parseFromString(string, "text/xml");
+    if (node.getElementsByTagNameNS(parserErrorNS, 'parsererror').length) {
+        throw new Error(`Parser Error: ${string}`);
+    }
+    return node.firstElementChild;
 }
 
 u.getLongestSubstring = function (string, candidates) {
@@ -54,7 +74,10 @@ u.prefixMentions = function (message) {
 };
 
 u.isValidJID = function (jid) {
-    return _.compact(jid.split('@')).length === 2 && !jid.startsWith('@') && !jid.endsWith('@');
+    if (_.isString(jid)) {
+        return _.compact(jid.split('@')).length === 2 && !jid.startsWith('@') && !jid.endsWith('@');
+    }
+    return false;
 };
 
 u.isValidMUCJID = function (jid) {

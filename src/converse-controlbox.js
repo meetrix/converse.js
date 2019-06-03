@@ -134,18 +134,6 @@ converse.plugins.add('converse-controlbox', {
                 } else {
                     this.__super__.initialize.apply(this, arguments);
                 }
-            },
-        },
-
-        ChatBoxView: {
-            insertIntoDOM () {
-                const view = this.__super__._converse.chatboxviews.get("controlbox");
-                if (view) {
-                    view.el.insertAdjacentElement('afterend', this.el)
-                } else {
-                    this.__super__.insertIntoDOM.apply(this, arguments);
-                }
-                return this;
             }
         }
     },
@@ -450,8 +438,7 @@ converse.plugins.add('converse-controlbox', {
                  */
                 if (ev && ev.preventDefault) { ev.preventDefault(); }
                 if (_converse.authentication === _converse.ANONYMOUS) {
-                    this.connect(_converse.jid, null);
-                    return;
+                    return this.connect(_converse.jid, null);
                 }
                 if (!this.validate()) { return; }
 
@@ -479,24 +466,16 @@ converse.plugins.add('converse-controlbox', {
                 } else if (_converse.default_domain && !_.includes(jid, '@')) {
                     jid = jid + '@' + _converse.default_domain;
                 }
-                this.connect(jid, form_data.get('password'));
+               this.connect(jid, form_data.get('password'));
             },
 
             connect (jid, password) {
-                if (jid) {
-                    const resource = Strophe.getResourceFromJid(jid);
-                    if (!resource) {
-                        jid = jid.toLowerCase() + _converse.generateResource();
-                    } else {
-                        jid = Strophe.getBareJidFromJid(jid).toLowerCase()+'/'+resource;
-                    }
-                }
                 if (_.includes(["converse/login", "converse/register"],
                         Backbone.history.getFragment())) {
                     _converse.router.navigate('', {'replace': true});
                 }
                 _converse.connection.reset();
-                _converse.connection.connect(jid, password, _converse.onConnectStatusChanged);
+                _converse.api.user.login(jid, password);
             }
         });
 
@@ -583,15 +562,15 @@ converse.plugins.add('converse-controlbox', {
         });
 
         _converse.api.listen.on('chatBoxViewsInitialized', () => {
-            const that = _converse.chatboxviews;
             _converse.chatboxes.on('add', item => {
                 if (item.get('type') === _converse.CONTROLBOX_TYPE) {
-                    const view = that.get(item.get('id'));
+                    const views = _converse.chatboxviews;
+                    const view = views.get(item.get('id'));
                     if (view) {
                         view.model = item;
                         view.initialize();
                     } else {
-                        that.add(item.get('id'), new _converse.ControlBoxView({model: item}));
+                        views.add(item.get('id'), new _converse.ControlBoxView({model: item}));
                     }
                 }
             });
