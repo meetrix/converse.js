@@ -13,7 +13,7 @@
         <div class="sidebar"></div>
         <div class="converse-chatboxes row no-gutters">
             <div id="controlbox" class="chatbox">
-                <div class="flyout box-flyout">
+                <div class="flyout box-flyout" id="flyout box-flyout">
                     <div class="controlbox-panes">
                         <div class="controlbox-pane"></div>
                     </div>
@@ -21,7 +21,7 @@
             </div>
 
             <div class="chatbox personal-chat" id="chatbox-37c0c87392010303765fe36b05c0967d62c6b70f">
-                <div class="flyout box-flyout">
+                <div class="flyout box-flyout" id="flyout box-flyout">
                     <div class="chat-head chat-head-chatbox row no-gutters">
                         <div class="col">
                             <div class="row no-gutters">
@@ -210,12 +210,30 @@
 <script type="text/javascript" src="controlbox.js"></script>
 <script type="text/javascript" src="modals.js"></script>
 <script type="text/javascript" src="../../node_modules/bootstrap.native/dist/bootstrap-native-v4.js"></script>
-
 <script>
+    function myFunction(x) {
+            if (x.matches) {
+                checkNr('flyout box-flyout');
+            }
+        }
+        function checkNr(id) {
+            var elem  = document.getElementById(id),
+            value = elem.value;
+            console.log(elem);
+            if (parseFloat(value) == NaN) {
+                elem.style.display = 'none'; 
+            } else {
+                elem.style.display = 'none'; 
+            }
+        }
     document.addEventListener("DOMContentLoaded", function(event) { 
         new Modals();
         new Sidebar();
         new UserPanel();
+        console.log('----');
+        var x = window.matchMedia("(max-width: 600px)")
+        myFunction(x) // Call listener function at run time
+        x.addListener(myFunction) // 
     });
 </script>
 
