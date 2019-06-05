@@ -108,21 +108,21 @@ converse.plugins.add('converse-roster', {
                           "child":[
                             {
                               "id":"4",
-                              "jid":"96265555555@example.com",
+                              "jid":"jay@link-im.com",
                               "type":"expert",
-                              "name":"expert1"
+                              "name":"jay"
                             },
                             {
                               "id":"5",
-                              "jid":"96265555556@example.com",
+                              "jid":"lahiru@link-im.com",
                               "type":"expert",
-                              "name":"expert2"
+                              "name":"lahiru"
                             },
                             {
                               "id":"6",
-                              "jid":"96265555557@example.com",
+                              "jid":"madusara@link-im.com",
                               "type":"expert",
-                              "name":"expert3"
+                              "name":"madusara"
                             }
                           ]
                         }

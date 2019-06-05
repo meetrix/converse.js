@@ -779,12 +779,20 @@ converse.plugins.add('converse-rosterview', {
             tagName: 'div',
             id: 'converse-roster',
             className: 'controlbox-section',
+            events:{
+                'click .openExpert':'openExpert'
+            },
             initialize () { 
+                _converse.api.listen.on('rosterContactsFetched', () => {
+                    console.log(_converse.roster)
+                     
+                 });
             },
             render(){
                 var that = this;
+                const hierachi = this.model;
                 let hierachiList = '<ul class="root list-group">'
-                this.model.forEach(node => {
+                hierachi.forEach(node => {
                     hierachiList = hierachiList + that.create(node,1);
                 });
                 this.el.innerHTML = hierachiList + '</ul>';
@@ -804,8 +812,21 @@ converse.plugins.add('converse-rosterview', {
                     list = list+ '</ul></li>'
                     return list;
                 }else if(node.type ==='expert') {
-                    return `<li class="expert-in-${level} list-group-item" data-expert-jid=${node.jid} data-expert-name=${node.name}> ${node.name}</li>`
+                    return `<li class="expert-in-${level} list-group-item openExpert" data-expert-jid=${node.jid} data-expert-name=${node.name}> ${node.name}</li>`
                 }
+            },
+            openExpert(ev){
+                console.log('event',ev.target.getAttribute("data-expert-jid"))
+                const expert = ev.target.getAttribute("data-expert-jid");
+                const contact = _converse.roster.filter((contact) => contact.get('jid')===expert)[0];
+                console.log(contact)
+                if(contact){
+                    const attrs = contact.attributes;
+                    console.log(attrs)
+                    _converse.api.chats.open(attrs.jid, attrs, true);
+                }
+                
+ 
             }
         });
         _converse.RosterView = OrderedListView.extend({
@@ -1049,8 +1070,9 @@ converse.plugins.add('converse-rosterview', {
             // });
             // _converse.rosterview.render();
             _converse.api.listen.on('hierachimodelfetched', () => {
+                
                 _converse.hierarchicalview = new _converse.HierarchicalView({
-                    'model': _converse.hierarchical
+                    'model':  _converse.hierarchical
                 })
                 _converse.hierarchicalview.render()
                 _converse.api.trigger('hierachiViewInitialized');
