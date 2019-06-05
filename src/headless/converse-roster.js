@@ -34,6 +34,7 @@ converse.plugins.add('converse-roster', {
             'rosterContactsFetched',
             'rosterGroupsFetched',
             'rosterInitialized',
+            'hierachimodelfetched'
         ]);
 
         _converse.HEADER_CURRENT_CONTACTS =  __('My contacts');
@@ -87,6 +88,51 @@ converse.plugins.add('converse-roster', {
              * @example _converse.api.waitUntil('rosterInitialized').then(() => { ... });
              */
             _converse.api.trigger('rosterInitialized');
+
+            //<---MDEV
+            _converse.hierarchical = [
+                {
+                  "id":"1",
+                  "level":"level1",
+                  "type":"level",
+                  "child":[
+                    {
+                      "id":"2",
+                      "level":"level2",
+                      "type":"level",
+                      "child":[
+                        {
+                          "id":"3",
+                          "level":"level3",
+                          "type":"level",
+                          "child":[
+                            {
+                              "id":"4",
+                              "jid":"96265555555@example.com",
+                              "type":"expert",
+                              "name":"expert1"
+                            },
+                            {
+                              "id":"5",
+                              "jid":"96265555556@example.com",
+                              "type":"expert",
+                              "name":"expert2"
+                            },
+                            {
+                              "id":"6",
+                              "jid":"96265555557@example.com",
+                              "type":"expert",
+                              "name":"expert3"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              
+              ]
+            _converse.api.trigger('hierachimodelfetched');
         };
 
 

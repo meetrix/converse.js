@@ -47,6 +47,8 @@ converse.plugins.add('converse-rosterview', {
             'xhr_user_search_url': null,
         });
         _converse.api.promises.add('rosterViewInitialized');
+        _converse.api.promises.add('hierachiViewInitialized');
+        
 
         const STATUSES = {
             'dnd': __('This contact is busy'),
@@ -773,7 +775,39 @@ converse.plugins.add('converse-rosterview', {
             }
         });
 
-
+        _converse.HierarchicalView = Backbone.NativeView.extend({
+            tagName: 'div',
+            id: 'converse-roster',
+            className: 'controlbox-section',
+            initialize () { 
+            },
+            render(){
+                var that = this;
+                let hierachiList = '<ul class="root list-group">'
+                this.model.forEach(node => {
+                    hierachiList = hierachiList + that.create(node,1);
+                });
+                this.el.innerHTML = hierachiList + '</ul>';
+                return this;
+            },
+            create(node,level){
+                if(node.type ==='level'){
+                    const childrens = node.child;
+                    if(!childrens){
+                        console.log('child are not exits in this level')
+                    }
+                    const numberOfChilds = childrens.length;
+                    let list = `<li class="level-item-${level} list-group-item"> ${node.level}<ul class=level-list-"${level} list-group">`;
+                    for(let i=0;i<numberOfChilds;i++){
+                        list = list+ this.create(childrens[i],level+1)
+                    }
+                    list = list+ '</ul></li>'
+                    return list;
+                }else if(node.type ==='expert') {
+                    return `<li class="expert-in-${level} list-group-item" data-expert-jid=${node.jid} data-expert-name=${node.name}> ${node.name}</li>`
+                }
+            }
+        });
         _converse.RosterView = OrderedListView.extend({
             tagName: 'div',
             id: 'converse-roster',
@@ -1009,16 +1043,26 @@ converse.plugins.add('converse-rosterview', {
             if (_converse.authentication === _converse.ANONYMOUS) {
                 return;
             }
-            _converse.rosterview = new _converse.RosterView({
-                'model': _converse.rostergroups
+            //<----MDEV
+            // _converse.rosterview = new _converse.RosterView({
+            //     'model': _converse.rostergroups
+            // });
+            // _converse.rosterview.render();
+            _converse.api.listen.on('hierachimodelfetched', () => {
+                _converse.hierarchicalview = new _converse.HierarchicalView({
+                    'model': _converse.hierarchical
+                })
+                _converse.hierarchicalview.render()
+                _converse.api.trigger('hierachiViewInitialized');
             });
-            _converse.rosterview.render();
+           
+            ///----->
             /**
              * Triggered once the _converse.RosterView instance has been created and initialized.
              * @event _converse#rosterViewInitialized
              * @example _converse.api.listen.on('rosterViewInitialized', () => { ... });
              */
-            _converse.api.trigger('rosterViewInitialized');
+             _converse.api.trigger('rosterViewInitialized');
         }
         _converse.api.listen.on('rosterInitialized', initRoster);
         _converse.api.listen.on('rosterReadyAfterReconnection', initRoster);
