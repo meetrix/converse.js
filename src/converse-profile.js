@@ -40,7 +40,7 @@ converse.plugins.add('converse-profile', {
 
         _converse.ProfileModal = _converse.BootstrapModal.extend({
             events: {
-                'change input[type="file"': "updateFilePreview",
+                'change input[type="file"]': "updateFilePreview",
                 'click .change-avatar': "openFileSelection",
                 'submit .profile-form': 'onFormSubmitted'
             },
@@ -58,6 +58,8 @@ converse.plugins.add('converse-profile', {
             },
 
             toHTML () {
+
+
                 var dataUri = "data:" + this.model.vcard.toJSON().image_type + ";base64," + this.model.vcard.toJSON().image;
                 if(this.model.vcard.toJSON().image === _converse.DEFAULT_IMAGE){
                     // eslint-disable-next-line no-undef
@@ -98,7 +100,7 @@ converse.plugins.add('converse-profile', {
 
             updateFilePreview (ev) {
                 const file = ev.target.files[0],
-                      reader = new FileReader();
+                    reader = new FileReader();
                 reader.onloadend = () => {
                     this.el.querySelector('.avatar').setAttribute('src', reader.result);
                 };
@@ -123,8 +125,8 @@ converse.plugins.add('converse-profile', {
             onFormSubmitted (ev) {
                 ev.preventDefault();
                 const reader = new FileReader(),
-                      form_data = new FormData(ev.target),
-                      image_file = form_data.get('image');
+                    form_data = new FormData(ev.target),
+                    image_file = form_data.get('image');
 
                 const data = {
                     'fn': form_data.get('fn'),
