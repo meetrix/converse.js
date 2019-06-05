@@ -436,6 +436,7 @@ converse.plugins.add('converse-chatboxes', {
              *     {@link _converse.ChatBox.getMessageAttributesFromStanza}
              */
             correctMessage (attrs) {
+                console.log()
                 if (!attrs.msgid || !attrs.from) {
                     return;
                 }

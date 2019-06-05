@@ -1238,6 +1238,7 @@ converse.plugins.add('converse-muc', {
                 }
 
                 let attrs = await this.getMessageAttributesFromStanza(stanza, original_stanza);
+                console.log()
                 if (attrs.nick &&
                         !this.subjectChangeHandled(attrs) &&
                         !this.ignorableCSN(attrs) &&

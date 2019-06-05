@@ -1067,9 +1067,6 @@ converse.plugins.add('converse-muc-views', {
              */
             close () {
                 this.hide();
-            },
-            closechatroombox(){
-                this.hide();
                 if (Backbone.history.getFragment() === "converse/room?jid="+this.model.get('jid')) {
                     _converse.router.navigate('');
                 }
@@ -1082,6 +1079,10 @@ converse.plugins.add('converse-muc-views', {
                 ///------>
                 this.model.close();
                 _converse.ChatBoxView.prototype.close.apply(this, arguments);
+            },
+            closechatroombox(){
+                this.hide();
+                
             },
             updateOccupantsToggle () {
                 const icon_el = this.el.querySelector('.toggle-occupants');
