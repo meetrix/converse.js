@@ -613,7 +613,6 @@ converse.plugins.add('converse-chatboxes', {
                         'id': message.get('edited') && _converse.connection.getUniqueId() || message.get('msgid'),
                     }).c('body').t(message.get('message')).up()
                       .c(_converse.ACTIVE, {'xmlns': Strophe.NS.CHATSTATES}).root();
-
                 if (message.get('type') === 'chat') {
                     stanza.c('request', {'xmlns': Strophe.NS.RECEIPTS}).root();
                 }
@@ -877,10 +876,10 @@ converse.plugins.add('converse-chatboxes', {
                             stanza.getElementsByTagName(_converse.INACTIVE).length && _converse.INACTIVE ||
                             stanza.getElementsByTagName(_converse.ACTIVE).length && _converse.ACTIVE ||
                             stanza.getElementsByTagName(_converse.GONE).length && _converse.GONE;
-
                 const replaced_id = this.getReplaceId(stanza)
                 const delete_id = this.getDeleteId(stanza)
                 const msgid = replaced_id || stanza.getAttribute('id') || original_stanza.getAttribute('id');
+                console.log()
                 const attrs = Object.assign({
                     'chat_state': chat_state,
                     'is_archived': this.isArchived(original_stanza),

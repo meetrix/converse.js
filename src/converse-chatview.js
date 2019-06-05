@@ -1017,7 +1017,6 @@ converse.plugins.add('converse-chatview', {
                       currently_correcting = idx >=0 ? this.model.messages.at(idx) : null,
                       message_el = u.ancestor(ev.target, '.chat-msg'),
                       message = this.model.messages.findWhere({'msgid': message_el.getAttribute('data-msgid')});
-
                 if (currently_correcting !== message) {
                     if (!_.isNil(currently_correcting)) {
                         currently_correcting.save('correcting', false);

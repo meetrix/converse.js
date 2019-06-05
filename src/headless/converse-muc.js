@@ -1217,6 +1217,7 @@ converse.plugins.add('converse-muc', {
              * @param { XMLElement } stanza - The message stanza.
              */
             async onMessage (stanza) {
+                console.log('stanza',stanza)
                 if(!stanza){
                     return;
                 }
@@ -1238,7 +1239,6 @@ converse.plugins.add('converse-muc', {
                 }
 
                 let attrs = await this.getMessageAttributesFromStanza(stanza, original_stanza);
-                console.log()
                 if (attrs.nick &&
                         !this.subjectChangeHandled(attrs) &&
                         !this.ignorableCSN(attrs) &&
