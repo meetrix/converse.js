@@ -755,7 +755,7 @@ converse.plugins.add('converse-muc-views', {
                 'click .chat-msg__action-edit': 'onMessageEditButtonClicked',
                 'click .chat-msg__action-delete': 'onMessageDeleteButtonClicked',
                 'click .chatbox-navback': 'showControlBox',
-                'click .close-chatbox-button': 'close',
+                'click .close-chatbox-button': 'closechatroombox',
                 'click .configure-chatroom-button': 'getAndRenderConfigurationForm',
                 'click .hide-occupants': 'hideOccupants',
                 'click .new-msgs-indicator': 'viewUnreadMessages',
@@ -1067,20 +1067,22 @@ converse.plugins.add('converse-muc-views', {
              */
             close () {
                 this.hide();
+            },
+            closechatroombox(){
+                this.hide();
                 if (Backbone.history.getFragment() === "converse/room?jid="+this.model.get('jid')) {
                     _converse.router.navigate('');
                 }
                 ///<----MDEV
-                const xhr = new window.XMLHttpRequest();
-                xhr.open("DELETE", `${_converse.xhr_restapi}chatrooms/${this.model.get('jid')}/occupants/${_converse.connection.jid.split('/')[0]}`, true);
-                xhr.setRequestHeader('Authorization',"Basic " + btoa(_converse.connection.jid.split('/')[0] + ":" + _converse.connection.pass));
-                xhr.setRequestHeader( 'Content-Type',   'application/json' );
-                xhr.send()
+                // const xhr = new window.XMLHttpRequest();
+                // xhr.open("DELETE", `${_converse.xhr_restapi}chatrooms/${this.model.get('jid')}/occupants/${_converse.connection.jid.split('/')[0]}`, true);
+                // xhr.setRequestHeader('Authorization',"Basic " + btoa(_converse.connection.jid.split('/')[0] + ":" + _converse.connection.pass));
+                // xhr.setRequestHeader( 'Content-Type',   'application/json' );
+                // xhr.send()
                 ///------>
-                this.model.leave();
+                this.model.close();
                 _converse.ChatBoxView.prototype.close.apply(this, arguments);
             },
-
             updateOccupantsToggle () {
                 const icon_el = this.el.querySelector('.toggle-occupants');
                 const chat_area = this.el.querySelector('.chat-area');
