@@ -804,7 +804,7 @@ converse.plugins.add('converse-rosterview', {
                         console.log('child are not exits in this level')
                     }
                     const numberOfChilds = childrens.length;
-                    let list = `<li class="level-item-${level} list-group-item"> ${node.level}<ul class="level-list-${level} list-group">`;
+                    let list = `<li class="level-item-${level} list-group-item"><div class="li-text-content"><div>${node.level}</div><i class="fas fa-angle-down"></i></div><ul class="level-list-${level} list-group">`;
                     for(let i=0;i<numberOfChilds;i++){
                         list = list+ this.create(childrens[i],level+1)
                     }
