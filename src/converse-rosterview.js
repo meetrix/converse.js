@@ -784,7 +784,6 @@ converse.plugins.add('converse-rosterview', {
             },
             initialize () { 
                 _converse.api.listen.on('rosterContactsFetched', () => {
-                    console.log(_converse.roster)
                      
                  });
             },
@@ -805,7 +804,7 @@ converse.plugins.add('converse-rosterview', {
                         console.log('child are not exits in this level')
                     }
                     const numberOfChilds = childrens.length;
-                    let list = `<li class="level-item-${level} list-group-item"> ${node.level}<ul class=level-list-"${level} list-group">`;
+                    let list = `<li class="level-item-${level} list-group-item"> ${node.level}<ul class="level-list-${level} list-group">`;
                     for(let i=0;i<numberOfChilds;i++){
                         list = list+ this.create(childrens[i],level+1)
                     }
@@ -816,13 +815,10 @@ converse.plugins.add('converse-rosterview', {
                 }
             },
             openExpert(ev){
-                console.log('event',ev.target.getAttribute("data-expert-jid"))
                 const expert = ev.target.getAttribute("data-expert-jid");
                 const contact = _converse.roster.filter((contact) => contact.get('jid')===expert)[0];
-                console.log(contact)
                 if(contact){
                     const attrs = contact.attributes;
-                    console.log(attrs)
                     _converse.api.chats.open(attrs.jid, attrs, true);
                 }
                 
