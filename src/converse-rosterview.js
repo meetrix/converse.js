@@ -791,22 +791,24 @@ converse.plugins.add('converse-rosterview', {
                 var that = this;
                 const hierachi = this.model;
                 let hierachiList = '<ul class="root list-group">'
+                let childIndex= 0;
                 hierachi.forEach(node => {
-                    hierachiList = hierachiList + that.create(node,1);
+                    childIndex++;
+                    hierachiList = hierachiList + that.create(node,1,childIndex);
                 });
                 this.el.innerHTML = hierachiList + '</ul>';
                 return this;
             },
-            create(node,level){
+            create(node,level,childIndex){
                 if(node.type ==='level'){
                     const childrens = node.child;
                     if(!childrens){
                         console.log('child are not exits in this level')
                     }
                     const numberOfChilds = childrens.length;
-                    let list = `<li class="level-item-${level} list-group-item"> ${node.level}<ul class="level-list-${level} list-group">`;
+                    let list = `<li class="level-item-${level} list-group-item"> ${node.level}<ul class="level-list-${level} list-group-${level}${childIndex}">`;
                     for(let i=0;i<numberOfChilds;i++){
-                        list = list+ this.create(childrens[i],level+1)
+                        list = list+ this.create(childrens[i],level+1,i+1)
                     }
                     list = list+ '</ul></li>'
                     return list;
