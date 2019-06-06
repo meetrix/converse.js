@@ -813,7 +813,7 @@ converse.plugins.add('converse-rosterview', {
                     list = list+ '</ul></li>'
                     return list;
                 }else if(node.type ==='expert') {
-                    return `<li class="expert-in-${level} list-group-item openExpert" data-expert-jid=${node.jid} data-expert-name=${node.name}> ${node.name}</li>`
+                    return `<li class="expert-in-${level} list-group-item openExpert" data-expert-jid=${node.jid} data-expert-name=${node.name}><div>${node.name}</div></li>`
                 }
             },
             openExpert(ev){
