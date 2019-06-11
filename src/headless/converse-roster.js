@@ -90,10 +90,10 @@ converse.plugins.add('converse-roster', {
             _converse.api.trigger('rosterInitialized');
 
             //<---MDEV
-            _converse.hierarchical = [
+            _converse.hierarchicaldummy = [
                 {
                   "id":"1",
-                  "level":"level1",
+                  "level":"1",
                   "type":"level",
                   "child":[
                     {
@@ -132,8 +132,21 @@ converse.plugins.add('converse-roster', {
                 }
               
               ]
+              _converse.hierachi =  new _converse.Hierachi();
+              _converse.hierachi.browserStorage = new BrowserStorage[storage](
+                `_converse.hierachi-${_converse.bare_jid}`);
+                _converse.hierachi.fetch();
+                
             _converse.api.trigger('hierachimodelfetched');
         };
+        _converse.HierachiChild = Backbone.Model.extend({
+            defaults: {
+                'child': []
+            },
+        });
+        _converse.Hierachi = Backbone.Collection.extend({
+            model: _converse.HierachiChild,
+        });
 
 
         /**
