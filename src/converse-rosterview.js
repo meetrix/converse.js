@@ -13,6 +13,8 @@ import _FormData from "formdata-polyfill";
 import converse from "@converse/headless/converse-core";
 import tpl_add_contact_modal from "templates/add_contact_modal.html";
 import tpl_group_header from "templates/group_header.html";
+import tpl_hierachi from "templates/hierachi.html";
+import tpl_hierachi_item from "templates/hierachi_item.html";
 import tpl_pending_contact from "templates/pending_contact.html";
 import tpl_requesting_contact from "templates/requesting_contact.html";
 import tpl_roster from "templates/roster.html";
@@ -787,26 +789,28 @@ converse.plugins.add('converse-rosterview', {
                 _converse.api.listen.on('rosterContactsFetched', () => {
                      
                  });
-                 this.model.on("change", this.render, this);
-                 this.loadRoots();
+                 _converse.hierachi.on("change", this.changeHierach, this);
             },
             render(){
                 var that = this;
                 const hierachi = this.model.models;
-                let hierachiList = '<ul class="root list-group">'
-                let childIndex= 0;
-                hierachi.forEach(node => {
-                    childIndex++;
-                    hierachiList = hierachiList + that.create(node,childIndex);
-                });
-                this.el.innerHTML = hierachiList + '</ul>';
+                // let hierachiList = '<ul class="root list-group">'
+                // let childIndex= 0;
+                // hierachi.forEach(node => {
+                //     childIndex++;
+                //     hierachiList = hierachiList + that.create(node,childIndex);
+                // });
+                // this.el.innerHTML = hierachiList + '</ul>';
+                this.el.innerHTML = tpl_hierachi()
+                this.hierachi_el = this.el.querySelector('.hierachi-lists');
+                this.loadRoots()
                 return this;
             },
             loadRoots(){
-                for(let i=0; i<5;i++){
+                for(let i=0; i<1;i++){
                     _converse.hierachi.create(
                         {
-                            "level":'1',
+                            "level":'level1',
                             "type":"level",
                         }
                     );
@@ -816,31 +820,42 @@ converse.plugins.add('converse-rosterview', {
                 // })
                 // this.loadRootsView( _converse.hierachi.models)
             },
+            changeHierach(){
+                console.log('changeHierach')
+                let childIndex= 0;
+                var that = this;
+                const hierachi = this.model.models;
+                hierachi.forEach(node => {
+                    childIndex++;
+                    that.create(node,childIndex);
+                });
+            },
             loadChild(parent){
                 _converse.hierachi.reset();
-                console.log(parent)
-                if(parent === '1'){
-                    for(let i=0; i<5;i++){
+                this.el.innerHTML = tpl_hierachi()
+                if(parent === 'level1'){
+                    for(let i=0; i<1;i++){
                         _converse.hierachi.create(
                            {
-                               "level":'2',
+                               "level":'level2',
                                "type":"level",
                            }
                        );
                    }
                 }
-                if(parent === '2'){
-                    for(let i=0; i<5;i++){
+                if(parent === 'level2'){
+                    for(let i=0; i<1;i++){
                         _converse.hierachi.create(
                            {
-                               "level":3,
-                               "type":"level",
+                               "level":'level3',
+                               "type":"expert",
+                               "jid":"jay@link-im.com",
+                                "name":"jay"
                            }
                        );
                    }
                 }
                 
-               console.log('child',_converse.hierachi)
 
             },
             create(node,childIndex){
@@ -850,6 +865,7 @@ converse.plugins.add('converse-rosterview', {
                         console.log('child are not exits in this level')
                     }
                     const numberOfChilds = childrens.length;
+                    
                     const list = 
                     `<li class="level-item-${node.get('level')} list-group-item list-group-level-item" >`+
                         `<div class="li-text-content">`+
@@ -858,9 +874,18 @@ converse.plugins.add('converse-rosterview', {
                         `</div>`+
                         `<ul class="level-list-${node.get('level')} list-group-${node.get('level')}${childIndex}">`+
                         '</ul></li>'
-                    return list;
-                }else if(node.type ==='expert') {
-                    return `<li class="expert-in-${node.get('level')} list-group-item openExpert" data-expert-jid=${node.jid} data-expert-name=${node.name}><div>${node.name}</div></li>`
+                        console.log('level')
+                        console.log(this.el.querySelector('.hierachi-lists'))
+                        this.el.insertAdjacentHTML('beforeend',list)
+                    // return list;
+                }else if(node.get('type') ==='expert') {
+                    console.log('jid',_converse.roster.findWhere({jid:node.get('jid')}));
+                    const expertEl = new _converse.RosterContactView({model:_converse.roster.findWhere({jid:node.get('jid')})})
+                    expertEl.render()
+                    console.log(this.el)
+                    this.el.querySelector('.hierachi-lists').insertAdjacentElement('beforeend',expertEl.el)
+                    // return `<li class="expert-in-${node.get('level')} list-group-item openExpert" data-expert-jid=${node.jid} data-expert-name=${node.name}><div>${node.name}</div></li>`
+                    // return ''
                 }
             },
             openExpert(ev){
@@ -1133,7 +1158,7 @@ converse.plugins.add('converse-rosterview', {
             _converse.api.listen.on('hierachimodelfetched', () => {
                 
                 _converse.hierarchicalview = new _converse.HierarchicalView({
-                    'model':  _converse.hierachi
+                    'model':   _converse.hierachi
                 })
                 _converse.hierarchicalview.render()
                 _converse.api.trigger('hierachiViewInitialized');

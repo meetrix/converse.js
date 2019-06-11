@@ -1,0 +1,13 @@
+{[ if (o.islevel) { ]}
+<!-- <li class="level-item-{{{o.level}}} list-group-item list-group-level-item" > -->
+  <div class="li-text-content">
+      <div>{{{o.level}}}</div>
+      <a htef="#" class="extract extract-level-{{{o.level}}}{{{o.childIndex}}}" data-class="level-item-{{{o.level}}}" data-id="{{{o.level}}}">
+        <i class="fas fa-angle-down"></i>
+      </a>
+  </div>
+<!-- </li> -->
+{[ } ]}
+{[ if (!o.islevel) { ]}
+<li class="expert-in-${node.get('level')} list-group-item openExpert" data-expert-jid=${node.jid} data-expert-name=${node.name}><div>${node.name}</div></li>
+{[ } ]}

@@ -136,7 +136,6 @@ converse.plugins.add('converse-roster', {
               _converse.hierachi.browserStorage = new BrowserStorage[storage](
                 `_converse.hierachi-${_converse.bare_jid}`);
                 _converse.hierachi.fetch();
-                
             _converse.api.trigger('hierachimodelfetched');
         };
         _converse.HierachiChild = Backbone.Model.extend({
