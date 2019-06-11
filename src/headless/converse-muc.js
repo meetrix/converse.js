@@ -1217,7 +1217,6 @@ converse.plugins.add('converse-muc', {
              * @param { XMLElement } stanza - The message stanza.
              */
             async onMessage (stanza) {
-                console.log('stanza',stanza)
                 if(!stanza){
                     return;
                 }

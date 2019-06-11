@@ -780,7 +780,8 @@ converse.plugins.add('converse-rosterview', {
             id: 'converse-roster',
             className: 'controlbox-section',
             events:{
-                'click .openExpert':'openExpert'
+                'click .openExpert':'openExpert',
+                'click .extract':'extractLevel'
             },
             initialize () { 
                 _converse.api.listen.on('rosterContactsFetched', () => {
@@ -806,7 +807,13 @@ converse.plugins.add('converse-rosterview', {
                         console.log('child are not exits in this level')
                     }
                     const numberOfChilds = childrens.length;
-                    let list = `<li class="level-item-${level} list-group-item"><div class="li-text-content"><div>${node.level}</div><i class="fas fa-angle-down"></i></div><ul class="level-list-${level} list-group-${level}${childIndex}">`;
+                    let list = 
+                    `<li class="level-item-${level} list-group-item list-group-level-item" >`+
+                        `<div class="li-text-content">`+
+                            `<div>${node.level}</div>`+
+                            `<a htef="#" class="extract extract-level-${level}${childIndex}" data-class="level-item-${level}"><i class="fas fa-angle-down"></i></a>`+
+                        `</div>`+
+                        `<ul class="level-list-${level} list-group-${level}${childIndex}">`;
                     for(let i=0;i<numberOfChilds;i++){
                         list = list+ this.create(childrens[i],level+1,i+1)
                     }
@@ -825,6 +832,20 @@ converse.plugins.add('converse-rosterview', {
                 }
                 
  
+            },
+            extractLevel(ev){
+                ev.stopImmediatePropagation()
+                console.log(ev.delegateTarget.classList[1])
+                const levelclass = this.el.querySelector(`.${ev.delegateTarget.classList[1]}`).getAttribute('data-class')
+                const experElement = this.el.querySelector(`.${levelclass}`)
+                if(experElement.classList.contains('show-child')){
+                    experElement.classList.remove("show-child")
+                }else{
+                    experElement.classList.add("show-child")
+                }
+                return false;
+                // console.log(ev.delegateTarget)
+                
             }
         });
         _converse.RosterView = OrderedListView.extend({
