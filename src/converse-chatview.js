@@ -177,15 +177,18 @@ converse.plugins.add('converse-chatview', {
             },
 
             render () {
+                const presense = _converse.presences.findWhere({'jid': this.model.get('jid')})
                 const vcard = _.get(this.model, 'vcard'),
                       vcard_json = vcard ? vcard.toJSON() : {};
+                      console.log(vcard_json)
                 this.el.innerHTML = tpl_chatbox_head(
                     Object.assign(
                         vcard_json,
                         this.model.toJSON(),
                         { '_converse': _converse,
                           'info_close': __('Close this chat box'),
-                          'display_name': this.model.getDisplayName()
+                          'display_name': this.model.getDisplayName(),
+                          show: presense.get('show')
                         }
                     )
                 );
@@ -370,6 +373,7 @@ converse.plugins.add('converse-chatview', {
                 this.show = _.debounce(this._show, 250, {'leading': true});
             },
             render () {
+                
                 this.el.innerHTML = tpl_chatbox(
                     Object.assign(
                         this.model.toJSON(),
