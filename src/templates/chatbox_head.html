@@ -93,7 +93,7 @@
                                             </div>
                                     </div>
                                     <div class="col">
-                                        {{{o.role}}}
+                                        {[ if (o.role !== '') { ]} | {{{o.role}}} {[ } ]}
                                     </div>
                                 </div>
                             </div>  

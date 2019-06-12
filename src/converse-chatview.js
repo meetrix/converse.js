@@ -180,7 +180,6 @@ converse.plugins.add('converse-chatview', {
                 const presense = _converse.presences.findWhere({'jid': this.model.get('jid')})
                 const vcard = _.get(this.model, 'vcard'),
                       vcard_json = vcard ? vcard.toJSON() : {};
-                      console.log(vcard_json)
                 this.el.innerHTML = tpl_chatbox_head(
                     Object.assign(
                         vcard_json,
