@@ -26,77 +26,57 @@
 <div class="top-toolbar">
         <div class="container-fluid">
             <div class="row">
-                <!-- <div class="col-sm-6 room-description">
-                    <div class="container-fluid">
-                        <div class="row channel-name">
-                            #Announcements
-                        </div>
-                        <div class="row channel-summary">
-                                <ul class="m-0 pl-0 d-block list-unstyled channel-info">
-                                <li class="favorite-star">
-                                    <span class="favorite"><i class="fas fa-star"></i></span>
-                                </li>
-                                <li class="favorite-user">
-                                    <span class="mr-1 ">13</span>
-                                    <i class="far fa-user"></i>
-                                </li>
-                                <li class="favorite-channel">
-                                    <span class="channel-desc ">Company-wide announcements and work-based
-                                        matters</span>
-                                </li>
-                            </ul>
+                <div class="col">
+                    <div class="row other-participant-name">
+                        <div class="col-12 chat-title" title="{{{o.jid}}}">
+                                {[ if (o.type !== o._converse.HEADLINES_TYPE) { ]}
+                                <!-- <canvas class="avatar" height="36" width="36"></canvas> -->
+                                {[ } ]}
+                            <!-- {[ if (o.url) { ]}
+                                <a href="{{{o.url}}}" target="_blank" rel="noopener" class="user">
+            
+                                    
+                            
+                                </a>
+                            {[ } ]} -->
+                            <div class="box-display-name">
+                                {{{ o.display_name }}}
+                            </div>
                         </div>
                     </div>
-                    </div> -->
-                <div class="col">
-                    <div class="row other-participant">
-                            <div class="col-12 chat-title" title="{{{o.jid}}}">
-                                    {[ if (o.type !== o._converse.HEADLINES_TYPE) { ]}
-                                    <!-- <canvas class="avatar" height="36" width="36"></canvas> -->
-                                    {[ } ]}
-                                <!-- {[ if (o.url) { ]}
-                                    <a href="{{{o.url}}}" target="_blank" rel="noopener" class="user">
-              
-                                        
-                                
-                                    </a>
-                                {[ } ]} -->
-                                <div class="box-display-name">
-                                    {{{ o.display_name }}}
+                    <div class="row other-participant-data">
+                        <div class="col-12">
+                            <div class="row">
+                                <div class="col-auto">
+                                        <div class="d-flex xmpp-status">
+                                            <span class="{{{o.show}}} w-100 align-self-center" data-value="{{{o.show}}}">
+                                                <span class="
+                                                    {[ if (o.show === 'online') { ]} fa fa-circle chat-status chat-status--online{[ } ]}
+                                                    {[ if (o.show === 'dnd') { ]} fa fa-minus-circle chat-status chat-status--busy {[ } ]}
+                                                    {[ if (o.show === 'away') { ]} fa fa-circle chat-status chat-status--away{[ } ]}
+                                                    {[ if (o.show === 'xa') { ]} fa fa-circle chat-status chat-status--xa {[ } ]}
+                                                    {[ if (o.show === 'offline') { ]} fa fa-circle chat-status chat-status--offline{[ } ]}">
+        
+                                                    <span class="status-title">
+                                                            {[ if (o.show === 'online') { ]} Active {[ } ]}
+                                                            {[ if (o.show === 'dnd') { ]} Busy {[ } ]}
+                                                            {[ if (o.show === 'away') { ]} Away {[ } ]}
+                                                            {[ if (o.show === 'xa') { ]} Away for long {[ } ]}
+                                                            {[ if (o.show === 'offline') { ]} Offline {[ } ]}
+                                                    </span>
+                                                </span>
+                                                    <!-- {{{o.status_message}}}-->
+                    
+                                            </span>
+                                                <!-- <span>{{{o.status_message}}}</span> -->
+                                                <!-- <a class="controlbox-heading__btn change-status fa fa-pencil-alt" title="{{{o.title_change_status}}}" data-toggle="modal" data-target="#changeStatusModal"></a> -->
+                                        </div>
+                                </div>
+                                <div class="col role">
+                                    {[ if (o.role !== '') { ]} {{{o.role}}} {[ } ]}
                                 </div>
                             </div>
-                            <div class="col-12">
-                                <div class="row">
-                                    <div class="col-auto">
-                                            <div class="d-flex xmpp-status">
-                                                <span class="{{{o.show}}} w-100 align-self-center" data-value="{{{o.show}}}">
-                                                    <span class="
-                                                        {[ if (o.show === 'online') { ]} fa fa-circle chat-status chat-status--online{[ } ]}
-                                                        {[ if (o.show === 'dnd') { ]} fa fa-minus-circle chat-status chat-status--busy {[ } ]}
-                                                        {[ if (o.show === 'away') { ]} fa fa-circle chat-status chat-status--away{[ } ]}
-                                                        {[ if (o.show === 'xa') { ]} fa fa-circle chat-status chat-status--xa {[ } ]}
-                                                        {[ if (o.show === 'offline') { ]} fa fa-circle chat-status chat-status--offline{[ } ]}">
-            
-                                                        <span class="status-title">
-                                                                {[ if (o.show === 'online') { ]} Active {[ } ]}
-                                                                {[ if (o.show === 'dnd') { ]} Busy {[ } ]}
-                                                                {[ if (o.show === 'away') { ]} Away {[ } ]}
-                                                                {[ if (o.show === 'xa') { ]} Away for long {[ } ]}
-                                                                {[ if (o.show === 'offline') { ]} Offline {[ } ]}
-                                                        </span>
-                                                    </span>
-                                                        <!-- {{{o.status_message}}}-->
-                        
-                                                </span>
-                                                    <!-- <span>{{{o.status_message}}}</span> -->
-                                                    <!-- <a class="controlbox-heading__btn change-status fa fa-pencil-alt" title="{{{o.title_change_status}}}" data-toggle="modal" data-target="#changeStatusModal"></a> -->
-                                            </div>
-                                    </div>
-                                    <div class="col">
-                                        {[ if (o.role !== '') { ]} | {{{o.role}}} {[ } ]}
-                                    </div>
-                                </div>
-                            </div>  
+                        </div>  
                     </div>
                 </div>
                 <div class="col-auto room-controls">
