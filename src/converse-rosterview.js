@@ -799,6 +799,18 @@ converse.plugins.add('converse-rosterview', {
                 return this;
             },
             loadRoots(){
+                // const xhr = new window.XMLHttpRequest();
+                // xhr.open("GET", `http://64.202.186.112/MEWAAPI/User/ExpertDomain/GetExpertDomain?level=1&parentId=1`, true);
+                // xhr.setRequestHeader( 'Content-Type',   'application/json' );
+                // xhr.send()
+                // xhr.onload = function() {
+                //     if (xhr.status != 200) { // analyze HTTP status of the response
+                    
+                //     } else { // show the result
+                    
+                //    console.log(JSON.parse(xhr.response).occupants)
+                //     }
+                // };
                 for(let i=0; i<1;i++){
                     _converse.hierachi.create(
                         {
@@ -824,6 +836,8 @@ converse.plugins.add('converse-rosterview', {
                 let childIndex= 0;
                 var that = this;
                 const hierachi = this.model.models;
+                console.log(hierachi)
+                this.el.querySelector('.hierachi-lists').innerHTML = ''
                 hierachi.forEach(node => {
                     childIndex++;
                     that.create(node,childIndex);
@@ -878,6 +892,24 @@ converse.plugins.add('converse-rosterview', {
                                 "parentId":'1'
                            }
                        );
+                       _converse.hierachi.create(
+                        {
+                            "level":'3',
+                            "jid":"madusara@link-im.com",
+                            "type":"expert",
+                            "name":"madusara",
+                            "parentId":'1'
+                        }
+                    );
+                    _converse.hierachi.create(
+                        {
+                            "level":'3',
+                            "jid":"lahiru@link-im.com",
+                            "type":"expert",
+                            "name":"lahiru",
+                             "parentId":'1'
+                        }
+                    );
                    }
                 }
                 
