@@ -782,8 +782,9 @@ converse.plugins.add('converse-rosterview', {
             id: 'converse-roster',
             className: 'controlbox-section',
             events:{
-                'click .openExpert':'openExpert',
-                'click .li-text-content':'extractLevel'
+                'click .open-chat':'openExpert',
+                'click .li-text-content':'extractLevel',
+                'click .load-parent': 'parentLoad'
             },
             initialize () { 
                 _converse.api.listen.on('rosterContactsFetched', () => {
@@ -792,15 +793,6 @@ converse.plugins.add('converse-rosterview', {
                  _converse.hierachi.on("change", this.changeHierach, this);
             },
             render(){
-                var that = this;
-                const hierachi = this.model.models;
-                // let hierachiList = '<ul class="root list-group">'
-                // let childIndex= 0;
-                // hierachi.forEach(node => {
-                //     childIndex++;
-                //     hierachiList = hierachiList + that.create(node,childIndex);
-                // });
-                // this.el.innerHTML = hierachiList + '</ul>';
                 this.el.innerHTML = tpl_hierachi()
                 this.destroyall();
                 this.loadRoots()
@@ -815,10 +807,6 @@ converse.plugins.add('converse-rosterview', {
                         }
                     );
                 }
-                // _converse.hierachi.models.forEach((child) => {
-                //     console.log('clid',child)
-                // })
-                // this.loadRootsView( _converse.hierachi.models)
             },
             destroyall(){
                 _converse.hierachi.models.forEach(model => {
@@ -841,9 +829,24 @@ converse.plugins.add('converse-rosterview', {
                     that.create(node,childIndex);
                 });
             },
-            loadChild(parent){
+            parentLoad(ev){
+                ev.stopImmediatePropagation()
+                const current = this.el.querySelector(`.load-parent`).getAttribute('data-level')
+                // this.destroyall();
+                if(current === '1'){
+                    this.resetList();
+                    this.loadRoots();
+                }else if(current === '2'){
+                    this.loadChild(current-1)
+                }
+            },
+            resetList(){
                 _converse.hierachi.reset();
-                this.el.innerHTML = tpl_hierachi()
+                this.el.querySelector('.hierachi-lists').innerHTML = tpl_hierachi()
+                
+            },
+            loadChild(parent){
+                this.resetList();
                 if(parent === '1'){
                     for(let i=0; i<1;i++){
                         _converse.hierachi.create(
@@ -882,8 +885,8 @@ converse.plugins.add('converse-rosterview', {
                     const list = 
                     `<li class="level-item-${node.get('level')} list-group-item list-group-level-item" >`+
                         `<div class="li-text-content extract-level-${node.get('level')}${childIndex}" data-class="level-item-${node.get('level')}" data-id="${node.get('level')}">`+
-                            `<div >${node.get('level')}</div>`+
-                            // `<a htef="#" class="extract extract-level-${node.get('level')}${childIndex}" data-class="level-item-${node.get('level')}" data-id="${node.get('level')}"><i class="fas fa-angle-down"></i></a>`+
+                            `<div >Node Level ${node.get('level')}</div>`+
+                            `<div  ><i class="fas fa-angle-down"></i></div>`+
                         `</div>`+
                         `<ul class="level-list-${node.get('level')} list-group-${node.get('level')}${childIndex}">`+
                         '</ul></li>'
@@ -897,7 +900,7 @@ converse.plugins.add('converse-rosterview', {
                 }
             },
             openExpert(ev){
-                const expert = ev.target.getAttribute("data-expert-jid");
+                const expert = ev.target.getAttribute("data-jid");
                 const contact = _converse.roster.filter((contact) => contact.get('jid')===expert)[0];
                 if(contact){
                     const attrs = contact.attributes;
@@ -908,17 +911,18 @@ converse.plugins.add('converse-rosterview', {
             },
             extractLevel(ev){
                 ev.stopImmediatePropagation()
-                // console.log(ev.delegateTarget.classList[1])
-                // const levelclass = this.el.querySelector(`.${ev.delegateTarget.classList[1]}`).getAttribute('data-class')
-                // const experElement = this.el.querySelector(`.${levelclass}`)
-                // if(experElement.classList.contains('show-child')){
-                //     experElement.classList.remove("show-child")
-                // }else{
-                //     experElement.classList.add("show-child")
-                // }
                 const levelid = this.el.querySelector(`.${ev.delegateTarget.classList[1]}`).getAttribute('data-id')
                 console.log(this.el.querySelector('.current-level'))
-                this.el.querySelector('.current-level').innerHTML = `<div >hi</div>`
+                let parentNode = ''
+                if(levelid === '1'){
+                    parentNode = `<a href="#" class="load-parent" data-level="${levelid}"><i class="far fa-home-alt mr-1"></i> Group List</a>`
+                    this.currentLevelId = 1
+                }
+                if(levelid === '2'){
+                    parentNode = `<a href="#" class="load-parent" data-level="${levelid}">Node Level ${levelid-1}</a>`
+                    this.currentLevelId = 2
+                }
+                this.el.querySelector('.current-level').innerHTML = parentNode
                 this.loadChild(levelid)
                 return false;
                 // console.log(ev.delegateTarget)
