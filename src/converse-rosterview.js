@@ -800,7 +800,7 @@ converse.plugins.add('converse-rosterview', {
             },
             loadRoots(){
                 const xhr = new window.XMLHttpRequest();
-                xhr.open("GET", `http://64.202.186.112/MEWAAPI/User/ExpertDomain/GetExpertDomain?level=1&parentId=1`, true);
+                xhr.open("GET", `https://64.202.186.112/MEWAAPI/User/ExpertDomain/GetExpertDomain?level=1&parentId=1`, true);
                 // xhr.setRequestHeader( 'Content-Type',   'application/json' );
                 xhr.send()
                 xhr.onload = function() {
@@ -833,7 +833,7 @@ converse.plugins.add('converse-rosterview', {
             },
             LoadLevel2(parentId){
                 const xhr = new window.XMLHttpRequest();
-                xhr.open("GET", `http://64.202.186.112/MEWAAPI/User/ExpertDomain/GetExpertDomain?level=2&parentId=${parentId}`, true);
+                xhr.open("GET", `https://64.202.186.112/MEWAAPI/User/ExpertDomain/GetExpertDomain?level=2&parentId=${parentId}`, true);
                 // xhr.setRequestHeader( 'Content-Type',   'application/json' );
                 xhr.send()
                 xhr.onload = function() {
@@ -858,7 +858,7 @@ converse.plugins.add('converse-rosterview', {
             },
             LoadLevel3(parentId){
                 const xhr = new window.XMLHttpRequest();
-                xhr.open("GET", `http://64.202.186.112/MEWAAPI/User/ExpertDomain/GetExpertDomain?level=3&parentId=${parentId}`, true);
+                xhr.open("GET", `https://64.202.186.112/MEWAAPI/User/ExpertDomain/GetExpertDomain?level=3&parentId=${parentId}`, true);
                 // xhr.setRequestHeader( 'Content-Type',   'application/json' );
                 xhr.send()
                 xhr.onload = function() {
@@ -1268,10 +1268,10 @@ converse.plugins.add('converse-rosterview', {
                 return;
             }
             //<----MDEV
-            // _converse.rosterview = new _converse.RosterView({
-            //     'model': _converse.rostergroups
-            // });
-            // _converse.rosterview.render();
+            _converse.rosterview = new _converse.RosterView({
+                'model': _converse.rostergroups
+            });
+            _converse.rosterview.render();
             _converse.api.listen.on('hierachimodelfetched', () => {
                 
                 _converse.hierarchicalview = new _converse.HierarchicalView({
