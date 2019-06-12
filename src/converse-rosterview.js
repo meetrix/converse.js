@@ -783,7 +783,7 @@ converse.plugins.add('converse-rosterview', {
             className: 'controlbox-section',
             events:{
                 'click .openExpert':'openExpert',
-                'click .extract':'extractLevel'
+                'click .li-text-content':'extractLevel'
             },
             initialize () { 
                 _converse.api.listen.on('rosterContactsFetched', () => {
@@ -802,6 +802,7 @@ converse.plugins.add('converse-rosterview', {
                 // });
                 // this.el.innerHTML = hierachiList + '</ul>';
                 this.el.innerHTML = tpl_hierachi()
+                this.destroyall();
                 this.loadRoots()
                 return this;
             },
@@ -809,7 +810,7 @@ converse.plugins.add('converse-rosterview', {
                 for(let i=0; i<1;i++){
                     _converse.hierachi.create(
                         {
-                            "level":'level1',
+                            "level":'1',
                             "type":"level",
                         }
                     );
@@ -818,6 +819,17 @@ converse.plugins.add('converse-rosterview', {
                 //     console.log('clid',child)
                 // })
                 // this.loadRootsView( _converse.hierachi.models)
+            },
+            destroyall(){
+                _converse.hierachi.models.forEach(model => {
+                    model.destroy();
+                })
+                var model;
+
+                // eslint-disable-next-line no-cond-assign
+                while ( model = _converse.hierachi.first()) {
+                    model.destroy();
+                }
             },
             changeHierach(){
                 console.log('changeHierach')
@@ -832,22 +844,22 @@ converse.plugins.add('converse-rosterview', {
             loadChild(parent){
                 _converse.hierachi.reset();
                 this.el.innerHTML = tpl_hierachi()
-                if(parent === 'level1'){
+                if(parent === '1'){
                     for(let i=0; i<1;i++){
                         _converse.hierachi.create(
                            {
-                               "level":'level2',
+                               "level":'2',
                                "type":"level",
-                               "parentId":'1'
+                               "parentId":'1',
                            }
                        );
                    }
                 }
-                if(parent === 'level2'){
+                if(parent === '2'){
                     for(let i=0; i<1;i++){
                         _converse.hierachi.create(
                            {
-                               "level":'level3',
+                               "level":'3',
                                "type":"expert",
                                "jid":"jay@link-im.com",
                                 "name":"jay",
@@ -869,9 +881,9 @@ converse.plugins.add('converse-rosterview', {
                     
                     const list = 
                     `<li class="level-item-${node.get('level')} list-group-item list-group-level-item" >`+
-                        `<div class="li-text-content">`+
-                            `<div>${node.get('level')}</div>`+
-                            `<a htef="#" class="extract extract-level-${node.get('level')}${childIndex}" data-class="level-item-${node.get('level')}" data-id="${node.get('level')}"><i class="fas fa-angle-down"></i></a>`+
+                        `<div class="li-text-content extract-level-${node.get('level')}${childIndex}" data-class="level-item-${node.get('level')}" data-id="${node.get('level')}">`+
+                            `<div >${node.get('level')}</div>`+
+                            // `<a htef="#" class="extract extract-level-${node.get('level')}${childIndex}" data-class="level-item-${node.get('level')}" data-id="${node.get('level')}"><i class="fas fa-angle-down"></i></a>`+
                         `</div>`+
                         `<ul class="level-list-${node.get('level')} list-group-${node.get('level')}${childIndex}">`+
                         '</ul></li>'
