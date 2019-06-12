@@ -832,13 +832,21 @@ converse.plugins.add('converse-rosterview', {
             parentLoad(ev){
                 ev.stopImmediatePropagation()
                 const current = this.el.querySelector(`.load-parent`).getAttribute('data-level')
-                // this.destroyall();
                 if(current === '1'){
                     this.resetList();
                     this.loadRoots();
                 }else if(current === '2'){
-                    this.loadChild(current-1)
+                    this.loadChild(`${current-1}`)
+
                 }
+                let parentNode = ''
+                if(current === '1'){
+                    parentNode = ``
+                }
+                if(current === '2'){
+                    parentNode = `<a href="#" class="load-parent" data-level="${current-1}"><i class="far fa-home-alt mr-1"></i> Group List</a>`
+                }
+                this.el.querySelector('.current-level').innerHTML = parentNode
             },
             resetList(){
                 _converse.hierachi.reset();
@@ -848,6 +856,7 @@ converse.plugins.add('converse-rosterview', {
             loadChild(parent){
                 this.resetList();
                 if(parent === '1'){
+                    console.log(parent)
                     for(let i=0; i<1;i++){
                         _converse.hierachi.create(
                            {
