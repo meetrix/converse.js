@@ -858,7 +858,7 @@ converse.plugins.add('converse-rosterview', {
                     parentNode = ``
                 }
                 if(current === '2'){
-                    parentNode = `<a href="#" class="load-parent" data-level="${current-1}"><i class="far fa-home-alt mr-1"></i> Group List</a>`
+                    parentNode = `<a href="#" class="load-parent" data-level="${current-1}"><i class="fas fa-home mr-1"></i> Group List</a>`
                 }
                 this.el.querySelector('.current-level').innerHTML = parentNode
             },
@@ -956,7 +956,7 @@ converse.plugins.add('converse-rosterview', {
                 console.log(this.el.querySelector('.current-level'))
                 let parentNode = ''
                 if(levelid === '1'){
-                    parentNode = `<a href="#" class="load-parent" data-level="${levelid}"><i class="far fa-home-alt mr-1"></i> Group List</a>`
+                    parentNode = `<a href="#" class="load-parent" data-level="${levelid}"><i class="fas fa-home mr-1"></i> Groups List</a>`
                     this.currentLevelId = 1
                 }
                 if(levelid === '2'){
