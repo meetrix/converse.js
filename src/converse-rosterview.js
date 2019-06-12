@@ -799,26 +799,87 @@ converse.plugins.add('converse-rosterview', {
                 return this;
             },
             loadRoots(){
-                // const xhr = new window.XMLHttpRequest();
-                // xhr.open("GET", `http://64.202.186.112/MEWAAPI/User/ExpertDomain/GetExpertDomain?level=1&parentId=1`, true);
+                const xhr = new window.XMLHttpRequest();
+                xhr.open("GET", `http://64.202.186.112/MEWAAPI/User/ExpertDomain/GetExpertDomain?level=1&parentId=1`, true);
                 // xhr.setRequestHeader( 'Content-Type',   'application/json' );
-                // xhr.send()
-                // xhr.onload = function() {
-                //     if (xhr.status != 200) { // analyze HTTP status of the response
+                xhr.send()
+                xhr.onload = function() {
+                    if (xhr.status != 200) { // analyze HTTP status of the response
                     
-                //     } else { // show the result
+                    } else { // show the result
                     
-                //    console.log(JSON.parse(xhr.response).occupants)
-                //     }
-                // };
-                for(let i=0; i<1;i++){
-                    _converse.hierachi.create(
-                        {
-                            "level":'1',
-                            "type":"level",
-                        }
-                    );
-                }
+                   console.log(JSON.parse(xhr.response))
+                        const rootLevels = JSON.parse(xhr.response);
+                        rootLevels.forEach(el => {
+                            _converse.hierachi.create(
+                                {
+                                    "level":'1',
+                                    "type":"level",
+                                    "key":el.Key,
+                                    "value":el.Value,
+                                }
+                            );
+                        })
+                    }
+                };
+                // for(let i=0; i<1;i++){
+                //     _converse.hierachi.create(
+                //         {
+                //             "level":'1',
+                //             "type":"level",
+                //         }
+                //     );
+                // }
+            },
+            LoadLevel2(parentId){
+                const xhr = new window.XMLHttpRequest();
+                xhr.open("GET", `http://64.202.186.112/MEWAAPI/User/ExpertDomain/GetExpertDomain?level=2&parentId=${parentId}`, true);
+                // xhr.setRequestHeader( 'Content-Type',   'application/json' );
+                xhr.send()
+                xhr.onload = function() {
+                    if (xhr.status != 200) { // analyze HTTP status of the response
+                    
+                    } else { // show the result
+                    
+                   console.log(JSON.parse(xhr.response))
+                        const rootLevels = JSON.parse(xhr.response);
+                        rootLevels.forEach(el => {
+                            _converse.hierachi.create(
+                                {
+                                    "level":'2',
+                                    "type":"level",
+                                    "key":el.Key,
+                                    "value":el.Value
+                                }
+                            );
+                        })
+                    }
+                };
+            },
+            LoadLevel3(parentId){
+                const xhr = new window.XMLHttpRequest();
+                xhr.open("GET", `http://64.202.186.112/MEWAAPI/User/ExpertDomain/GetExpertDomain?level=3&parentId=${parentId}`, true);
+                // xhr.setRequestHeader( 'Content-Type',   'application/json' );
+                xhr.send()
+                xhr.onload = function() {
+                    if (xhr.status != 200) { // analyze HTTP status of the response
+                    
+                    } else { // show the result
+                    
+                   console.log(JSON.parse(xhr.response))
+                        const rootLevels = JSON.parse(xhr.response);
+                        rootLevels.forEach(el => {
+                            _converse.hierachi.create(
+                                {
+                                    "level":'2',
+                                    "type":"expert",
+                                    "key":el.Key,
+                                    "jid":el.Key,
+                                }
+                            );
+                        })
+                    }
+                };
             },
             destroyall(){
                 _converse.hierachi.models.forEach(model => {
@@ -846,11 +907,12 @@ converse.plugins.add('converse-rosterview', {
             parentLoad(ev){
                 ev.stopImmediatePropagation()
                 const current = this.el.querySelector(`.load-parent`).getAttribute('data-level')
+                const parentId = this.el.querySelector(`.load-parent`).getAttribute('data-parentId')
                 if(current === '1'){
                     this.resetList();
                     this.loadRoots();
                 }else if(current === '2'){
-                    this.loadChild(`${current-1}`)
+                    this.loadChild(`${current-1}`,parentId)
 
                 }
                 let parentNode = ''
@@ -867,50 +929,52 @@ converse.plugins.add('converse-rosterview', {
                 this.el.querySelector('.hierachi-lists').innerHTML = tpl_hierachi()
                 
             },
-            loadChild(parent){
+            loadChild(level,parentId){
                 this.resetList();
-                if(parent === '1'){
+                if(level === '1'){
+                    this.LoadLevel2(parentId)
                     console.log(parent)
-                    for(let i=0; i<1;i++){
-                        _converse.hierachi.create(
-                           {
-                               "level":'2',
-                               "type":"level",
-                               "parentId":'1',
-                           }
-                       );
-                   }
+                //     for(let i=0; i<1;i++){
+                //         _converse.hierachi.create(
+                //            {
+                //                "level":'2',
+                //                "type":"level",
+                //                "parentId":'1',
+                //            }
+                //        );
+                //    }
                 }
-                if(parent === '2'){
-                    for(let i=0; i<1;i++){
-                        _converse.hierachi.create(
-                           {
-                               "level":'3',
-                               "type":"expert",
-                               "jid":"jay@link-im.com",
-                                "name":"jay",
-                                "parentId":'1'
-                           }
-                       );
-                       _converse.hierachi.create(
-                        {
-                            "level":'3',
-                            "jid":"madusara@link-im.com",
-                            "type":"expert",
-                            "name":"madusara",
-                            "parentId":'1'
-                        }
-                    );
-                    _converse.hierachi.create(
-                        {
-                            "level":'3',
-                            "jid":"lahiru@link-im.com",
-                            "type":"expert",
-                            "name":"lahiru",
-                             "parentId":'1'
-                        }
-                    );
-                   }
+                if(level === '2'){
+                    this.LoadLevel3(parentId)
+                    // for(let i=0; i<1;i++){
+                    //     _converse.hierachi.create(
+                    //        {
+                    //            "level":'3',
+                    //            "type":"expert",
+                    //            "jid":"jay@link-im.com",
+                    //             "name":"jay",
+                    //             "parentId":'1'
+                    //        }
+                    //    );
+                    //    _converse.hierachi.create(
+                    //     {
+                    //         "level":'3',
+                    //         "jid":"madusara@link-im.com",
+                    //         "type":"expert",
+                    //         "name":"madusara",
+                    //         "parentId":'1'
+                    //     }
+                    // );
+                    // _converse.hierachi.create(
+                    //     {
+                    //         "level":'3',
+                    //         "jid":"lahiru@link-im.com",
+                    //         "type":"expert",
+                    //         "name":"lahiru",
+                    //          "parentId":'1'
+                    //     }
+                    // );
+                //    }
                 }
                 
 
@@ -925,8 +989,8 @@ converse.plugins.add('converse-rosterview', {
                     
                     const list = 
                     `<li class="level-item-${node.get('level')} list-group-item list-group-level-item" >`+
-                        `<div class="li-text-content extract-level-${node.get('level')}${childIndex}" data-class="level-item-${node.get('level')}" data-id="${node.get('level')}">`+
-                            `<div >Node Level ${node.get('level')}</div>`+
+                        `<div class="li-text-content extract-level-${node.get('level')}${childIndex}" data-class="level-item-${node.get('level')}" data-parentId="${node.get('key')}" data-level="${node.get('level')}">`+
+                            `<div >${node.get('value')}</div>`+
                             `<div  ><i class="fas fa-angle-down"></i></div>`+
                         `</div>`+
                         `<ul class="level-list-${node.get('level')} list-group-${node.get('level')}${childIndex}">`+
@@ -952,19 +1016,17 @@ converse.plugins.add('converse-rosterview', {
             },
             extractLevel(ev){
                 ev.stopImmediatePropagation()
-                const levelid = this.el.querySelector(`.${ev.delegateTarget.classList[1]}`).getAttribute('data-id')
-                console.log(this.el.querySelector('.current-level'))
+                const levelid = this.el.querySelector(`.${ev.delegateTarget.classList[1]}`).getAttribute('data-level')
+                const parentId = this.el.querySelector(`.${ev.delegateTarget.classList[1]}`).getAttribute('data-parentId')
                 let parentNode = ''
                 if(levelid === '1'){
-                    parentNode = `<a href="#" class="load-parent" data-level="${levelid}"><i class="fas fa-home mr-1"></i> Groups List</a>`
-                    this.currentLevelId = 1
+                    parentNode = `<a href="#" class="load-parent" data-parentId="${parentId}" data-level="${levelid}"><i class="fas fa-home mr-1"></i> Group List</a>`
                 }
                 if(levelid === '2'){
-                    parentNode = `<a href="#" class="load-parent" data-level="${levelid}">Node Level ${levelid-1}</a>`
-                    this.currentLevelId = 2
+                    parentNode = `<a href="#" class="load-parent" data-parentId="${parentId}" data-level="${levelid}">Node Level ${levelid-1}</a>`
                 }
                 this.el.querySelector('.current-level').innerHTML = parentNode
-                this.loadChild(levelid)
+                this.loadChild(levelid,parentId)
                 return false;
                 // console.log(ev.delegateTarget)
                 
