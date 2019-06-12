@@ -800,7 +800,7 @@ converse.plugins.add('converse-rosterview', {
             },
             loadRoots(){
                 const xhr = new window.XMLHttpRequest();
-                xhr.open("GET", `http://64.202.186.112/MEWAAPI/User/ExpertDomain/GetExpertDomain?level=1&parentId=1`, true);
+                xhr.open("GET", `https://64.202.186.112/MEWAAPI/User/ExpertDomain/GetExpertDomain?level=1&parentId=1`, true);
                 // xhr.setRequestHeader( 'Content-Type',   'application/json' );
                 xhr.send()
                 xhr.onload = function() {
@@ -808,7 +808,6 @@ converse.plugins.add('converse-rosterview', {
                     
                     } else { // show the result
                     
-                   console.log(JSON.parse(xhr.response))
                         const rootLevels = JSON.parse(xhr.response);
                         rootLevels.forEach(el => {
                             _converse.hierachi.create(
@@ -822,26 +821,16 @@ converse.plugins.add('converse-rosterview', {
                         })
                     }
                 };
-                // for(let i=0; i<1;i++){
-                //     _converse.hierachi.create(
-                //         {
-                //             "level":'1',
-                //             "type":"level",
-                //         }
-                //     );
-                // }
             },
             LoadLevel2(parentId){
                 const xhr = new window.XMLHttpRequest();
-                xhr.open("GET", `http://64.202.186.112/MEWAAPI/User/ExpertDomain/GetExpertDomain?level=2&parentId=${parentId}`, true);
+                xhr.open("GET", `https://64.202.186.112/MEWAAPI/User/ExpertDomain/GetExpertDomain?level=2&parentId=${parentId}`, true);
                 // xhr.setRequestHeader( 'Content-Type',   'application/json' );
                 xhr.send()
                 xhr.onload = function() {
                     if (xhr.status != 200) { // analyze HTTP status of the response
                     
                     } else { // show the result
-                    
-                   console.log(JSON.parse(xhr.response))
                         const rootLevels = JSON.parse(xhr.response);
                         rootLevels.forEach(el => {
                             _converse.hierachi.create(
@@ -858,7 +847,7 @@ converse.plugins.add('converse-rosterview', {
             },
             LoadLevel3(parentId){
                 const xhr = new window.XMLHttpRequest();
-                xhr.open("GET", `http://64.202.186.112/MEWAAPI/User/ExpertDomain/GetExpertDomain?level=3&parentId=${parentId}`, true);
+                xhr.open("GET", `https://64.202.186.112/MEWAAPI/User/ExpertDomain/GetExpertDomain?level=3&parentId=${parentId}`, true);
                 // xhr.setRequestHeader( 'Content-Type',   'application/json' );
                 xhr.send()
                 xhr.onload = function() {
@@ -866,7 +855,6 @@ converse.plugins.add('converse-rosterview', {
                     
                     } else { // show the result
                     
-                   console.log(JSON.parse(xhr.response))
                         const rootLevels = JSON.parse(xhr.response);
                         rootLevels.forEach(el => {
                             _converse.hierachi.create(
@@ -893,11 +881,9 @@ converse.plugins.add('converse-rosterview', {
                 }
             },
             changeHierach(){
-                console.log('changeHierach')
                 let childIndex= 0;
                 var that = this;
                 const hierachi = this.model.models;
-                console.log(hierachi)
                 this.el.querySelector('.hierachi-lists').innerHTML = ''
                 hierachi.forEach(node => {
                     childIndex++;
@@ -933,48 +919,9 @@ converse.plugins.add('converse-rosterview', {
                 this.resetList();
                 if(level === '1'){
                     this.LoadLevel2(parentId)
-                    console.log(parent)
-                //     for(let i=0; i<1;i++){
-                //         _converse.hierachi.create(
-                //            {
-                //                "level":'2',
-                //                "type":"level",
-                //                "parentId":'1',
-                //            }
-                //        );
-                //    }
                 }
                 if(level === '2'){
                     this.LoadLevel3(parentId)
-                    // for(let i=0; i<1;i++){
-                    //     _converse.hierachi.create(
-                    //        {
-                    //            "level":'3',
-                    //            "type":"expert",
-                    //            "jid":"jay@link-im.com",
-                    //             "name":"jay",
-                    //             "parentId":'1'
-                    //        }
-                    //    );
-                    //    _converse.hierachi.create(
-                    //     {
-                    //         "level":'3',
-                    //         "jid":"madusara@link-im.com",
-                    //         "type":"expert",
-                    //         "name":"madusara",
-                    //         "parentId":'1'
-                    //     }
-                    // );
-                    // _converse.hierachi.create(
-                    //     {
-                    //         "level":'3',
-                    //         "jid":"lahiru@link-im.com",
-                    //         "type":"expert",
-                    //         "name":"lahiru",
-                    //          "parentId":'1'
-                    //     }
-                    // );
-                //    }
                 }
                 
 
@@ -1268,10 +1215,10 @@ converse.plugins.add('converse-rosterview', {
                 return;
             }
             //<----MDEV
-            // _converse.rosterview = new _converse.RosterView({
-            //     'model': _converse.rostergroups
-            // });
-            // _converse.rosterview.render();
+            _converse.rosterview = new _converse.RosterView({
+                'model': _converse.rostergroups
+            });
+            _converse.rosterview.render();
             _converse.api.listen.on('hierachimodelfetched', () => {
                 
                 _converse.hierarchicalview = new _converse.HierarchicalView({
