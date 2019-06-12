@@ -833,7 +833,6 @@ converse.plugins.add('converse-rosterview', {
                 _converse.hierachi.reset();
                 this.el.innerHTML = tpl_hierachi()
                 if(parent === 'level1'){
-
                     for(let i=0; i<1;i++){
                         _converse.hierachi.create(
                            {
@@ -845,9 +844,6 @@ converse.plugins.add('converse-rosterview', {
                    }
                 }
                 if(parent === 'level2'){
-                    console.log(this.expertlevel)
-                    const list = `<li>${this.expertlevel.get('level')}<ul class="expert-level"></ul></li>`
-                    this.el.querySelector('.hierachi-lists').insertAdjacentHTML('beforeend',list)
                     for(let i=0; i<1;i++){
                         _converse.hierachi.create(
                            {
@@ -875,7 +871,7 @@ converse.plugins.add('converse-rosterview', {
                     `<li class="level-item-${node.get('level')} list-group-item list-group-level-item" >`+
                         `<div class="li-text-content">`+
                             `<div>${node.get('level')}</div>`+
-                            `<a htef="#" class="extract extract-level-${node.get('level')}${childIndex}" data-class="level-item-${node.get('level')}" data-id="${node.get('id')}" data-level="${node.get('level')}"><i class="fas fa-angle-down"></i></a>`+
+                            `<a htef="#" class="extract extract-level-${node.get('level')}${childIndex}" data-class="level-item-${node.get('level')}" data-id="${node.get('level')}"><i class="fas fa-angle-down"></i></a>`+
                         `</div>`+
                         `<ul class="level-list-${node.get('level')} list-group-${node.get('level')}${childIndex}">`+
                         '</ul></li>'
@@ -884,7 +880,7 @@ converse.plugins.add('converse-rosterview', {
                     const expertEl = new _converse.RosterContactView({model:_converse.roster.findWhere({jid:node.get('jid')})})
                     expertEl.render()
                     u.showElement(expertEl.el);
-                    this.el.querySelector('.expert-level').insertAdjacentElement('beforeend',expertEl.el)
+                    this.el.querySelector('.hierachi-lists').insertAdjacentElement('beforeend',expertEl.el)
                   
                 }
             },
@@ -909,15 +905,9 @@ converse.plugins.add('converse-rosterview', {
                 //     experElement.classList.add("show-child")
                 // }
                 const levelid = this.el.querySelector(`.${ev.delegateTarget.classList[1]}`).getAttribute('data-id')
-                const levellevel = this.el.querySelector(`.${ev.delegateTarget.classList[1]}`).getAttribute('data-level')
                 console.log(this.el.querySelector('.current-level'))
                 this.el.querySelector('.current-level').innerHTML = `<div >hi</div>`
-                if(levellevel==='level2'){
-                    console.log()
-                    this.expertlevel = _converse.hierachi.findWhere({id:levelid})
-
-                }
-                this.loadChild(levellevel)
+                this.loadChild(levelid)
                 return false;
                 // console.log(ev.delegateTarget)
                 
