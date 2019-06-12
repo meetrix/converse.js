@@ -920,7 +920,7 @@ converse.plugins.add('converse-rosterview', {
                     parentNode = ``
                 }
                 if(current === '2'){
-                    parentNode = `<a href="#" class="load-parent" data-level="${current-1}"><i class="fas fa-home mr-1"></i> Group List</a>`
+                    parentNode = `<a href="#" class="load-parent" data-level="${current-1}"><i class="fas fa-home mr-1"></i> Groups List</a>`
                 }
                 this.el.querySelector('.current-level').innerHTML = parentNode
             },
@@ -991,7 +991,7 @@ converse.plugins.add('converse-rosterview', {
                     `<li class="level-item-${node.get('level')} list-group-item list-group-level-item" >`+
                         `<div class="li-text-content extract-level-${node.get('level')}${childIndex}" data-class="level-item-${node.get('level')}" data-parentId="${node.get('key')}" data-level="${node.get('level')}">`+
                             `<div >${node.get('value')}</div>`+
-                            `<div  ><i class="fas fa-angle-down"></i></div>`+
+                            `<div  ><i class="fas fa-lg fa-angle-right"></i></div>`+
                         `</div>`+
                         `<ul class="level-list-${node.get('level')} list-group-${node.get('level')}${childIndex}">`+
                         '</ul></li>'
@@ -1020,7 +1020,7 @@ converse.plugins.add('converse-rosterview', {
                 const parentId = this.el.querySelector(`.${ev.delegateTarget.classList[1]}`).getAttribute('data-parentId')
                 let parentNode = ''
                 if(levelid === '1'){
-                    parentNode = `<a href="#" class="load-parent" data-parentId="${parentId}" data-level="${levelid}"><i class="fas fa-home mr-1"></i> Group List</a>`
+                    parentNode = `<a href="#" class="load-parent" data-parentId="${parentId}" data-level="${levelid}"><i class="fas fa-home mr-1"></i> Groups List</a>`
                 }
                 if(levelid === '2'){
                     parentNode = `<a href="#" class="load-parent" data-parentId="${parentId}" data-level="${levelid}">Node Level ${levelid-1}</a>`
