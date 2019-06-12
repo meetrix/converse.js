@@ -920,13 +920,13 @@ converse.plugins.add('converse-rosterview', {
                     parentNode = ``
                 }
                 if(current === '2'){
-                    parentNode = `<a href="#" class="load-parent" data-level="${current-1}"><i class="far fa-home-alt mr-1"></i> Group List</a>`
+                    parentNode = `<a href="#" class="load-parent" data-level="${current-1}"><i class="fas fa-home mr-1"></i> Group List</a>`
                 }
                 this.el.querySelector('.current-level').innerHTML = parentNode
             },
             resetList(){
                 _converse.hierachi.reset();
-                this.el.querySelector('.hierachi-lists').innerHTML = tpl_hierachi()
+                this.el.querySelector('.hierachi-lists').innerHTML = ''
                 
             },
             loadChild(level,parentId){
@@ -1020,7 +1020,7 @@ converse.plugins.add('converse-rosterview', {
                 const parentId = this.el.querySelector(`.${ev.delegateTarget.classList[1]}`).getAttribute('data-parentId')
                 let parentNode = ''
                 if(levelid === '1'){
-                    parentNode = `<a href="#" class="load-parent" data-parentId="${parentId}" data-level="${levelid}"><i class="far fa-home-alt mr-1"></i> Group List</a>`
+                    parentNode = `<a href="#" class="load-parent" data-parentId="${parentId}" data-level="${levelid}"><i class="fas fa-home mr-1"></i> Group List</a>`
                 }
                 if(levelid === '2'){
                     parentNode = `<a href="#" class="load-parent" data-parentId="${parentId}" data-level="${levelid}">Node Level ${levelid-1}</a>`
