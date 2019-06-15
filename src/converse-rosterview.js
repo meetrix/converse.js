@@ -857,14 +857,16 @@ converse.plugins.add('converse-rosterview', {
                     
                         const rootLevels = JSON.parse(xhr.response);
                         rootLevels.forEach(el => {
-                            _converse.hierachi.create(
-                                {
-                                    "level":'2',
-                                    "type":"expert",
-                                    "key":el.Key,
-                                    "jid":el.Key,
-                                }
-                            );
+                            if(el.Key!== _converse.connection.jid.split('/')[0]){
+                                _converse.hierachi.create(
+                                    {
+                                        "level":'2',
+                                        "type":"expert",
+                                        "key":el.Key,
+                                        "jid":el.Key,
+                                    }
+                                );
+                            }
                         })
                     }
                 };
