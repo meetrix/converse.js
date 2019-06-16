@@ -856,8 +856,9 @@ converse.plugins.add('converse-rosterview', {
                     } else { // show the result
                     
                         const rootLevels = JSON.parse(xhr.response);
+                        console.log()
                         rootLevels.forEach(el => {
-                            if(el.Key!== _converse.connection.jid.split('/')[0]){
+                            if(el.Key !== _converse.connection.jid.split('/')[0]){
                                 _converse.hierachi.create(
                                     {
                                         "level":'2',
@@ -946,10 +947,13 @@ converse.plugins.add('converse-rosterview', {
                         '</ul></li>'
                         this.el.querySelector('.hierachi-lists').insertAdjacentHTML('beforeend',list)
                 }else if(node.get('type') ==='expert') {
-                    const expertEl = new _converse.RosterContactView({model:_converse.roster.findWhere({jid:node.get('jid')})})
-                    expertEl.render()
-                    u.showElement(expertEl.el);
-                    this.el.querySelector('.hierachi-lists').insertAdjacentElement('beforeend',expertEl.el)
+                    if(_converse.roster.findWhere({jid:node.get('jid')})){
+                        const expertEl = new _converse.RosterContactView({model:_converse.roster.findWhere({jid:node.get('jid')})})
+                        expertEl.render()
+                        u.showElement(expertEl.el);
+                        this.el.querySelector('.hierachi-lists').insertAdjacentElement('beforeend',expertEl.el)
+                    }
+                    
                   
                 }
             },
