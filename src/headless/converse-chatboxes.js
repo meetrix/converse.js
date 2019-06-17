@@ -894,13 +894,14 @@ converse.plugins.add('converse-chatboxes', {
                     'time': delay ? dayjs(delay.getAttribute('stamp')).toISOString() : (new Date()).toISOString(),
                     'type': stanza.getAttribute('type')
                 }, this.getStanzaIDs(original_stanza));
-
                 if (attrs.type === 'groupchat') {
                     attrs.from = stanza.getAttribute('from');
+                    attrs.to = stanza.getAttribute('to');
                     attrs.nick = Strophe.unescapeNode(Strophe.getResourceFromJid(attrs.from));
                     attrs.sender = attrs.nick === this.get('nick') ? 'me': 'them';
                 } else {
                     attrs.from = Strophe.getBareJidFromJid(stanza.getAttribute('from'));
+                    attrs.to = Strophe.getBareJidFromJid(stanza.getAttribute('to'));
                     if (attrs.from === _converse.bare_jid) {
                         attrs.sender = 'me';
                         attrs.fullname = _converse.xmppstatus.get('fullname');
