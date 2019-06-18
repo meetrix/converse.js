@@ -791,11 +791,15 @@ converse.plugins.add('converse-rosterview', {
                      
                  });
                  _converse.hierachi.on("change", this.changeHierach, this);
+                 this.level2Parent 
+                 this.level3Parent
             },
             render(){
                 this.el.innerHTML = tpl_hierachi()
                 this.destroyall();
                 this.loadRoots()
+                this.level2Parent 
+                this.level3Parent
                 return this;
             },
             loadRoots(){
@@ -897,6 +901,7 @@ converse.plugins.add('converse-rosterview', {
                 ev.stopImmediatePropagation()
                 const current = this.el.querySelector(`.load-parent`).getAttribute('data-level')
                 const parentId = this.el.querySelector(`.load-parent`).getAttribute('data-parentId')
+                const parentValue = this.el.querySelector(`.load-parent`).getAttribute('data-key')
                 if(current === '1'){
                     this.resetList();
                     this.loadRoots();
@@ -909,7 +914,7 @@ converse.plugins.add('converse-rosterview', {
                     parentNode = ``
                 }
                 if(current === '2'){
-                    parentNode = `<a href="#" class="load-parent" data-level="${current-1}"><i class="fas fa-home mr-1"></i> Groups List</a>`
+                    parentNode = `<a href="#" class="load-parent" data-level="${current-1}"><i class="fas fa-home mr-1"></i>${this.level2Parent}</a>`
                 }
                 this.el.querySelector('.current-level').innerHTML = parentNode
             },
@@ -939,7 +944,7 @@ converse.plugins.add('converse-rosterview', {
                     
                     const list = 
                     `<li class="level-item-${node.get('level')} list-group-item list-group-level-item" >`+
-                        `<div class="li-text-content extract-level-${node.get('level')}${childIndex}" data-class="level-item-${node.get('level')}" data-parentId="${node.get('key')}" data-level="${node.get('level')}">`+
+                        `<div class="li-text-content extract-level-${node.get('level')}${childIndex}" data-class="level-item-${node.get('level')}" data-parentId="${node.get('key')}" data-level="${node.get('level')}" data-value="${node.get('value')}">`+
                             `<div >${node.get('value')}</div>`+
                             `<div  ><i class="fas fa-lg fa-angle-right"></i></div>`+
                         `</div>`+
@@ -971,12 +976,15 @@ converse.plugins.add('converse-rosterview', {
                 ev.stopImmediatePropagation()
                 const levelid = this.el.querySelector(`.${ev.delegateTarget.classList[1]}`).getAttribute('data-level')
                 const parentId = this.el.querySelector(`.${ev.delegateTarget.classList[1]}`).getAttribute('data-parentId')
+                const parentvalue = this.el.querySelector(`.${ev.delegateTarget.classList[1]}`).getAttribute('data-value')
                 let parentNode = ''
                 if(levelid === '1'){
-                    parentNode = `<a href="#" class="load-parent" data-parentId="${parentId}" data-level="${levelid}"><i class="fas fa-home mr-1"></i> Groups List</a>`
+                    this.level2Parent =  parentvalue
+                    parentNode = `<a href="#" class="load-parent" data-parentId="${parentId}" data-level="${levelid}"><i class="fas fa-home mr-1"></i>${parentvalue}</a>`
                 }
                 if(levelid === '2'){
-                    parentNode = `<a href="#" class="load-parent" data-parentId="${parentId}" data-level="${levelid}">Node Level ${levelid-1}</a>`
+                    this.level3Parent =  parentvalue
+                    parentNode = `<a href="#" class="load-parent" data-parentId="${parentId}" data-level="${levelid}">${parentvalue}</a>`
                 }
                 this.el.querySelector('.current-level').innerHTML = parentNode
                 this.loadChild(levelid,parentId)
