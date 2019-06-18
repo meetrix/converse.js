@@ -90,48 +90,7 @@ converse.plugins.add('converse-roster', {
             _converse.api.trigger('rosterInitialized');
 
             //<---MDEV
-            _converse.hierarchicaldummy = [
-                {
-                  "id":"1",
-                  "level":"1",
-                  "type":"level",
-                  "child":[
-                    {
-                      "id":"2",
-                      "level":"level2",
-                      "type":"level",
-                      "child":[
-                        {
-                          "id":"3",
-                          "level":"level3",
-                          "type":"level",
-                          "child":[
-                            {
-                              "id":"4",
-                              "jid":"jay@link-im.com",
-                              "type":"expert",
-                              "name":"jay"
-                            },
-                            {
-                              "id":"5",
-                              "jid":"lahiru@link-im.com",
-                              "type":"expert",
-                              "name":"lahiru"
-                            },
-                            {
-                              "id":"6",
-                              "jid":"madusara@link-im.com",
-                              "type":"expert",
-                              "name":"madusara"
-                            }
-                          ]
-                        }
-                      ]
-                    }
-                  ]
-                }
-              
-              ]
+           
               _converse.hierachi =  new _converse.Hierachi();
               _converse.hierachi.browserStorage = new BrowserStorage[storage](
                 `_converse.hierachi-${_converse.bare_jid}`);

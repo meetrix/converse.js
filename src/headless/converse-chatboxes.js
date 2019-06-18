@@ -709,9 +709,14 @@ converse.plugins.add('converse-chatboxes', {
                 else {
                     message = this.messages.findWhere('deleting')
                     if(message){
-                        
-                        const older_versions = message.get('older_versions') || [];
-                        older_versions.push(message.get('message'));
+
+                        let older_versions = message.get('older_versions') || [];
+                        try {
+                            older_versions.push(message.get('message'));
+                        } catch (error) {
+                           console.log('eroor',error) 
+                           older_versions = []
+                        }
                         message.save({
                             'deleting': false,
                             'deleted': (new Date()).toISOString(),

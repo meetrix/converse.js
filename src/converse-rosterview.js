@@ -925,7 +925,7 @@ converse.plugins.add('converse-rosterview', {
             },
             loadChild(level,parentId){
                 this.resetList();
-                if(level === '1'){
+                if(level === '1'){_converse.HierarchicalView
                     this.LoadLevel2(parentId)
                 }
                 if(level === '2'){
@@ -1232,14 +1232,7 @@ converse.plugins.add('converse-rosterview', {
                 'model': _converse.rostergroups
             });
             _converse.rosterview.render();
-            _converse.api.listen.on('hierachimodelfetched', () => {
-                
-                _converse.hierarchicalview = new _converse.HierarchicalView({
-                    'model':   _converse.hierachi
-                })
-                _converse.hierarchicalview.render()
-                _converse.api.trigger('hierachiViewInitialized');
-            });
+             
            
             ///----->
             /**
@@ -1249,6 +1242,15 @@ converse.plugins.add('converse-rosterview', {
              */
              _converse.api.trigger('rosterViewInitialized');
         }
+        _converse.api.listen.on('hierachimodelfetched', () => {
+                
+            _converse.hierarchicalview = new _converse.HierarchicalView({
+                'model':   _converse.hierachi
+            })
+            _converse.hierarchicalview.render()
+            console.log('_converse.hierarchicalview',_converse.hierarchicalview)
+            _converse.api.trigger('hierachiViewInitialized');
+         });
         _converse.api.listen.on('rosterInitialized', initRoster);
         _converse.api.listen.on('rosterReadyAfterReconnection', initRoster);
 
