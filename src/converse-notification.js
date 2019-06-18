@@ -138,6 +138,7 @@ converse.plugins.add('converse-notification', {
             /* Shows an HTML5 Notification to indicate that a new chat
              * message was received.
              */
+           
             if (!_converse.areDesktopNotificationsEnabled()) {
                 return;
             }
@@ -179,6 +180,10 @@ converse.plugins.add('converse-notification', {
                          __('OMEMO Message received') :
                          _.get(message.querySelector('body'), 'textContent');
             if (!body) {
+                return;
+            }
+            const command = /^\\(\bcall\b):((\bstart\b|\bend\b)):([a-z0-9-]+):((\baudio\b|\bvideo\b))\\$/;      
+            if (command.test(body)){
                 return;
             }
             const n = new Notification(title, {
