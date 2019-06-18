@@ -779,7 +779,7 @@ converse.plugins.add('converse-rosterview', {
 
         _converse.HierarchicalView = Backbone.NativeView.extend({
             tagName: 'div',
-            id: 'converse-roster',
+            id: 'converse-hierachi',
             className: 'controlbox-section',
             events:{
                 'click .open-chat':'openExpert',

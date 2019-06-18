@@ -259,9 +259,9 @@ converse.plugins.add('converse-controlbox', {
                 }
                 //<---MDEV
                 /* Place the rosterview inside the "Contacts" panel. */
-                // _converse.api.waitUntil('rosterViewInitialized')
-                //     .then(() => this.controlbox_pane.el.insertAdjacentElement('beforeEnd', _converse.rosterview.el))
-                //     .catch(_.partial(_converse.log, _, Strophe.LogLevel.FATAL));
+                _converse.api.waitUntil('rosterViewInitialized')
+                    .then(() => this.controlbox_pane.el.insertAdjacentElement('beforeEnd', _converse.rosterview.el))
+                    .catch(_.partial(_converse.log, _, Strophe.LogLevel.FATAL));
                 _converse.api.waitUntil('hierachiViewInitialized')
                     .then(() => this.controlbox_pane.el.insertAdjacentElement('beforeEnd', _converse.hierarchicalview.el))
                     .catch(_.partial(_converse.log, _, Strophe.LogLevel.FATAL));
