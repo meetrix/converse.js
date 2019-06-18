@@ -860,7 +860,7 @@ converse.plugins.add('converse-rosterview', {
                     } else { // show the result
                     
                         const rootLevels = JSON.parse(xhr.response);
-                        console.log()
+                    
                         rootLevels.forEach(el => {
                             if(el.Key !== _converse.connection.jid.split('/')[0]){
                                 _converse.hierachi.create(
@@ -989,7 +989,6 @@ converse.plugins.add('converse-rosterview', {
                 this.el.querySelector('.current-level').innerHTML = parentNode
                 this.loadChild(levelid,parentId)
                 return false;
-                // console.log(ev.delegateTarget)
                 
             }
         });

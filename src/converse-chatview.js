@@ -174,10 +174,10 @@ converse.plugins.add('converse-chatview', {
                     this.model.contact.on('change:nickname', this.debouncedRender, this);
                     this.debouncedRender();
                 });
+                 this.model.presence.on('change:show',this.render,this);
             },
 
             render () {
-                const presense = _converse.presences.findWhere({'jid': this.model.get('jid')})
                 const vcard = _.get(this.model, 'vcard'),
                       vcard_json = vcard ? vcard.toJSON() : {};
                 this.el.innerHTML = tpl_chatbox_head(
@@ -187,7 +187,7 @@ converse.plugins.add('converse-chatview', {
                         { '_converse': _converse,
                           'info_close': __('Close this chat box'),
                           'display_name': this.model.getDisplayName(),
-                          show: presense.get('show')
+                          show: this.model.presence.get('show')
                         }
                     )
                 );
