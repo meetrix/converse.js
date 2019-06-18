@@ -152,15 +152,16 @@ converse.plugins.add('converse-message-view', {
                 ev.preventDefault();
                 ev.stopPropagation();
                 var actiosnel= this.el.querySelector('.chat-msg-actions');
+                console.log("---chat msg actions",actiosnel);
 
                 this.model.set({'hidden_chat_actions': !this.model.get('hidden_chat_actions')})
                 if (this.model.get('hidden_chat_actions')){
                     u.addClass('hidden', actiosnel);
                 }else{
-                    var buttonPosition = this.el.querySelector('.toggle-chat-msg-actions').getBoundingClientRect();
-                    var targetPosition = buttonPosition.top + buttonPosition.bottom;
-                    var buttontop = targetPosition/2 - 80;
-                    actiosnel.setAttribute("style", "top:"+buttontop);
+                    // var buttonPosition = this.el.querySelector('.toggle-chat-msg-actions').getBoundingClientRect();
+                    // var targetPosition = buttonPosition.top + buttonPosition.bottom;
+                    // var buttontop = targetPosition/2 - 80;
+                    // actiosnel.setAttribute("style", "top:"+buttontop);
                     u.removeClass('hidden', actiosnel);
                 }
                 // if(actiosnelstyle === 'none'){
