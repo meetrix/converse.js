@@ -97,13 +97,18 @@ converse.plugins.add('converse-controlbox', {
         ChatBoxViews: {
             closeAllChatBoxes () {
                 const { _converse } = this.__super__;
-                this.forEach(function (view) {
-                    if (view.model.get('id') === 'controlbox' &&
-                            (_converse.disconnection_cause !== _converse.LOGOUT || _converse.show_controlbox_by_default)) {
-                        return;
-                    }
-                    view.close();
-                });
+                try {
+                    this.forEach(function (view) {
+                        if (view.model.get('id') === 'controlbox' &&
+                                (_converse.disconnection_cause !== _converse.LOGOUT || _converse.show_controlbox_by_default)) {
+                            return;
+                        }
+                        view.close();
+                    }); 
+                } catch (error) {
+                    console.log(error)
+                }
+                
                 return this;
             }
         },

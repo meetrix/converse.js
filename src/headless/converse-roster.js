@@ -90,7 +90,7 @@ converse.plugins.add('converse-roster', {
             _converse.api.trigger('rosterInitialized');
 
             //<---MDEV
-           
+                console.log('hierach instailzation')
               _converse.hierachi =  new _converse.Hierachi();
               _converse.hierachi.browserStorage = new BrowserStorage[storage](
                 `_converse.hierachi-${_converse.bare_jid}`);
@@ -209,7 +209,12 @@ converse.plugins.add('converse-roster', {
                 if (resource) {
                     resource.save(settings);
                 } else {
-                    this.resources.create(settings);
+                    try {
+                        this.resources.create(settings); 
+                    } catch (error) {
+                        console.log(error)
+                    }
+                    
                 }
             },
 
@@ -1005,6 +1010,7 @@ converse.plugins.add('converse-roster', {
                  * @example _converse.api.listen.on('rosterReadyAfterReconnection', () => { ... });
                  */
                 _converse.api.trigger('rosterReadyAfterReconnection');
+                _converse.api.trigger('hierachiReadyAfterReconnection');
             } else {
                 _converse.registerIntervalHandler();
                 _converse.initRoster();
