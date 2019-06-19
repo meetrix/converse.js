@@ -1251,7 +1251,6 @@ converse.plugins.add('converse-rosterview', {
                 'model':   _converse.hierachi
             })
             _converse.hierarchicalview.render()
-            console.log('_converse.hierarchicalview',_converse.hierarchicalview)
             _converse.api.trigger('hierachiViewInitialized');
          });
         _converse.api.listen.on('hierachimodelfetched', () => {
@@ -1260,7 +1259,6 @@ converse.plugins.add('converse-rosterview', {
                 'model':   _converse.hierachi
             })
             _converse.hierarchicalview.render()
-            console.log('_converse.hierarchicalview',_converse.hierarchicalview)
             _converse.api.trigger('hierachiViewInitialized');
          });
         _converse.api.listen.on('rosterInitialized', initRoster);

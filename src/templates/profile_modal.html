@@ -29,7 +29,7 @@
                                             <canvas class="avatar" height="100px" width="100px"></canvas>
                                         {[ } ]}
                                     </a>
-                                    <input class="hidden" name="image" type="file"/>
+                                    <input disabled=true class="hidden" name="image" type="file"/>
                                 </div>
                                 <div class="col">
                                     <div class="form-group">
@@ -40,28 +40,28 @@
                             </div>
                             <div class="form-group">
                                 <label for="vcard-fullname" class="col-form-label">{{{o.label_fullname}}}:</label>
-                                <input id="vcard-fullname" type="text" class="form-control" name="fn" value="{{{o.fullname}}}"/>
+                                <input disabled=true id="vcard-fullname" type="text" class="form-control" name="fn" value="{{{o.fullname}}}"/>
                             </div>
                             <div class="form-group">
                                 <label for="vcard-nickname" class="col-form-label">{{{o.label_nickname}}}:</label>
-                                <input id="vcard-nickname" type="text" class="form-control" name="nickname" value="{{{o.nickname}}}"/>
+                                <input disabled=true id="vcard-nickname" type="text" class="form-control" name="nickname" value="{{{o.nickname}}}"/>
                             </div>
                             <div class="form-group">
                                 <label for="vcard-url" class="col-form-label">{{{o.label_url}}}:</label>
-                                <input id="vcard-url" type="url" class="form-control" name="url" value="{{{o.url}}}"/>
+                                <input disabled=true id="vcard-url" type="url" class="form-control" name="url" value="{{{o.url}}}"/>
                             </div>
                             <div class="form-group">
                                 <label for="vcard-email" class="col-form-label">{{{o.label_email}}}:</label>
-                                <input id="vcard-email" type="email" class="form-control" name="email" value="{{{o.email}}}"/>
+                                <input disabled=true id="vcard-email" type="email" class="form-control" name="email" value="{{{o.email}}}"/>
                             </div>
                             <div class="form-group">
                                 <label for="vcard-role" class="col-form-label">{{{o.label_role}}}:</label>
-                                <input id="vcard-role" type="text" class="form-control" name="role" value="{{{o.role}}}" aria-describedby="vcard-role-help"/>
+                                <input disabled =true id="vcard-role" type="text" class="form-control" name="role" value="{{{o.role}}}" aria-describedby="vcard-role-help"/>
                                 <small id="vcard-role-help" class="form-text text-muted">{{{o.label_role_help}}}</small>
                             </div>
                             <hr/>
                             <div class="form-group">
-                                <button type="submit" class="save-form btn btn-primary">{{{o.__('Save and close')}}}</button>
+                                <!-- <button type="submit" class="save-form btn btn-primary">{{{o.__('Save and close')}}}</button> -->
                             </div>
                         </form>
                     </div>

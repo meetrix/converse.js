@@ -42,7 +42,7 @@ converse.plugins.add('converse-profile', {
             events: {
                 'change input[type="file"]': "updateFilePreview",
                 'click .change-avatar': "openFileSelection",
-                'submit .profile-form': 'onFormSubmitted'
+                // 'submit .profile-form': 'onFormSubmitted'
             },
 
             initialize () {
@@ -233,7 +233,7 @@ converse.plugins.add('converse-profile', {
         _converse.XMPPStatusView = _converse.VDOMViewWithAvatar.extend({
             tagName: "div",
             events: {
-                // "click a.show-profile": "showProfileModal",
+                "click a.show-profile": "showProfileModal",
                 "click a.change-status": "showStatusChangeModal",
                 "click .show-client-info": "showClientInfoModal",
                 "click .logout": "logOut",
