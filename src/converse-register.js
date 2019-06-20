@@ -614,6 +614,8 @@ converse.plugins.add('converse-register', {
                 if(!this.validationRegistationForm(form)){
                     return;
                 }
+
+                sessionStorage.setItem("password",form.querySelector('input[name=password]').value );
                 //-------->
                 const has_empty_inputs = _.reduce(
                     this.el.querySelectorAll('input.required'),
