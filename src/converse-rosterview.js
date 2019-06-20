@@ -409,9 +409,9 @@ converse.plugins.add('converse-rosterview', {
                     const chatbox = _converse.chatboxes.get(this.model.get('jid'));
                     if (chatbox) {
                         if (chatbox.get('hidden')) {
-                            this.el.classList.remove('open');
+                            this.el.classList.remove('openx');
                         } else {
-                            this.el.classList.add('open');
+                            this.el.classList.add('openx');
                         }
                     }
                 }
@@ -463,9 +463,9 @@ converse.plugins.add('converse-rosterview', {
                 if (_converse.isUniView()) {
                     const chatbox = _converse.chatboxes.get(this.model.get('jid'));
                     if ((chatbox && chatbox.get('hidden')) || !chatbox) {
-                        this.el.classList.remove('open');
+                        this.el.classList.remove('openx');
                     } else {
-                        this.el.classList.add('open');
+                        this.el.classList.add('openx');
                     }
                 }
             },
