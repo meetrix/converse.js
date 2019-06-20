@@ -793,16 +793,21 @@ converse.plugins.add('converse-rosterview', {
                  _converse.hierachi.on("change", this.changeHierach, this);
                  this.level2Parent 
                  this.level3Parent
+                 this.loading = false
             },
             render(){
                 this.el.innerHTML = tpl_hierachi()
                 this.destroyall();
-                this.loadRoots()
+                if(! this.loading){
+                    this.loadRoots()
+                }
                 this.level2Parent 
                 this.level3Parent
                 return this;
             },
             loadRoots(){
+                this.loading = true
+                var that = this
                 const xhr = new window.XMLHttpRequest();
                 xhr.open("GET", `https://64.202.186.112/MEWAAPI/User/ExpertDomain/GetExpertDomain?level=1&parentId=1`, true);
                 // xhr.setRequestHeader( 'Content-Type',   'application/json' );
@@ -824,9 +829,12 @@ converse.plugins.add('converse-rosterview', {
                             );
                         })
                     }
+                    that.loading = false
                 };
             },
             LoadLevel2(parentId){
+                this.loading = true
+                var that = this
                 const xhr = new window.XMLHttpRequest();
                 xhr.open("GET", `https://64.202.186.112/MEWAAPI/User/ExpertDomain/GetExpertDomain?level=2&parentId=${parentId}`, true);
                 // xhr.setRequestHeader( 'Content-Type',   'application/json' );
@@ -847,9 +855,12 @@ converse.plugins.add('converse-rosterview', {
                             );
                         })
                     }
+                    that.loading = false
                 };
             },
             LoadLevel3(parentId){
+                this.loading = true
+                var that = this
                 const xhr = new window.XMLHttpRequest();
                 xhr.open("GET", `https://64.202.186.112/MEWAAPI/User/ExpertDomain/GetExpertDomain?level=3&parentId=${parentId}`, true);
                 // xhr.setRequestHeader( 'Content-Type',   'application/json' );
@@ -874,6 +885,7 @@ converse.plugins.add('converse-rosterview', {
                             }
                         })
                     }
+                    that.loading = false
                 };
             },
             destroyall(){
@@ -904,7 +916,9 @@ converse.plugins.add('converse-rosterview', {
                 const parentValue = this.el.querySelector(`.load-parent`).getAttribute('data-key')
                 if(current === '1'){
                     this.resetList();
-                    this.loadRoots();
+                    if(! this.loading){
+                        this.loadRoots()
+                    }
                 }else if(current === '2'){
                     this.loadChild(`${current-1}`,parentId)
 
@@ -926,10 +940,16 @@ converse.plugins.add('converse-rosterview', {
             loadChild(level,parentId){
                 this.resetList();
                 if(level === '1'){_converse.HierarchicalView
-                    this.LoadLevel2(parentId)
+                    if(! this.loading){
+                        this.LoadLevel2(parentId)
+                    }
+                    
                 }
                 if(level === '2'){
-                    this.LoadLevel3(parentId)
+                    if(! this.loading){
+                        this.LoadLevel3(parentId)
+                    }
+                    
                 }
                 
 
