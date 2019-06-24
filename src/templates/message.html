@@ -10,7 +10,9 @@
                 <li class="chat-msg__action cancel-chat-msg-actions"><i class="fa fa-times"></i>{{{o.__('Cancel')}}}</li>
             
             </ul>
+            {[ if (!o.url) { ]}
             <button class="toggle-chat-msg-actions">...</i></button>
+            {[ } ]}
         </div>
         <div class="style-box">
         {[ if (o.type !== 'headline' && !o.is_me_message) { ]}
