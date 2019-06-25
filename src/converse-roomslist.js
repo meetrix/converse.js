@@ -158,7 +158,12 @@ converse.plugins.add('converse-roomslist', {
                     name = this.model.get('jid')
                 }
                 if(name){
-                    name = name.split('@')[0]
+                    const tmpName = name.split('@')[0];
+                    if (tmpName.includes('#')) {
+                        name = tmpName.split('#')[2];
+                    } else {
+                        name = tmpName;
+                    }
                 }
                 return name
             },
