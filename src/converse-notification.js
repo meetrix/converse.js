@@ -182,7 +182,7 @@ converse.plugins.add('converse-notification', {
             if (!body) {
                 return;
             }
-            const command = /^\\(\bcall\b):((\bstart\b|\bend\b)):([a-z0-9-]+):((\baudio\b|\bvideo\b))\\$/;      
+            const command = /^\\(\bcall\b):((\bstart\b|\bended\b)):([a-z0-9-]+):((\baudio\b|\bvideo\b))\\$/;      
             if (command.test(body)){
                 return;
             }
