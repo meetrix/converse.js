@@ -494,7 +494,7 @@ converse.plugins.add('converse-muc-views', {
             },
             validationChatRoomForm(form){
                 const chatroom = form.querySelector('input[name=chatroom]').value;
-                const chatroomReg =  new RegExp('^[a-z]+$');
+                const chatroomReg =  new RegExp(/(^([a-z]+)|^([#](\bSEMINAR\b)[#]))([a-z]+)$/gi);
                 if(!(chatroomReg.test(chatroom) && chatroom.length <= 22)){
                     this.showValidationError(__('Names must be lowercase without spaces or period, and shorter than 22 characters'));
                     return false;
