@@ -174,7 +174,7 @@ converse.plugins.add('converse-chatview', {
                     this.model.contact.on('change:nickname', this.debouncedRender, this);
                     this.debouncedRender();
                 });
-                 this.model.presence.on('change:show',this.render,this);
+                 this.model.presence.on('change:show',this.onPresenceChanged,this);
             },
 
             render () {
@@ -193,6 +193,9 @@ converse.plugins.add('converse-chatview', {
                 );
                 this.renderAvatar();
                 return this;
+            },
+            onPresenceChanged(item){
+                this.render()
             },
 
             onStatusMessageChanged (item) {

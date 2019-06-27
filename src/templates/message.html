@@ -1,19 +1,19 @@
 <div class="message chat-msg  {{{o.type}}} {[ if (o.type === 'chat') {]} direct {[}]} {[ if (o.type === 'groupchat') {]} channel {[}]} {[ if (o.is_me_message) { ]} chat-msg--action {[ } ]} {{{o.extra_classes}}} chat-msg-whole__{{{o.sender}}}"
         data-isodate="{{{o.time}}}" data-msgid="{{{o.msgid}}}" data-from="{{{o.from}}}" data-encrypted="{{{o.is_encrypted}}}">
-        <div class="dropdown-actions">
+        <!-- <div class="dropdown-actions">
             <ul class="chat-msg-actions hidden">
                     
                     {[ if (!o.url) { ]}
                 <li class="chat-msg__action chat-msg__action-edit"><i class="fa fa-pencil-alt"></i>{{{o.__('Edit message')}}}</li>
                 {[ } ]}
-                <!-- <li class="chat-msg__action chat-msg__action-delete"><i class="fa fa-flag"></i>{{{o.__('Delete message')}}}</li> -->
+                 <li class="chat-msg__action chat-msg__action-delete"><i class="fa fa-flag"></i>{{{o.__('Delete message')}}}</li>
                 <li class="chat-msg__action cancel-chat-msg-actions"><i class="fa fa-times"></i>{{{o.__('Cancel')}}}</li>
             
             </ul>
             {[ if (!o.url) { ]}
             <button class="toggle-chat-msg-actions">...</i></button>
             {[ } ]}
-        </div>
+        </div> -->
         <div class="style-box">
         {[ if (o.type !== 'headline' && !o.is_me_message) { ]}
         <canvas class="avatar chat-msg__avatar" height="36" width="36"></canvas>
@@ -59,6 +59,22 @@
                 {[ } ]}
 
             {[ if (!o.is_me_message) { ]}</div>{[ } ]}
+
         </div>
     </div>
+    <div class="dropdown-actions">
+        <ul class="chat-msg-actions hidden">
+                
+                {[ if (!o.url) { ]}
+            <li class="chat-msg__action chat-msg__action-edit"><i class="fa fa-pencil-alt"></i>{{{o.__('Edit message')}}}</li>
+            {[ } ]}
+            <!-- <li class="chat-msg__action chat-msg__action-delete"><i class="fa fa-flag"></i>{{{o.__('Delete message')}}}</li> -->
+            <li class="chat-msg__action cancel-chat-msg-actions"><i class="fa fa-times"></i>{{{o.__('Cancel')}}}</li>
+        
+        </ul>
+        {[ if (!o.url) { ]}
+        <button class="toggle-chat-msg-actions">...</i></button>
+        {[ } ]}
+    </div>
+        
 </div>
