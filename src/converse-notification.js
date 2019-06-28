@@ -128,28 +128,7 @@ converse.plugins.add('converse-notification', {
                 }
             }
         };
-        _converse.playRingCall = function () {
-            /* Plays a sound to notify that a new message was recieved.
-             */
-            // XXX Eventually this can be refactored to use Notification's sound
-            // feature, but no browser currently supports it.
-            // https://developer.mozilla.org/en-US/docs/Web/API/notification/sound
-            if (_converse.play_sounds && !_.isUndefined(window.Audio)) {
-               
-                const audioMp3 = new Audio(_converse.sounds_path+"ringing.mp3");
-                const canPlayMp3 = audioMp3.canPlayType('audio/mp3');
-                if (canPlayMp3 === 'probably') {
-                    try {
-                        audioMp3.play();
-                    } catch (error) {
-                        console.log(error)
-                    }
-                    
-                } else if (canPlayMp3 === 'maybe') {
-                    audioMp3.play();
-                }
-            }
-        };
+        
 
         _converse.areDesktopNotificationsEnabled = function () {
             return _converse.supports_html5_notification &&
