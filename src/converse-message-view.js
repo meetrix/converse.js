@@ -78,10 +78,7 @@ converse.plugins.add('converse-message-view', {
 
         _converse.MessageView = _converse.ViewWithAvatar.extend({
             events: {
-                'click .chat-msg__edit-modal': 'showMessageVersionsModal',
-                'click .cancel-chat-msg-actions': 'toggleChatMsgActions',
-                'click .toggle-chat-msg-actions': 'toggleChatMsgActions',
-                'mouseout .chat-msg-actions':'hideChatMsgActions'
+                'click .chat-msg__edit-modal': 'showMessageVersionsModal'
             },
 
             initialize () {
@@ -100,24 +97,23 @@ converse.plugins.add('converse-message-view', {
                     this.debouncedRender();
                 });
                 this.model.on('change', this.onChanged, this);
-                this.model.on('destroy', this.remove, this);
-                this.model.set({'hidden_chat_actions':true })
+                this.model.on('destroy', this.fadeOut, this);
             },
 
             async render () {
                 const is_followup = u.hasClass('chat-msg--followup', this.el);
                 if (this.model.isOnlyChatStateNotification()) {
                     this.renderChatStateNotification()
-                } else if (this.model.get('file') && !this.model.get('oob_url') && !this.model.get('deleted')) {
+                } else if (this.model.get('file') && !this.model.get('oob_url')) {
                     if (!this.model.file) {
                         _converse.log("Attempted to render a file upload message with no file data");
                         return this.el;
                     }
                     this.renderFileUploadProgresBar();
                 } else if (this.model.get('type') === 'error') {
-                    //<-----MDEV
-                    // this.renderErrorMessage();
-                    //------>
+                    this.renderErrorMessage();
+                } else if (this.model.get('type') === 'info') {
+                    this.renderInfoMessage();
                 } else {
                     await this.renderChatMessage();
                 }
@@ -132,68 +128,36 @@ converse.plugins.add('converse-message-view', {
                 // attr gets removed when this.render() gets called further
                 // down.
                 const edited = item.changed.edited;
-                const deleted = item.changed.deleted;
                 if (this.model.changed.progress) {
                     return this.renderFileUploadProgresBar();
                 }
-                if (_.filter(['correcting', 'message', 'type', 'upload', 'received','deleting'],
+                if (_.filter(['correcting', 'message', 'type', 'upload', 'received'],
                              prop => Object.prototype.hasOwnProperty.call(this.model.changed, prop)).length) {
                     await this.debouncedRender();
                 }
                 if (edited) {
                     this.onMessageEdited();
                 }
-                if(deleted){
-                    this.onMessageDeleted();
-                }
             },
-            //------MDEV
-            toggleChatMsgActions(ev){
-                ev.preventDefault();
-                ev.stopPropagation();
-                var actiosnel= this.el.querySelector('.chat-msg-actions');
-                console.log("---chat msg actions",actiosnel);
 
-                this.model.set({'hidden_chat_actions': !this.model.get('hidden_chat_actions')})
-                if (this.model.get('hidden_chat_actions')){
-                    u.addClass('hidden', actiosnel);
-                }else{
-                    // var buttonPosition = this.el.querySelector('.toggle-chat-msg-actions').getBoundingClientRect();
-                    // var targetPosition = buttonPosition.top + buttonPosition.bottom;
-                    // var buttontop = targetPosition/2 - 80;
-                    // actiosnel.setAttribute("style", "top:"+buttontop);
-                    u.removeClass('hidden', actiosnel);
+            fadeOut () {
+                if (_converse.animate) {
+                    setTimeout(() => this.remove(), 600);
+                    u.addClass('fade-out', this.el);
+                } else {
+                    this.remove();
                 }
-                // if(actiosnelstyle === 'none'){
-                //     actiosnelstyle = 'block'
-                // }
-                // else{
-                //     actiosnelstyle = 'none'
-                // }
-                
             },
-            hideChatMsgActions(ev){
-                ev.stopPropagation();
-                if(ev.target.className !== 'chat-msg-actionsr'){
-                    return;
-                }
-            
-                this.model.set({'hidden_chat_actions': true})
-                var actiosnel= this.el.querySelector('.chat-msg-actions');
-                u.addClass('hidden', actiosnel);
-        
-            },
-            onMessageDeleted(){
-                this.model.set({'hidden_chat_actions': !this.model.get('hidden_chat_actions')})
-         
-            },
-            //-------
+
             onMessageEdited () {
-                this.model.set({'hidden_chat_actions': !this.model.get('hidden_chat_actions')})
                 if (this.model.get('is_archived')) {
                     return;
                 }
-                this.el.addEventListener('animationend', () => u.removeClass('onload', this.el));
+                this.el.addEventListener(
+                    'animationend',
+                    () => u.removeClass('onload', this.el),
+                    {'once': true}
+                );
                 u.addClass('onload', this.el);
             },
 
@@ -201,42 +165,33 @@ converse.plugins.add('converse-message-view', {
                 if (!_.isNil(this.el.parentElement)) {
                     this.el.parentElement.replaceChild(msg, this.el);
                 }
-
                 this.setElement(msg);
                 return this.el;
             },
 
-             async renderChatMessage () {
+            async renderChatMessage () {
                 const is_me_message = this.isMeCommand(),
                       time = dayjs(this.model.get('time')),
                       role = this.model.vcard ? this.model.vcard.get('role') : null,
                       roles = role ? role.split(',') : [];
-                let username = this.model.getDisplayName();
-                const msg_deleted = this.getMessageText();
-                const url = this.model.get('oob_url');
-                const isDeleted = msg_deleted ==='This message was deleted'
-                if(_.includes(username,'@')){
-                    username = username.split('@')[0]
-                }
+
                 const msg = u.stringToElement(tpl_message(
                     Object.assign(
                         this.model.toJSON(), {
                         '__': __,
+                        'is_groupchat_message': this.model.get('type') === 'groupchat',
                         'is_me_message': is_me_message,
                         'roles': roles,
                         'pretty_time': time.format(_converse.time_format),
                         'time': time.toISOString(),
                         'extra_classes': this.getExtraMessageClasses(),
                         'label_show': __('Show more'),
-                        'username': username,
-                        'isDeleted':isDeleted,
-                        'url':url
+                        'username': this.model.getDisplayName()
                     })
                 ));
 
-                const deleted = this.model.get('deleted');
-                
-                if (url && !deleted && !isDeleted) {
+                const url = this.model.get('oob_url');
+                if (url) {
                     msg.querySelector('.chat-msg__media').innerHTML = _.flow(
                         _.partial(u.renderFileURL, _converse),
                         _.partial(u.renderMovieURL, _converse),
@@ -259,25 +214,27 @@ converse.plugins.add('converse-message-view', {
                         _.partial(u.addEmoji, _converse, _)
                     )(text);
                 }
-              
-                if(msg_content){
-                    const promise = u.renderImageURLs(_converse, msg_content);
-                    await promise;
-                }else {
-                    await new Promise((resolve, reject) => {
-                        resolve();
-                    });
-                }
+                const promise = u.renderImageURLs(_converse, msg_content);
                 if (this.model.get('type') !== 'headline') {
                     this.renderAvatar(msg);
                 }
-               
+                await promise;
                 this.replaceElement(msg);
                 if (this.model.collection) {
                     // If the model gets destroyed in the meantime, it no
                     // longer has a collection.
                     this.model.collection.trigger('rendered', this);
                 }
+            },
+
+            renderInfoMessage () {
+                const msg = u.stringToElement(
+                    tpl_info(Object.assign(this.model.toJSON(), {
+                        'extra_classes': 'chat-info',
+                        'isodate': dayjs(this.model.get('time')).toISOString()
+                    }))
+                );
+                return this.replaceElement(msg);
             },
 
             renderErrorMessage () {
@@ -292,11 +249,9 @@ converse.plugins.add('converse-message-view', {
 
             renderChatStateNotification () {
                 let text;
-                const from = this.model.get('from');
-                let  name = this.model.getDisplayName();
-                    if(_.includes(name, '@')){
-                        name = name.split('@')[0]
-                    }
+                const from = this.model.get('from'),
+                      name = this.model.getDisplayName();
+
                 if (this.model.get('chat_state') === _converse.COMPOSING) {
                     if (this.model.get('sender') === 'me') {
                         text = __('Typing from another device');

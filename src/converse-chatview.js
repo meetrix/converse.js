@@ -809,7 +809,6 @@ converse.plugins.add('converse-chatview', {
                 }
                 const view = this.add(message.get('id'), new _converse.MessageView({'model': message}));
                 await view.render();
-
                 // Clear chat state notifications
                 sizzle(`.chat-state-notification[data-csn="${message.get('from')}"]`, this.content).forEach(u.removeElement);
 
@@ -842,6 +841,7 @@ converse.plugins.add('converse-chatview', {
              * @param { object } message - The message Backbone object that was added.
              */
             async onMessageAdded (message) {
+                
                 const id = message.get('id');
                 if (id && this.get(id)) {
                     // We already have a view for this message
