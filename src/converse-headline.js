@@ -116,8 +116,14 @@ converse.plugins.add('converse-headline', {
         function ringingHandle(message){
             let from_jid = message.getAttribute('from');
             from_jid = from_jid.split('/')[0]
-            const chatbox = _converse.chatboxviews.get(from_jid);
-            chatbox.ringingHandle(message)
+            if(_converse.chatboxviews){
+                const chatbox = _converse.chatboxviews.get(from_jid);
+                if(chatbox){
+
+                    chatbox.ringingHandle(message)
+                }
+            }
+            
 
         }
         async function onHeadlineMessage (message) {
