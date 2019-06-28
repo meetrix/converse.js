@@ -94,6 +94,7 @@ converse.plugins.add('converse-notification', {
                 return _converse.shouldNotifyOfGroupMessage(message);
             } else if (u.isHeadlineMessage(_converse, message)) {
                 // We want to show notifications for headline messages.
+                console.log('message',message)
                 return _converse.isMessageToHiddenChat(message);
             }
             const is_me = Strophe.getBareJidFromJid(
@@ -122,6 +123,28 @@ converse.plugins.add('converse-notification', {
                     audioMp3.play();
                 } else if (canPlayOgg === 'maybe') {
                     audioOgg.play();
+                } else if (canPlayMp3 === 'maybe') {
+                    audioMp3.play();
+                }
+            }
+        };
+        _converse.playRingCall = function () {
+            /* Plays a sound to notify that a new message was recieved.
+             */
+            // XXX Eventually this can be refactored to use Notification's sound
+            // feature, but no browser currently supports it.
+            // https://developer.mozilla.org/en-US/docs/Web/API/notification/sound
+            if (_converse.play_sounds && !_.isUndefined(window.Audio)) {
+               
+                const audioMp3 = new Audio(_converse.sounds_path+"ringing.mp3");
+                const canPlayMp3 = audioMp3.canPlayType('audio/mp3');
+                if (canPlayMp3 === 'probably') {
+                    try {
+                        audioMp3.play();
+                    } catch (error) {
+                        console.log(error)
+                    }
+                    
                 } else if (canPlayMp3 === 'maybe') {
                     audioMp3.play();
                 }
@@ -197,6 +220,7 @@ converse.plugins.add('converse-notification', {
                 setTimeout(n.close.bind(n), _converse.notification_delay);
             }
         };
+        
     //-------->
         _converse.showChatStateNotification = function (contact) {
             /* Creates an HTML5 Notification to inform of a change in a
@@ -230,6 +254,7 @@ converse.plugins.add('converse-notification', {
             setTimeout(n.close.bind(n), 5000);
             //-------->
         };
+        
 
         _converse.showContactRequestNotification = function (contact) {
 

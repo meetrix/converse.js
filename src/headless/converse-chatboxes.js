@@ -885,7 +885,6 @@ converse.plugins.add('converse-chatboxes', {
                 const replaced_id = this.getReplaceId(stanza)
                 const delete_id = this.getDeleteId(stanza)
                 const msgid = replaced_id || stanza.getAttribute('id') || original_stanza.getAttribute('id');
-                console.log()
                 const attrs = Object.assign({
                     'chat_state': chat_state,
                     'is_archived': this.isArchived(original_stanza),
@@ -1070,6 +1069,7 @@ converse.plugins.add('converse-chatboxes', {
              * @param { XMLElement } stanza - The incoming message stanza
              */
             async onMessage (stanza) {
+                
                 let to_jid = stanza.getAttribute('to');
                 const to_resource = Strophe.getResourceFromJid(to_jid);
 
@@ -1080,6 +1080,7 @@ converse.plugins.add('converse-chatboxes', {
                     );
                     return true;
                 } else if (utils.isHeadlineMessage(_converse, stanza)) {
+                    //console.log('head',stanza)
                     // XXX: Ideally we wouldn't have to check for headline
                     // messages, but Prosody sends headline messages with the
                     // wrong type ('chat'), so we need to filter them out here.

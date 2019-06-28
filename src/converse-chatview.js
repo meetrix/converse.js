@@ -22,6 +22,7 @@ import tpl_error_message from "templates/error_message.html";
 import tpl_help_message from "templates/help_message.html";
 import tpl_info from "templates/info.html";
 import tpl_new_day from "templates/new_day.html";
+import tpl_ring_model from "templates/ring_model.html"
 import tpl_spinner from "templates/spinner.html";
 import tpl_spoiler_button from "templates/spoiler_button.html";
 import tpl_status_message from "templates/status_message.html";
@@ -800,6 +801,7 @@ converse.plugins.add('converse-chatview', {
              * @param { _converse.Message } message - The message object
              */
             async showMessage (message) {
+                
                 if (!u.isNewMessage(message) && u.isEmptyMessage(message)) {
                     // Handle archived or delayed messages without any message
                     // text to show.
