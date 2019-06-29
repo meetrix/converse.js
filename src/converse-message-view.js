@@ -113,7 +113,7 @@ converse.plugins.add('converse-message-view', {
                 } else if (this.model.get('type') === 'error') {
                     this.renderErrorMessage();
                 } else if (this.model.get('type') === 'info') {
-                    this.renderInfoMessage();
+                    // this.renderInfoMessage();
                 } else {
                     await this.renderChatMessage();
                 }
