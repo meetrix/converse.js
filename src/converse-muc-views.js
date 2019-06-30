@@ -984,6 +984,7 @@ converse.plugins.add('converse-muc-views', {
             generateHeadingHTML () {
                 /* Returns the heading HTML to be rendered.
                  */
+                console.log(this.model.toJSON())
                 return tpl_chatroom_head(
                     Object.assign(this.model.toJSON(), {
                         'Strophe': Strophe,
@@ -993,8 +994,22 @@ converse.plugins.add('converse-muc-views', {
                         'info_details': __('Show more details about this groupchat'),
                         'description': u.addHyperlinks(xss.filterXSS(_.get(this.model.get('subject'), 'text'), {'whiteList': {}})),
                         'room_description':this.model.get('description'),
-                        'occupants':this.model.occupants.length
+                        'occupants':this.model.occupants.length,
+                        'name':this.getSeminarRoomName(),
                 }));
+            },
+            getSeminarRoomName(){
+                const roomJid = this.model.get('jid');
+                let seminarName;
+                if(roomJid){
+                    const tmpName = roomJid.split('@')[0];
+                    if (tmpName.includes('#') && tmpName.split('#').length > 2) {
+                        seminarName = tmpName.split('#')[2];
+                    } else {
+                        seminarName = tmpName;
+                    }
+                }
+                return this.model.get('name') || seminarName; 
             },
             generateTopToolBarHTML(){
                 return  tpl_chatarea_toptoolbar(_.extend(this.model.toJSON(), {
