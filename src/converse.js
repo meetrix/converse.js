@@ -29,6 +29,7 @@ import "meetrix-attachment-filter";
 import "meetrix-message-filter";
 import "meetrix-drag-file-handler";
 import "meetrix-fileupload-handler";
+import "meetrix-user-own-room-list";
 /* END: Removable components */
 
 import converse from "@converse/headless/converse-core";
@@ -62,7 +63,8 @@ const WHITELISTED_PLUGINS = [
     "meetrix-attachment-filter",
     "meetrix-message-filter",
     "meetrix-drag-file-handler",
-    "meetrix-fileupload-handler"
+    "meetrix-fileupload-handler",
+    "meetrix-user-own-room-list"
 ];
 
 const initialize = converse.initialize;
