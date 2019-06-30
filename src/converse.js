@@ -33,6 +33,7 @@ import "meetrix-user-own-room-list";
 import  "meetrix-file-previewer";
 import "meetrix-ringing-handler";
 import "meetrix-welcome-view";
+import "meetrix-conference-view";
 /* END: Removable components */
 
 import converse from "@converse/headless/converse-core";
@@ -70,7 +71,8 @@ const WHITELISTED_PLUGINS = [
     "meetrix-user-own-room-list",
     "meetrix-file-previewer",
     "meetrix-ringing-handler",
-    "meetrix-welcome-view"
+    "meetrix-welcome-view",
+    "meetrix-conference-view"
 ];
 
 const initialize = converse.initialize;
