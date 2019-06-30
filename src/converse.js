@@ -22,7 +22,8 @@ import "converse-roomslist";       // Show currently open chat rooms
 import "converse-rosterview";
 import "converse-singleton";
 import "converse-uniview";
-import "search-box";
+import "meetrix-search-box-view";
+import "meetrix-avatar-generate"
 /* END: Removable components */
 
 import converse from "@converse/headless/converse-core";
@@ -50,7 +51,8 @@ const WHITELISTED_PLUGINS = [
     'converse-rosterview',
     'converse-singleton',
     'converse-uniview',
-    'search-box'
+    'meetrix-search-box-view',
+    "meetrix-avatar-generate"
 ];
 
 const initialize = converse.initialize;

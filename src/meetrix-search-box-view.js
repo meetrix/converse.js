@@ -1,7 +1,7 @@
 import converse from "@converse/headless/converse-core";
 const { Strophe, _, sizzle, Backbone } = converse.env;
 
-converse.plugins.add("search-box", {
+converse.plugins.add("meetrix-search-box-view", {
 
     /* Dependencies are other plugins which might be
     * overridden or relied upon, and therefore need to be loaded before
