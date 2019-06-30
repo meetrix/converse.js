@@ -1583,13 +1583,13 @@ converse.plugins.add('converse-muc', {
                 "affiliation":affiliation,
                 "room":jid
             }
-            setTimeout(function(){
-                const xhr = new window.XMLHttpRequest();
-                xhr.open("POST", `${_converse.xhr_restapi}chatrooms/${roomName}/occupants/${_converse.connection.jid.split('/')[0]}`, true);
-                xhr.setRequestHeader('Authorization',"Basic " + btoa(_converse.connection.jid.split('/')[0] + ":" + _converse.connection.pass));
-                xhr.setRequestHeader( 'Content-Type',   'application/json' );
-                xhr.send(JSON.stringify(occupant))
-            },3000)
+            // setTimeout(function(){
+            //     const xhr = new window.XMLHttpRequest();
+            //     xhr.open("POST", `${_converse.xhr_restapi}chatrooms/${roomName}/occupants/${_converse.connection.jid.split('/')[0]}`, true);
+            //     xhr.setRequestHeader('Authorization',"Basic " + btoa(_converse.connection.jid.split('/')[0] + ":" + _converse.connection.pass));
+            //     xhr.setRequestHeader( 'Content-Type',   'application/json' );
+            //     xhr.send(JSON.stringify(occupant))
+            // },3000)
            
             
         };
