@@ -111,9 +111,9 @@ converse.plugins.add('converse-message-view', {
                     }
                     this.renderFileUploadProgresBar();
                 } else if (this.model.get('type') === 'error') {
-                    this.renderErrorMessage();
+                    //this.renderErrorMessage();
                 } else if (this.model.get('type') === 'info') {
-                    this.renderInfoMessage();
+                    // this.renderInfoMessage();
                 } else {
                     await this.renderChatMessage();
                 }
@@ -174,7 +174,7 @@ converse.plugins.add('converse-message-view', {
                       time = dayjs(this.model.get('time')),
                       role = this.model.vcard ? this.model.vcard.get('role') : null,
                       roles = role ? role.split(',') : [];
-
+                console.log('*** The Message Body', this.model.get('message') );
                 const msg = u.stringToElement(tpl_message(
                     Object.assign(
                         this.model.toJSON(), {
@@ -188,6 +188,7 @@ converse.plugins.add('converse-message-view', {
                         'label_show': __('Show more'),
                         'username': this.model.getDisplayName()
                     })
+
                 ));
 
                 const url = this.model.get('oob_url');
