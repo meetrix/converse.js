@@ -1709,40 +1709,6 @@ function startConferenceTimeCounter() {
 function stopConferenceTimeCounter() {
     clearTimeout(counter);
 }
-// function renderCustomConfiguration(stanza) {
-//     var roomConfiguration = {};
-//     const fields = stanza.querySelectorAll('field')
-//     _.each(fields, field => {
-//         if (_converse.roomconfig_whitelist.length === 0 ||
-//             _.includes(_converse.roomconfig_whitelist, field.getAttribute('var'))) {
-//             if (field.getAttribute('var') === 'muc#roomconfig_roomname') {
-//                 roomConfiguration.roomname = _.get(field.querySelector('value'), 'textContent')
-//             } else if (field.getAttribute('var') === 'muc#roomconfig_roomdesc') {
-//                 roomConfiguration.roomdesc = _.get(field.querySelector('value'), 'textContent')
-//             } else if (field.getAttribute('var') === 'muc#roomconfig_publicroom') {
-//                 roomConfiguration.publicroom = _.get(field.querySelector('value'), 'textContent')
-//             } else if (field.getAttribute('var') === 'muc#roomconfig_moderatedroom') {
-//                 roomConfiguration.moderatedroom = _.get(field.querySelector('value'), 'textContent')
-//             }
-//             else if (field.getAttribute('var') === 'muc#roomconfig_membersonly') {
-//                 roomConfiguration.membersonly = _.get(field.querySelector('value'), 'textContent')
-//             }
-//             else if (field.getAttribute('var') === 'muc#roomconfig_allowpm') {
-//                 roomConfiguration.allowpm = _.get(field.querySelector('value'), 'textContent')
-//             }
-//             else if (field.getAttribute('var') === 'muc#roomconfig_roomowners') {
-//                 const values = _.map(
-//                     u.queryChildren(field, 'value'),
-//                     _.partial(_.get, _, 'textContent')
-//                 );
-//                 roomConfiguration.roomowners = [values]
-//             }
-
-//         }
-//     });
-//     return roomConfiguration
-
-// }
 function localTracksAddingToConference() {
     for (let i = 0; i < localTracks.length; i++) {
         if (isVideoTrack(localTracks[i]) && isAudioCall()) {
