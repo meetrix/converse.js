@@ -431,9 +431,14 @@ converse.plugins.add("meetrix-conference-view", {
 
             },
             getAvatar() {
-                const vcard = this.model.get('vcard')
-                console.log(vcard);
-                return `data:${vcard.get('image_type')};base64,${vcard.get('image')}`
+                if(getConferenceTypeFromView(this.model.get('view')) === ONE_TO_ONE_CALL){
+                    const vcard = this.model.get('vcard')
+                    console.log(vcard);
+                    return `data:${vcard.get('image_type')};base64,${vcard.get('image')}`
+                }else {
+                    return `data:${_converse.DEFAULT_IMAGE_TYPE};base64,${_converse.DEFAULT_IMAGE}`
+                }
+                
             },
             isMe() {
                 const who = this.model.get('caller')
@@ -522,7 +527,7 @@ converse.plugins.add("meetrix-conference-view", {
             show() {
                 this.modal.show();
             },
-            hide() {addLocalVideoElement
+            hide() {
                 this.modal.hide();
             }
         });

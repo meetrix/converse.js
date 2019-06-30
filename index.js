@@ -32,7 +32,7 @@ var configConverse =
           show_message_load_animation: true,
           show_desktop_notifications: true,
           show_chatstate_notifications: true,
-          sounds_path: 'chatapp/sounds/',
+          sounds_path: 'sounds/',
           visible_toolbar_buttons: {'emoji': true, 'call': false, 'clear': true, spoiler:false },
           locales_url: "chatapp/locale/{{{locale}}}/LC_MESSAGES/converse.json",
           strict_plugin_dependencies: true,
