@@ -25,6 +25,8 @@ import "converse-uniview";
 import "meetrix-search-box-view";
 import "meetrix-avatar-generate";
 import "meetrix-chat-tool";
+import "meetrix-attachment-filter";
+import "meetrix-message-filter"
 /* END: Removable components */
 
 import converse from "@converse/headless/converse-core";
@@ -54,7 +56,9 @@ const WHITELISTED_PLUGINS = [
     'converse-uniview',
     'meetrix-search-box-view',
     "meetrix-avatar-generate",
-    "meetrix-chat-tool"
+    "meetrix-chat-tool",
+    "meetrix-attachment-filter",
+    "meetrix-message-filter"
 ];
 
 const initialize = converse.initialize;
