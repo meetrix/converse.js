@@ -57,15 +57,15 @@ const CALL_REJECT = 'Call Reject';
 const CALL_END = 'Call End'
 
 // command regex filter
-const commonCommandMessage = /^\\(\bcall\b):([a-zA-Z]+):([a-z0-9-]+):((\baudio\b|\bvideo\b))\\$/;
-const commandConnecting = /^\\(\bconnecting\b):([a-zA-Z]+):([a-z0-9-]+):((\baudio\b|\bvideo\b))\\$/;
-const commandConnected = /^\\(\bconnected\b):([a-zA-Z]+):([a-z0-9-]+):((\baudio\b|\bvideo\b))\\$/;
-const commandCallStart = /^\\(\bcall\b):((\bstart\b)):([a-z0-9-]+):((\baudio\b|\bvideo\b))\\$/;
-const commandCallEnd = /^\\(\bcall\b):((\bended\b)):([a-z0-9-]+):((\baudio\b|\bvideo\b))\\$/;
-const commandCallReject = /^\\(\bcall\b):((\breject\b)):([a-z0-9-]+):((\baudio\b|\bvideo\b))\\$/;
-const commandCallAccepted = /^\\(\bcall\b):((\baccepted\b)):([a-z0-9-]+):((\baudio\b|\bvideo\b))\\$/;
-const commandCallNotAnswered = /^\\(\bcall\b):((\bnotAnswered\b)):([a-z0-9-]+):((\baudio\b|\bvideo\b))\\$/;
-const filterStartEndMessageCommand = /^\\(\bcall\b):((\bstart\b|\bended\b)):([a-z0-9-]+):((\baudio\b|\bvideo\b))\\$/;
+const commonCommandMessage = /^\\(\bcall\b):([a-zA-Z]+):([a-z0-9-#]+):((\baudio\b|\bvideo\b))\\$/;
+const commandConnecting = /^\\(\bconnecting\b):([a-zA-Z]+):([a-z0-9-#]+):((\baudio\b|\bvideo\b))\\$/;
+const commandConnected = /^\\(\bconnected\b):([a-zA-Z]+):([a-z0-9-#]+):((\baudio\b|\bvideo\b))\\$/;
+const commandCallStart = /^\\(\bcall\b):((\bstart\b)):([a-z0-9-#]+):((\baudio\b|\bvideo\b))\\$/;
+const commandCallEnd = /^\\(\bcall\b):((\bended\b)):([a-z0-9-#]+):((\baudio\b|\bvideo\b))\\$/;
+const commandCallReject = /^\\(\bcall\b):((\breject\b)):([a-z0-9-#]+):((\baudio\b|\bvideo\b))\\$/;
+const commandCallAccepted = /^\\(\bcall\b):((\baccepted\b)):([a-z0-9-#]+):((\baudio\b|\bvideo\b))\\$/;
+const commandCallNotAnswered = /^\\(\bcall\b):((\bnotAnswered\b)):([a-z0-9-#]+):((\baudio\b|\bvideo\b))\\$/;
+const filterStartEndMessageCommand = /^\\(\bcall\b):((\bstart\b|\bended\b)):([a-z0-9-#]+):((\baudio\b|\bvideo\b))\\$/;
 
 // The following line registers your plugin.
 converse.plugins.add("meetrix-conference-view", {
@@ -431,9 +431,14 @@ converse.plugins.add("meetrix-conference-view", {
 
             },
             getAvatar() {
-                const vcard = this.model.get('vcard')
-                console.log(vcard);
-                return `data:${vcard.get('image_type')};base64,${vcard.get('image')}`
+                if(getConferenceTypeFromView(this.model.get('view')) === ONE_TO_ONE_CALL){
+                    const vcard = this.model.get('vcard')
+                    console.log(vcard);
+                    return `data:${vcard.get('image_type')};base64,${vcard.get('image')}`
+                }else {
+                    return `data:${_converse.DEFAULT_IMAGE_TYPE};base64,${_converse.DEFAULT_IMAGE}`
+                }
+                
             },
             isMe() {
                 const who = this.model.get('caller')
@@ -522,7 +527,7 @@ converse.plugins.add("meetrix-conference-view", {
             show() {
                 this.modal.show();
             },
-            hide() {addLocalVideoElement
+            hide() {
                 this.modal.hide();
             }
         });

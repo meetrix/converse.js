@@ -174,7 +174,6 @@ converse.plugins.add('converse-message-view', {
                       time = dayjs(this.model.get('time')),
                       role = this.model.vcard ? this.model.vcard.get('role') : null,
                       roles = role ? role.split(',') : [];
-                console.log('*** The Message Body', this.model.get('message') );
                 const msg = u.stringToElement(tpl_message(
                     Object.assign(
                         this.model.toJSON(), {
