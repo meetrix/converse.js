@@ -57,15 +57,15 @@ const CALL_REJECT = 'Call Reject';
 const CALL_END = 'Call End'
 
 // command regex filter
-const commonCommandMessage = /^\\(\bcall\b):([a-zA-Z]+):([a-z0-9-]+):((\baudio\b|\bvideo\b))\\$/;
-const commandConnecting = /^\\(\bconnecting\b):([a-zA-Z]+):([a-z0-9-]+):((\baudio\b|\bvideo\b))\\$/;
-const commandConnected = /^\\(\bconnected\b):([a-zA-Z]+):([a-z0-9-]+):((\baudio\b|\bvideo\b))\\$/;
-const commandCallStart = /^\\(\bcall\b):((\bstart\b)):([a-z0-9-]+):((\baudio\b|\bvideo\b))\\$/;
-const commandCallEnd = /^\\(\bcall\b):((\bended\b)):([a-z0-9-]+):((\baudio\b|\bvideo\b))\\$/;
-const commandCallReject = /^\\(\bcall\b):((\breject\b)):([a-z0-9-]+):((\baudio\b|\bvideo\b))\\$/;
-const commandCallAccepted = /^\\(\bcall\b):((\baccepted\b)):([a-z0-9-]+):((\baudio\b|\bvideo\b))\\$/;
-const commandCallNotAnswered = /^\\(\bcall\b):((\bnotAnswered\b)):([a-z0-9-]+):((\baudio\b|\bvideo\b))\\$/;
-const filterStartEndMessageCommand = /^\\(\bcall\b):((\bstart\b|\bended\b)):([a-z0-9-]+):((\baudio\b|\bvideo\b))\\$/;
+const commonCommandMessage = /^\\(\bcall\b):([a-zA-Z]+):([a-z0-9-#]+):((\baudio\b|\bvideo\b))\\$/;
+const commandConnecting = /^\\(\bconnecting\b):([a-zA-Z]+):([a-z0-9-#]+):((\baudio\b|\bvideo\b))\\$/;
+const commandConnected = /^\\(\bconnected\b):([a-zA-Z]+):([a-z0-9-#]+):((\baudio\b|\bvideo\b))\\$/;
+const commandCallStart = /^\\(\bcall\b):((\bstart\b)):([a-z0-9-#]+):((\baudio\b|\bvideo\b))\\$/;
+const commandCallEnd = /^\\(\bcall\b):((\bended\b)):([a-z0-9-#]+):((\baudio\b|\bvideo\b))\\$/;
+const commandCallReject = /^\\(\bcall\b):((\breject\b)):([a-z0-9-#]+):((\baudio\b|\bvideo\b))\\$/;
+const commandCallAccepted = /^\\(\bcall\b):((\baccepted\b)):([a-z0-9-#]+):((\baudio\b|\bvideo\b))\\$/;
+const commandCallNotAnswered = /^\\(\bcall\b):((\bnotAnswered\b)):([a-z0-9-#]+):((\baudio\b|\bvideo\b))\\$/;
+const filterStartEndMessageCommand = /^\\(\bcall\b):((\bstart\b|\bended\b)):([a-z0-9-#]+):((\baudio\b|\bvideo\b))\\$/;
 
 // The following line registers your plugin.
 converse.plugins.add("meetrix-conference-view", {
