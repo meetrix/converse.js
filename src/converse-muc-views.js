@@ -984,7 +984,6 @@ converse.plugins.add('converse-muc-views', {
             generateHeadingHTML () {
                 /* Returns the heading HTML to be rendered.
                  */
-                console.log(this.model.toJSON())
                 return tpl_chatroom_head(
                     Object.assign(this.model.toJSON(), {
                         'Strophe': Strophe,
