@@ -645,12 +645,12 @@ converse.plugins.add('converse-chatboxes', {
                         'id': message.get('msgid')
                     }).root();
                 }
-                if (message.get('deleted')) {
-                    stanza.c('replace', {
-                        'xmlns': Strophe.NS.MESSAGE_DELETE,
-                        'id': message.get('msgid')
-                    }).root();
-                }
+                // if (message.get('deleted')) {
+                //     stanza.c('replace', {
+                //         'xmlns': Strophe.NS.MESSAGE_DELETE,
+                //         'id': message.get('msgid')
+                //     }).root();
+                // }
                 if (message.get('origin_id')) {
                     stanza.c('origin-id', {'xmlns': Strophe.NS.SID, 'id': message.get('origin_id')}).root();
                 }
@@ -707,30 +707,30 @@ converse.plugins.add('converse-chatboxes', {
                     });
                 } 
                 else {
-                    message = this.messages.findWhere('deleting')
-                    if(message){
+                    // message = this.messages.findWhere('deleting')
+                    // if(message){
 
-                        let older_versions = message.get('older_versions') || [];
-                        try {
-                            older_versions.push(message.get('message'));
-                        } catch (error) {
-                           console.log('eroor',error) 
-                           older_versions = []
-                        }
-                        message.save({
-                            'deleting': false,
-                            'deleted': (new Date()).toISOString(),
-                            'message':  attrs.message,
-                            'older_versions': older_versions,
-                            'references': attrs.references,
-                            oob_desc:'',
-                            oob_url:""
+                    //     let older_versions = message.get('older_versions') || [];
+                    //     try {
+                    //         older_versions.push(message.get('message'));
+                    //     } catch (error) {
+                    //        console.log('eroor',error) 
+                    //        older_versions = []
+                    //     }
+                    //     message.save({
+                    //         'deleting': false,
+                    //         'deleted': (new Date()).toISOString(),
+                    //         'message':  attrs.message,
+                    //         'older_versions': older_versions,
+                    //         'references': attrs.references,
+                    //         oob_desc:'',
+                    //         oob_url:""
 
-                        });
-                    }
-                    else {
+                    //     });
+                    // }
+                    // else {
                         message = this.messages.create(attrs);
-                    }
+                    // }
                     
                 }
                 _converse.api.send(this.createMessageStanza(message));
@@ -883,7 +883,7 @@ converse.plugins.add('converse-chatboxes', {
                             stanza.getElementsByTagName(_converse.ACTIVE).length && _converse.ACTIVE ||
                             stanza.getElementsByTagName(_converse.GONE).length && _converse.GONE;
                 const replaced_id = this.getReplaceId(stanza)
-                const delete_id = this.getDeleteId(stanza)
+                // const delete_id = this.getDeleteId(stanza)
                 const msgid = replaced_id || stanza.getAttribute('id') || original_stanza.getAttribute('id');
                 const attrs = Object.assign({
                     'chat_state': chat_state,
@@ -1141,7 +1141,7 @@ converse.plugins.add('converse-chatboxes', {
 
                         const attrs = await chatbox.getMessageAttributesFromStanza(stanza, original_stanza);
                         if (attrs['chat_state'] || !u.isEmptyMessage(attrs)) {
-                            const msg = chatbox.correctMessage(attrs)|| chatbox.deleteMessage(attrs) || chatbox.messages.create(attrs);
+                            const msg = chatbox.correctMessage(attrs)|| chatbox.messages.create(attrs);
                             chatbox.incrementUnreadMsgCounter(msg);
                         }
                     }

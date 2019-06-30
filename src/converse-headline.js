@@ -113,23 +113,9 @@ converse.plugins.add('converse-headline', {
             'renderMessageForm': _.noop,
             'afterShown': _.noop
         });
-        function ringingHandle(message){
-            let from_jid = message.getAttribute('from');
-            from_jid = from_jid.split('/')[0]
-            if(_converse.chatboxviews){
-                const chatbox = _converse.chatboxviews.get(from_jid);
-                if(chatbox){
-
-                    chatbox.ringingHandle(message)
-                }
-            }
-            
-
-        }
         async function onHeadlineMessage (message) {
             /* Handler method for all incoming messages of type "headline". */
             if (utils.isHeadlineMessage(_converse, message)) {
-                ringingHandle(message)
                 const from_jid = message.getAttribute('from');
                 if (_.includes(from_jid, '@') &&
                         !_converse.roster.get(from_jid) &&
