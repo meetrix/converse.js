@@ -23,7 +23,8 @@ import "converse-rosterview";
 import "converse-singleton";
 import "converse-uniview";
 import "meetrix-search-box-view";
-import "meetrix-avatar-generate"
+import "meetrix-avatar-generate";
+import "meetrix-chat-tool";
 /* END: Removable components */
 
 import converse from "@converse/headless/converse-core";
@@ -52,7 +53,8 @@ const WHITELISTED_PLUGINS = [
     'converse-singleton',
     'converse-uniview',
     'meetrix-search-box-view',
-    "meetrix-avatar-generate"
+    "meetrix-avatar-generate",
+    "meetrix-chat-tool"
 ];
 
 const initialize = converse.initialize;
