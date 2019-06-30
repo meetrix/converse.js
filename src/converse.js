@@ -26,7 +26,8 @@ import "meetrix-search-box-view";
 import "meetrix-avatar-generate";
 import "meetrix-chat-tool";
 import "meetrix-attachment-filter";
-import "meetrix-message-filter"
+import "meetrix-message-filter";
+import "meetrix-drag-file-handler";
 /* END: Removable components */
 
 import converse from "@converse/headless/converse-core";
@@ -58,7 +59,8 @@ const WHITELISTED_PLUGINS = [
     "meetrix-avatar-generate",
     "meetrix-chat-tool",
     "meetrix-attachment-filter",
-    "meetrix-message-filter"
+    "meetrix-message-filter",
+    "meetrix-drag-file-handler"
 ];
 
 const initialize = converse.initialize;
