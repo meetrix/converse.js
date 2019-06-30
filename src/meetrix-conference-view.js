@@ -691,7 +691,10 @@ converse.plugins.add("meetrix-conference-view", {
                         const link_label = _converse.api.settings.get("jitsimeet_invitation");
                         const link_content = '<a data-jid="' + dataJid + '" id="' + link_id + '" href="#">' + link_label + '</a>';
                         // show join button
-                        showJoinButton(view, this, link_room);
+                        if(getCaller() === THEM_CALLER){
+
+                            showJoinButton(view, this, link_room,link_callType);
+                        }
                         //rewrite conference join message
                         conferenceStartMessageReWrite(this, link_room, link_content, link_id, link_label, link_callType);
                     }
@@ -733,7 +736,9 @@ converse.plugins.add("meetrix-conference-view", {
             },
             joinCall(e) {
                 console.log('join call')
-                roomName = e.target.getAttribute("data-room");
+                const roomName = e.target.getAttribute("data-room");
+                const callType = e.target.getAttribute("data-room");
+                beforeJoinConference(this, callType, roomName, THEM_CALLER)
                 joiningConferenceCall(this)
             },
             // switchCall() {
@@ -771,7 +776,9 @@ converse.plugins.add("meetrix-conference-view", {
             joinCall(e) {
 
                 console.log('join call')
-                roomName = e.target.getAttribute("data-room");
+                const roomName = e.target.getAttribute("data-room");
+                const callType = e.target.getAttribute("data-room");
+                beforeJoinConference(this, callType, roomName, THEM_CALLER)
                 joiningConferenceCall(this)
             },
             switchCall() {
@@ -792,7 +799,8 @@ converse.plugins.add("meetrix-conference-view", {
                     ringingModalHide()
 
                 } else if (commandCallAccepted.test(msg_attribute.message)) {
-                    ringingModalHide()
+                    ringingModalHide();
+                    joiningConferenceCall(this)
 
                 } else if (commandCallNotAnswered.test(msg_attribute.message)) {
                     ringingModalHide()
@@ -854,25 +862,25 @@ function calling(view, _callType) {
     // set model for converse
 
     // conference Panel Open
-    conferencePanelOpen(view);
-    // start jitsi
-    startJitsi(view);
-    // top tool bar block
-    hideTopToolBarConferenceTool(view)
+    // conferencePanelOpen(view);
+    // // start jitsi
+    // startJitsi(view);
+    // // top tool bar block
+    // hideTopToolBarConferenceTool(view)
 }
 // joing existing conference
 function joiningConferenceCall(view) {
-    //set caller
-    // setCaller
-    setCaller(THEM_CALLER)
-    // set current chat view
-    setCurrentChatView(view)
-    // decide room name
-    // decide call type
-    // decide who iam
-    setWhoIam(view)
-    // decide conference mode;
-    setConferenceMode(view)
+    // //set caller
+    // // setCaller
+    // setCaller(THEM_CALLER)
+    // // set current chat view
+    // setCurrentChatView(view)
+    // // decide room name
+    // // decide call type
+    // // decide who iam
+    // setWhoIam(view)
+    // // decide conference mode;
+    // setConferenceMode(view)
     // join conference
     // set model for conference
     // conference panel open
@@ -1338,9 +1346,9 @@ function onConnectionSuccess() {
     room.on(
         JitsiMeetJS.events.conference.DISPLAY_NAME_CHANGED, onRemoteDisplayName
     );
-    room.on(
-        JitsiMeetJS.events.conference.TRACK_AUDIO_LEVEL_CHANGED,
-        (userID, audioLevel) => console.log(`${userID} - ${audioLevel}`));
+    // room.on(
+    //     JitsiMeetJS.events.conference.TRACK_AUDIO_LEVEL_CHANGED,
+    //     (userID, audioLevel) => console.log(`${userID} - ${audioLevel}`));
     room.on(
         JitsiMeetJS.events.conference.PHONE_NUMBER_CHANGED,
         () => console.log(`${room.getPhoneNumber()} - ${room.getPhonePin()}`));
@@ -1806,10 +1814,10 @@ function removeJoinButton() {
 function hideJoinButton(view) {
     hideElement(view.el.querySelector('.top-toolbar-join-call'));
 }
-function showJoinButton(_chtBoxView, _msgView, _roomName) {
+function showJoinButton(_chtBoxView, _msgView, _roomName,_callType) {
     const joinCallButton = document.createElement('li');
     joinCallButton.className = 'top-toolbar-join-call';
-    joinCallButton.insertAdjacentHTML('beforeend', `<a data-room="${_roomName}" href="#"><i data-room="${_roomName}" class="fas fa-phone-volume"></i></a>`);
+    joinCallButton.insertAdjacentHTML('beforeend', `<a data-room="${_roomName}" data-callType="${_callType}" href="#"><i data-room="${_roomName}" class="fas fa-phone-volume"></i></a>`);
     const messageTime = new Date(_msgView.model.get("time"));
     if ((new Date() - messageTime) < 30 * 1000) {
         let preElement = _chtBoxView.el.querySelector('.top-toolbar-join-call');
