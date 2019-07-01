@@ -59,7 +59,6 @@ converse.plugins.add('converse-vcard', {
             }
         });
 
-
         async function onVCardData (jid, iq) {
             const vcard = iq.querySelector('vCard');
             let result = {};
