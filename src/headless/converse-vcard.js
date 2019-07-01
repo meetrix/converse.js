@@ -7,6 +7,7 @@
 import BrowserStorage from "backbone.browserStorage";
 import converse from "./converse-core";
 import tpl_vcard from "./templates/vcard.html";
+import { validateUndefined } from "utils/meetrix";
 
 const { Backbone, Promise, Strophe, _, $iq, $build, dayjs, sizzle } = converse.env;
 const u = converse.env.utils;
@@ -65,13 +66,13 @@ converse.plugins.add('converse-vcard', {
             if (!_.isNull(vcard)) {
                 result = {
                     'stanza': iq,
-                    'fullname': _.get(vcard.querySelector('FN'), 'textContent'),
-                    'nickname': _.get(vcard.querySelector('NICKNAME'), 'textContent'),
-                    'image': _.get(vcard.querySelector('PHOTO BINVAL'), 'textContent'),
-                    'image_type': _.get(vcard.querySelector('PHOTO TYPE'), 'textContent'),
-                    'url': _.get(vcard.querySelector('URL'), 'textContent'),
-                    'role': _.get(vcard.querySelector('ROLE'), 'textContent'),
-                    'email': _.get(vcard.querySelector('EMAIL USERID'), 'textContent'),
+                    'fullname':  validateUndefined(_.get(vcard.querySelector('FN'), 'textContent')),
+                    'nickname': validateUndefined(_.get(vcard.querySelector('NICKNAME'), 'textContent')),
+                    'image': validateUndefined(_.get(vcard.querySelector('PHOTO BINVAL'), 'textContent')),
+                    'image_type': validateUndefined(_.get(vcard.querySelector('PHOTO TYPE'), 'textContent')),
+                    'url': validateUndefined(_.get(vcard.querySelector('URL'), 'textContent')),
+                    'role': validateUndefined(_.get(vcard.querySelector('ROLE'), 'textContent')),
+                    'email': validateUndefined(_.get(vcard.querySelector('EMAIL USERID'), 'textContent')),
                     'vcard_updated': (new Date()).toISOString(),
                     'vcard_error': undefined
                 };

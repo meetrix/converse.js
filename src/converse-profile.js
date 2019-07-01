@@ -16,7 +16,6 @@ import tpl_client_info_modal from "templates/client_info_modal.html";
 import tpl_profile_modal from "templates/profile_modal.html";
 import tpl_profile_view from "templates/profile_view.html";
 import tpl_status_option from "templates/status_option.html";
-import { validateUndefined } from "utils/meetrix";
 
 
 const { Strophe, Backbone, Promise, utils, _, dayjs, sizzle } = converse.env;
@@ -250,29 +249,6 @@ converse.plugins.add('converse-profile', {
 
             toHTML () {
                 const chat_status = this.model.get('status') || 'offline';
-                // const getDisplayName = () => {
-                //     let displayName;
-                //     const fullName = this.model.vcard.get('fullname');
-                //     const nickName = this.model.vcard.get('nickname');
-                //     const jidName = _converse.bare_jid.split('@')[0];
-                //     if( !_.isNil(fullName) && (fullName!=='undefined')){
-                //         console.log ('Full Name');
-                //         displayName = this.model.vcard.get('fullname');
-                //     }else if(!_.isNil(nickName) && (nickName!=='undefined')) {
-                //         console.log ('Nick Name');
-                //         displayName = this.model.vcard.get('nickname');
-                //         console.log(displayName);
-                //     }else if(!_.isNil(jidName) ){
-                //         // displayName = _converse.bare_jid.split('@')[0];
-                //         console.log ('JID');
-                //         displayName = jidName;
-                //     }else{
-                //         console.log ('No Name');
-                //         displayName = 'No Name';
-                //     }
-                //     console.log(displayName);
-                //     return displayName;
-                // };
 
                 const getDisplayRole = () => {
                     const vCardRole = this.model.vcard.get('role');
@@ -285,10 +261,10 @@ converse.plugins.add('converse-profile', {
                     this.model.toJSON(),
                     this.model.vcard.toJSON(), {
                     '__': __,
-                    'fullname': validateUndefined(this.model.vcard.get('nickname')) || validateUndefined(this.model.vcard.get('fullname')) || validateUndefined(_converse.bare_jid.split('@')[0]),
+                    'fullname': this.model.vcard.get('nickname') || this.model.vcard.get('fullname') || _converse.bare_jid.split('@')[0],
                     'status_message': this.model.get('status_message') ||
                                         __("I am %1$s", this.getPrettyStatus(chat_status)),
-                    'role': validateUndefined(this.model.vcard.get('role')) || '',                    
+                    'role': this.model.vcard.get('role') || '',                 
                     'chat_status': chat_status,
                     '_converse': _converse,
                     'title_change_settings': __('Change settings'),
