@@ -459,10 +459,12 @@ converse.plugins.add("meetrix-conference-view", {
             acceptCall(ev) {
                 var _view = _converse.chatboxviews.get(this.model.get('to'));
                 beforeJoinConference(_view, this.model.get('callType'), this.model.get('roomName'), this.model.get('caller'));
+                openChatbox(_view);
                 joiningConferenceCall(_view);
+                callAccepted(this.model.get('to'));
                 this.stopRinging();
                 this.hide();
-                callAccepted(this.model.get('to'));
+                
             },
             rejectCall(ev) {
                 this.stopRinging();
@@ -1062,7 +1064,7 @@ function callAccepted(to) {
     } else if (callType === VIDEO_CALL) {
         roomCommand = `\\call:accepted:${roomName}:video\\`
     }
-    console.log(to, roomCommand)
+    console.log(to, roomCommand,callType,'-----------------------------------')
     createHeaderMessageStanza(to, roomCommand)
     //sendMeetEnd()
 }
@@ -1175,10 +1177,11 @@ function commandSplit(command) {
     if (commonCommandMessage.test(command)) {
         let breakCommand = command.replace(/\\/gi, '')
         breakCommand = breakCommand.split(':');
+        decideCallType(breakCommand[3])
         return {
             'commandType': breakCommand[1],
             'roomName': breakCommand[2],
-            'callType': breakCommand[3]
+            'callType':getCallType()
 
         }
     }
@@ -1190,7 +1193,7 @@ function serRoomName(room) {
 
 function ringingHandler(_view, _callType, _callerType, _roomName) {
     console.log( _view)
-    _converse.ring_model.set({ 'view': _view, 'callType': _callType, 'caller': _callerType, from: getMyJID(), to: getToJid(_view), vcard: getVCardOfUser(_view) })
+    _converse.ring_model.set({ 'view': _view, 'callType': _callType, 'caller': _callerType, from: getMyJID(), to: getToJid(_view), vcard: getVCardOfUser(_view),roomName:_roomName })
 
     if (_.isUndefined(_converse.ringView) || !_converse.ringView) {
 
