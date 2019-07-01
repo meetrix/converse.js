@@ -261,7 +261,7 @@ converse.plugins.add('converse-profile', {
                     this.model.toJSON(),
                     this.model.vcard.toJSON(), {
                     '__': __,
-                    'fullname': this.model.vcard.get('nickname') || this.model.vcard.get('fullname') || _converse.bare_jid.split('@')[0],
+                    'fullname': this.model.vcard.get('fullname') || this.model.vcard.get('nickname') || _converse.bare_jid.split('@')[0],
                     'status_message': this.model.get('status_message') ||
                                         __("I am %1$s", this.getPrettyStatus(chat_status)),
                     'role': this.model.vcard.get('role') || '',                 
