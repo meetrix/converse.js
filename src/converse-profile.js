@@ -249,11 +249,35 @@ converse.plugins.add('converse-profile', {
 
             toHTML () {
                 const chat_status = this.model.get('status') || 'offline';
+                const getDisplayName = () => {
+                    let displayName;
+                    const fullName = this.model.vcard.get('fullname');
+                    const nickName = this.model.vcard.get('nickname');
+                    const jidName = _converse.bare_jid.split('@')[0];
+                    if( !_.isNil(fullName) && (fullName!=='undefined')){
+                        console.log ('Full Name');
+                        displayName = this.model.vcard.get('fullname');
+                    }else if(!_.isNil(nickName) && (nickName!=='undefined')) {
+                        console.log ('Nick Name');
+                        displayName = this.model.vcard.get('nickname');
+                        console.log(displayName);
+                    }else if(!_.isNil(jidName) ){
+                        // displayName = _converse.bare_jid.split('@')[0];
+                        console.log ('JID');
+                        displayName = jidName;
+                    }else{
+                        console.log ('No Name');
+                        displayName = 'No Name';
+                    }
+                    console.log(displayName);
+                    return displayName;
+                };
                 return tpl_profile_view(Object.assign(
                     this.model.toJSON(),
                     this.model.vcard.toJSON(), {
                     '__': __,
-                    'fullname': this.model.vcard.get('nickname') || this.model.vcard.get('fullname') || _converse.bare_jid.split('@')[0],
+                    // 'fullname': this.model.vcard.get('nickname') || this.model.vcard.get('fullname') || _converse.bare_jid.split('@')[0],
+                    'fullname': getDisplayName(),
                     'status_message': this.model.get('status_message') ||
                                         __("I am %1$s", this.getPrettyStatus(chat_status)),
                     'role': this.model.vcard.get('role') || '',                    
